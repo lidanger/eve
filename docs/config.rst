@@ -114,15 +114,11 @@
                                     fields from filters (see
                                     ``ALLOWED_FILTERS``).
 
-``SORTING``                         ``True`` if sorting is supported for ``GET``
-                                    requests, otherwise ``False``. Can be
-                                    overridden by resource settings. Defaults
-                                    to ``True``.
+``SORTING``                         如果 ``GET`` 请求支持排序，``True``，否则，``False``。
+                                    可以被资源配置重载。默认为 ``True``。
 
-``PAGINATION``                      ``True`` if pagination is enabled for ``GET``
-                                    requests, otherwise ``False``. Can be
-                                    overridden by resource settings. Defaults
-                                    to ``True``.
+``PAGINATION``                      如果 ``GET`` 请求启用了分页，``True``，否则，``False``。
+                                    可以被资源配置重载。默认为 ``True``。
 
 ``PAGINATION_LIMIT``                Maximum value allowed for QUERY_MAX_RESULTS
                                     query parameter. Values exceeding the
@@ -131,8 +127,7 @@
                                     compromise between performance and transfer
                                     size. Defaults to 50.
 
-``PAGINATION_DEFAULT``              Default value for QUERY_MAX_RESULTS.
-                                    Defaults to 25.
+``PAGINATION_DEFAULT``              QUERY_MAX_RESULTS 的默认值。默认为 25。
 
 ``OPTIMIZE_PAGINATION_FOR_SPEED``   Set this to ``True`` to improve pagination
                                     performance. When optimization is active no
@@ -182,10 +177,8 @@
                                     Can be overridden by resource settings.
                                     Defaults to ``['GET']``.
 
-``PUBLIC_METHODS``                  A list of HTTP methods supported at resource
-                                    endpoints, open to public access even when
-                                    :ref:`auth` is enabled. Can be overridden
-                                    by resource settings. Defaults to ``[]``.
+``PUBLIC_METHODS``                  资源终结点支持的 HTTP 方法的列表，开放到公开访问，甚至启用了 :ref:`auth`。
+                                    可以被资源配置重载。默认为 ``[]``。
 
 ``ITEM_METHODS``                    A list of HTTP methods supported at item
                                     endpoints. Allowed values: ``GET``,
@@ -806,11 +799,11 @@
                                 then whitelisting valid ones at the local level
                                 is the way to go.
 
-``sorting``                     ``True`` if sorting is enabled, ``False``
-                                otherwise. Locally overrides ``SORTING``.
+``sorting``                     如果启用了排序，``True``，否则 ``False``。本地
+                                重载 ``SORTING``。
 
-``pagination``                  ``True`` if pagination is enabled, ``False``
-                                otherwise. Locally overrides ``PAGINATION``.
+``pagination``                  如果启用了分页，``True``，否则 ``False``。本地
+                                重载 ``PAGINATION``。
 
 ``resource_methods``            A list of HTTP methods supported at resource
                                 endpoint. Allowed values: ``GET``, ``POST``,
@@ -894,8 +887,7 @@
 ``item_lookup_field``           Field used when looking up a resource
                                 item. Locally overrides ``ITEM_LOOKUP_FIELD``.
 
-``item_url``                    Rule used to construct item endpoint URL.
-                                Locally overrides ``ITEM_URL``.
+``item_url``                    用于创建数据项终结点 URL 的规则。本地重载 ``ITEM_URL``。
 
 ``resource_title``              Title used when building resource links
                                 (HATEOAS). Defaults to resource's ``url``.
@@ -919,9 +911,8 @@
                                 snippet below for an usage example of this
                                 feature.
 
-``datasource``                  Explicitly links API resources to database
-                                collections. See `Advanced Datasource
-                                Patterns`_.
+``datasource``                  明确地链接 API 资源到数据库集合。参考 `Advanced Datasource
+                                Patterns`_。
 
 ``auth_field``                  Enables :ref:`user-restricted`. When the
                                 feature is enabled, users can only
@@ -1389,7 +1380,7 @@
 
                                 这是一个字典，包含一个或更多以下的键:
 
-                                - ``pipeline``. 聚合管道。语法必须匹配 PyMongo
+                                - ``pipeline``. 聚合管道。语法必须匹配 PyMongo 
                                 支持的那个。要获取更多信息，参考 
                                 `PyMongo Aggregation Examples`_ 和 官方的 
                                 `MongoDB Aggregation Framework`_ 文档。
