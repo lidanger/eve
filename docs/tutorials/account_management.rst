@@ -1,9 +1,8 @@
-RESTful Account Management
+RESTful 账户管理
 ==========================
-.. admonition:: Please note
+.. 提示:: 请注意
 
-    This tutorial assumes that you've read the :ref:`quickstart` and the
-    :ref:`auth` guides.
+    这篇教程假定你已经阅读了 :ref:`quickstart` 和 :ref:`auth` 指南。
 
 Except for the relatively rare occurence of open (and generally read-only) public
 APIs, most services are only accessible to authenticated users.  A common
@@ -27,7 +26,7 @@ Let's say we're upgrading the API we defined in the :ref:`quickstart` tutorial.
 
 .. _accounts_basic:
 
-Accounts with Basic Authentication
+使用基本身份验证的账户
 -----------------------------------
 Our tasks are as follows:
 
@@ -40,7 +39,7 @@ Our tasks are as follows:
    accounts (created by means of the above mentioned endpoint).
 4. Allow authenticated users to only access resources created by themselves.
 
-1. The ``/accounts`` endpoint
+1. ``/accounts`` 终结点
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The account management endpoint is no different than any other API endpoint.
 It is just a matter of declaring it in our settings file. Let's declare the
@@ -98,7 +97,7 @@ Once the endpoint has been configured, we need to add it to the API domain:
     DOMAIN['accounts'] = accounts
 
 
-2. Securing the ``/accounts/`` endpoint
+2. 保护 ``/accounts/`` 终结点
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 2a. Hard-coding our way in
 ''''''''''''''''''''''''''
@@ -138,7 +137,7 @@ are encrypted with `bcrypt` (storing passwords as plain text is *never* a good
 idea). See :ref:`basic` for an alternative, faster but less secure SHA1/MAC
 example.
 
-2b. User Roles Access Control
+2b. 用户角色访问控制
 '''''''''''''''''''''''''''''
 Hard-coding usernames and passwords might very well do the job, but it is
 hardly the best approach that we can take here. What if another `superurser`
@@ -232,7 +231,7 @@ API). Also, should the need arise, we could easily restrict access to more
 endpoints just by updating the settings file, again without touching the
 authentication class.
 
-3. Securing other API endpoints
+3. 保护其他 API 终结点
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 This will be quick, as both the `hard-coding` and the `role-based` access
 control approaches above effectively secure all API endpoints already.  Passing
@@ -244,7 +243,7 @@ Of course, you can still fine-tune security, for example by allowing public
 access to certain endpoints, or to certain HTTP methods. See :ref:`auth` for
 more details.
 
-4. Only allowing access to account resources
+4. 只允许访问账户资源
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Most of the time when you allow Authenticated users to store data, you only
 want them to access their own data. This can be convenientely achieved by
@@ -306,7 +305,7 @@ its own account. The same will happen with DELETE and PATCH, making it
 impossible for an authenticated user to accidentally retrieve, edit or delete
 other people's data.
 
-Accounts with Token Authentication
+使用令牌身份验证的账户
 ----------------------------------
 As seen in :ref:`token`, token authentication is just a specialized version of
 Basic Authentication. It is actually executed as a standard Basic

@@ -1,24 +1,12 @@
 .. _config:
 
-Configuration
+配置
 =============
-Generally Eve configuration is best done with configuration files. The
-configuration files themselves are actual Python files. However, Eve will
-give precedence to dictionary-based settings first, then it will try to
-locate a file passed in :envvar:`EVE_SETTINGS` environmental variable (if
-set) and finally it will try to locate `settings.py` or a file with filename
-passed to `settings` flag in constructor.
+一般来说，Eve 配置最好通过配置文件来进行。配置文件它们自己实际上是 Python 文件。但是，Eve 会首先给与基于字典的设置优先权，然后它会尝试找到在 :envvar:`EVE_SETTINGS` 环境变量 (如果设置了的话) 中定义的一个文件，最后它会尝试找到 `settings.py` 或一个文件名通过 `settings` 参数传递到构造函数的文件。
 
-Configuration With Files
+使用文件配置
 ------------------------
-On startup, if `settings` flag is omitted in constructor, Eve will try to locate
-file named `settings.py`, first in the application folder and then in one of the
-application's subfolders. You can choose an alternative filename/path, just pass
-it as an argument when you instantiate the application. If the file path is
-relative, Eve will try to locate it recursively in one of the folders in your
-`sys.path`, therefore you have to be sure that your application root is appended
-to it. This is useful, for example, in testing environments, when settings file
-is not necessarily located in the root of your application.
+启动时，如果 `settings` 参数在构造函数中被忽略，Eve 会尝试寻找名为 `settings.py` 的文件，先是在应用程序文件夹，然后是应用程序的其中一个子文件夹。你可以选择一个其他的文件名/路径，只要在你实例化应用程序时将它作为参数传递。如果文件路径时相对的，Eve 会尝试递归查找你的 `sys.path` 的其中一个文件夹，因此，你必须确保你的应用程序根路径被附加到它上面了。这很有用，例如，在测试环境，当配置文件不需要被放在你的应用程序的根路径下时。
 
 .. code-block:: python
 
@@ -27,12 +15,9 @@ is not necessarily located in the root of your application.
     app = Eve(settings='my_settings.py')
     app.run()
 
-Configuration With a Dictionary
+使用一个字典配置
 -------------------------------
-Alternatively, you can choose to provide a settings dictionary. Unlike
-configuring Eve with the settings file, dictionary-based approach will only
-update Eve's default settings with your own values, rather than overwriting
-all the settings.
+或者，你可以选择提供一个配置字典。不想通过配置文件配置 Eve，基于字典的途径只会使用你自己的值更新 Eve 的默认设置，而不是重写所有设置。
 
 .. code-block:: python
 
@@ -48,42 +33,28 @@ all the settings.
     app = Eve(settings=my_settings)
     app.run()
 
-Development / Production
+开发 / 生产
 ------------------------
-Most applications need more than one configuration. There should be at least
-separate configurations for the production server and the one used during
-development. The easiest way to handle this is to use a default configuration
-that is always loaded and part of the version control, and a separate
-configuration that overrides the values as necessary.
+大多数应用程序需要不止一个配置。至少，应该有针对生产和开发阶段的服务器的单独配置。最简单的处理这个的方式是使用一个默认的总是被加载并作为版本控制的一部分的配置，和一个单独的根据需要重载前值的配置。
 
-This is the main reason why you can override or extend the settings with the
-contents of the file the :envvar:`EVE_SETTINGS` environment variable points to.
-The development/local settings could be stored in `settings.py` and then, in
-production, you could export EVE_SETTINGS=/path/to/production_setting.py, and
-you are done.
+这是为什么你可以通过 :envvar:`EVE_SETTINGS` 环境变量指向的文件重载或扩展配置的主要原因。开发/本地配置应该被存储在 `settings.py` 中，然后，在开发环境，你可以定义 EVE_SETTINGS=/path/to/production_setting.py，然后就结束了。
 
-There are many alternative ways to handle development/production
-however. Using Python modules for configuration is very convenient, as they
-allow for all kinds of nice tricks, like being able to seamlessly launch the
-same API on both local and production systems, connecting to the appropriate
-database instance as needed.  Consider the following example, taken directly
-from the :ref:`demo`:
+虽然如此，还是有很多可选的方式来处理开发/生产。使用 Python 模块来配置是非常方便的，因为它们允许各种不错的玩法，像能天衣无缝地在本地和生产系统上启动同一个 API，根据需要连接到恰当地数据库实例。考虑以下直接从 :ref:`demo` 拿来地示例:
 
 ::
 
-    # We want to run seamlessly our API both locally and on Heroku, so:
+    # 我们希望同时在本地和 Heroku 上无缝运行，因此:
     if os.environ.get('PORT'):
-        # We're hosted on Heroku! Use the MongoHQ sandbox as our backend.
+        # 我们驻在 Heroku 上! 使用 MongoHQ 沙盒作为我们地后端.
         MONGO_HOST = 'alex.mongohq.com'
         MONGO_PORT = 10047
         MONGO_USERNAME = '<user>'
         MONGO_PASSWORD = '<pw>'
         MONGO_DBNAME = '<dbname>'
     else:
-        # Running on local machine. Let's just use the local mongod instance.
+        # 在本地机器上运行。让我们只使用本地 mongod 实例.
 
-        # Please note that MONGO_HOST and MONGO_PORT could very well be left
-        # out as they already default to a bare bones local 'mongod' instance.
+        # 请注意，MONGO_HOST 和 MONGO_PORT 可以被很好地省略，因为它们已经默认为一个本地 'mongod' 实例.
         MONGO_HOST = 'localhost'
         MONGO_PORT = 27017
         MONGO_USERNAME = 'user'
@@ -92,12 +63,9 @@ from the :ref:`demo`:
 
 .. _global:
 
-Global Configuration
+全局设置
 --------------------
-Besides defining the general API behavior, most global configuration settings
-are used to define the standard endpoint ruleset, and can be fine-tuned later,
-when configuring individual endpoints. Global configuration settings are always
-uppercase.
+除了定义一般的 API 行为，大多数全局设置配置项都用于定义标准终结点规则集合，稍后配置单个终结点时也可以进行微调。全局设置配置项总是大写。
 
 .. tabularcolumns:: |p{6.5cm}|p{8.5cm}|
 
@@ -781,33 +749,27 @@ uppercase.
 
 .. _domain:
 
-Domain Configuration
+域配置
 --------------------
-In Eve terminology, a `domain` is the definition of the API structure, the area
-where you design your API, fine-tune resources endpoints, and define validation
-rules.
+在 Eve 术语中，一个 `domain` 是 API 结构的定义，是你设计 API，微调资源终结点和定义验证规则的区域。
 
-``DOMAIN`` is a :ref:`global configuration setting <global>`: a Python
-dictionary where keys are API resources and values their definitions.
+``DOMAIN`` 是一个 :ref:`global configuration setting <global>`: 一个 Python 字典，键是 API 资源，而值是它们的定义。
 
 ::
 
-    # Here we define two API endpoints, 'people' and 'works', leaving their
-    # definitions empty.
+    # 这里我们定义了连个 API 终结点，'people' 和 'works'，让它们的定义留空。
     DOMAIN = {
         'people': {},
         'works': {},
         }
 
-In the following two sections, we will customize the `people` resource.
+在下面的两节中，我们将自定义 `people` 资源。
 
 .. _local:
 
-Resource / Item Endpoints
+资源 / 数据项终结点
 '''''''''''''''''''''''''
-Endpoint customization is mostly done by overriding some :ref:`global settings
-<global>`, but other unique settings are also available. Resource settings are
-always lowercase.
+终结点自定义主要通过重载一些 :ref:`global settings <global>` 来实现，但是还有其他的唯一设置可用。资源设置总是小写。
 
 .. tabularcolumns:: |p{6.5cm}|p{8.5cm}|
 
@@ -1123,8 +1085,7 @@ always lowercase.
 
 =============================== ===============================================
 
-Here's an example of resource customization, mostly done by overriding global
-API settings:
+这里是一个资源自定义的示例，主要通过重载全局 API 设置实现:
 
 ::
 
@@ -1152,11 +1113,9 @@ API settings:
 
 .. _schema:
 
-Schema Definition
+模式定义
 -----------------
-Unless your API is read-only, you probably want to define resource `schemas`.
-Schemas are important because they enable proper validation for incoming
-streams.
+除非你的 API 是只读的，你很可能希望定义资源 `模式`。模式很重要，因为它们对进来的流启用合适的验证。
 
 ::
 
@@ -1192,8 +1151,7 @@ streams.
         },
     }
 
-As you can see, schema keys are the actual field names, while values are dicts
-defining the field validation rules. Allowed validation rules are:
+就像你看到地那样，模式键实际上是字段名称，而值是定义字段验证规则的字典。允许的验证规则有:
 
 .. tabularcolumns:: |p{6.5cm}|p{8.5cm}|
 
@@ -1391,14 +1349,9 @@ defining the field validation rules. Allowed validation rules are:
 
 =============================== ==============================================
 
-Schema syntax is based on Cerberus_ and yes, it can be extended.  In fact, Eve
-itself extends the original grammar by adding the ``unique`` and
-``data_relation`` keywords, along with the ``objectid`` datatype. For more
-information on custom validation and usage examples see :ref:`validation`.
+模式语法基于 Cerberus_，当然它可以被扩展。事实上，Eve 自己通过添加 ``unique`` 和 ``data_relation`` 关键字 ``objectid`` 数据类型以及扩展了原始的语法。要获取更多关于自定义验证和用法示例的信息，请查看 :ref:`validation`。
 
-In :ref:`local` you customized the `people` endpoint. Then, in this section,
-you defined `people` validation rules. Now you are ready to update the domain
-which was originally set up in `Domain Configuration`_:
+在 :ref:`local` 中，你自定义了 `people` 终结点。然后，在这一节，你定义了 `people` 的验证规则。限制你已经准备好更新最初在 `Domain Configuration`_ 中创建的域了:
 
 ::
 
@@ -1409,11 +1362,9 @@ which was originally set up in `Domain Configuration`_:
 
 .. _datasource:
 
-Advanced Datasource Patterns
+高级数据源模式
 ----------------------------
-The ``datasource`` keyword allows to explicitly link API resources to database
-collections. If omitted, the domain resource key is assumed to also be the name
-of the database collection. It is a dictionary with four allowed keys:
+``datasource`` 关键字允许明确得链接 API 资源到数据库集合。如果被忽略，那么域资源键也会被假定为数据库集合的名称。它是一个使用四个允许的键的字典:
 
 .. tabularcolumns:: |p{6.5cm}|p{8.5cm}|
 
@@ -1473,9 +1424,9 @@ of the database collection. It is a dictionary with four allowed keys:
 
 .. _filter:
 
-Predefined Database Filters
+预定义的数据库过滤器
 '''''''''''''''''''''''''''
-Database filters for the API endpoint are set with the ``filter`` keyword.
+用于 API 终结点的数据库过滤器通过 ``filter`` 关键字设置。
 
 ::
 
@@ -1485,30 +1436,21 @@ Database filters for the API endpoint are set with the ``filter`` keyword.
             }
         }
 
-In the example above, the API endpoint for the `people` resource will only
-expose and update documents with an existing `username` field.
+在上面的示例中，`people` 资源的 API 终结点只会暴露和更新带有一个已存在的 `username` 字段的文档。
 
-Predefined filters run on top of user queries (GET requests with `where`
-clauses) and standard conditional requests (`If-Modified-Since`, etc.)
+预定义的过滤器运行在用户查询 (使用 `where` 从句的 GET 请求) 和标准条件请求 (`If-Modified-Since`, 等等) 之上。
 
-Please note that datasource filters are applied on GET, PATCH and DELETE
-requests. If your resource allows POST requests (document insertions),
-then you will probably want to set the validation rules accordingly (in our
-example, 'username' should probably be a required field).
+请注意，数据源过滤器应用于 GET, PATCH 和 DELETE 请求。如果你的资源允许 POST 请求 (文档插入)，你很可能会希望设置对应的验证规则 (在我们的例子中，'username' 应该很可能是一个需要的字段)。
 
-.. admonition:: Static vs Dynamic filters
+.. 提示:: 静态 vs 动态过滤器
 
-    Predefined filters are static. You can also exploit the :ref:`eventhooks`
-    system (specifically, ``on_pre_<METHOD>`` hooks) to set up dynamic filters
-    instead.
+    预定义的过滤器是静态的。相反，你也可以利用 :ref:`eventhooks` 系统 (特别是 ``on_pre_<METHOD>`` hooks) 来建立动态过滤器。
 
 .. _source:
 
-Multiple API Endpoints, One Datasource
+多 API 终结点，一个数据源
 ''''''''''''''''''''''''''''''''''''''
-Multiple API endpoints can target the same database collection. For
-example you can set both ``/admins`` and ``/users`` to read and write from
-the same `people` collection on the database.
+多个 API 终结点e可以以同一个数据库集合为目标。例如，你可以同时设置 ``/admins`` 和 ``/users``，从数据库中的同一个 `people` 集合中读和写。
 
 ::
 
@@ -1519,24 +1461,17 @@ the same `people` collection on the database.
             }
         }
 
-The above setting will retrieve, edit and delete only documents from the
-`people` collection with a `userlevel` of 1.
+上面的配置只会从 `people` 集合获取，编辑和删除 `userlevel` 是 1 文档。
 
 .. _projection:
 
-Limiting the Fieldset Exposed by the API Endpoint
+限制 API 终结点暴露的字段集
 '''''''''''''''''''''''''''''''''''''''''''''''''
-By default API responses to GET requests will include all fields defined by the
-corresponding resource schema_. The ``projection`` setting of the `datasource`
-resource keyword allows you to redefine the fieldset.
+默认情况下，对 GET 请求的 API 响应会包含对应的资源 schema_ 定义的所有字段。`datasource` 资源关键字 ``projection`` 配置允许你重定义字段集合。
 
-When you want to hide some *secret fields* from client, you should use
-inclusive projection setting and include all fields should be exposed. While,
-when you want to limit default responses to certain fields but still allow them
-to be accessible through client-side projections, you should use exclusive
-projection setting and exclude fields should be omitted.
+当你希望对客户端隐藏一些*秘密字段*时，你应该使用包含性的投影配置并包含所有应该被暴露的字段。而当你希望限制默认的响应为特定的字段，但仍允许通过客户端投影访问它们时，你应该使用排他性的投影配置并排除应该被忽略的字段。
 
-The following is an example for inclusive projection setting:
+下面是一个包含性投影配置的例子:
 
 ::
 
@@ -1546,19 +1481,14 @@ The following is an example for inclusive projection setting:
             }
         }
 
-The above setting will expose only the `username` field to GET requests, no
-matter the schema_ defined for the resource. And other fields **will not** be
-exposed even by client-side projection. The following API call will not return
-`lastname` or `born`.
+上面的配置将会只 `username` 字段给 GET 请求，不管资源是否定义了 schema_。而其他字段即使通过客户端投影也 **不会** 被暴露。下面的 API 调用不会返回 `lastname` 或 `born`。
 
 .. code-block:: console
 
     $ curl -i http://eve-demo.herokuapp.com/people?projection={"lastname": 1, "born": 1}
     HTTP/1.1 200 OK
 
-You can also exclude fields from API responses. But this time, the excluded
-fields **will be** exposed to client-side projection. The following is an
-example for exclusive projection setting:
+你也可以从 API 响应中排除字段。但是这次，被排除的字段 **会** 暴露给客户端投影。下面是一个排他性投影配置的例子:
 
 ::
 
@@ -1568,13 +1498,9 @@ example for exclusive projection setting:
             }
         }
 
-The above will include all document fields but `username`. However, the
-following API call will return `username` this time. Thus, you can exploit this
-behaviour to serve media fields or other expensive fields.
+上面的配置将保护所有文档字段，除了 `username`。虽然如此，这次下面的 API 调用会返回 `username`。所以，你可以利用这个行为来提供媒体字段或其他昂贵的字段。
 
-In most cases, none or inclusive projection setting is preferred. With
-inclusive projection, secret fields are taken care from server side, and default
-fields returned can be defined by short-cut functions from client-side.
+在大多场景中，推荐使用空的或包含性投影配置。通过包含性投影，秘密字段被小心得从服务端获取，而返回的默认字段可以由客户端的快捷功能定义。
 
 .. code-block:: console
 
@@ -1582,12 +1508,9 @@ fields returned can be defined by short-cut functions from client-side.
     HTTP/1.1 200 OK
 
 
-Please note that POST and PATCH methods will still allow the whole schema to be
-manipulated. This feature can come in handy when, for example, you want to
-protect insertion and modification behind an :ref:`auth` scheme while leaving
-read access open to the public.
+请注意，POST 和 PATCH 方法仍允许操作整个模式。这个特性会在，例如，你希望通过一项 :ref:`auth` 模式保护插入和修改而仍然公开读取权限给大家时派上用场。
 
-.. admonition:: See also
+.. 提示:: 请参阅
 
     - :ref:`projections`
     - :ref:`projection_filestorage`

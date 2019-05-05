@@ -15,12 +15,9 @@ Eve
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :target: https://github.com/ambv/black
 
-Eve is an open source Python REST API framework designed for human beings. It
-allows to effortlessly build and deploy highly customizable, fully featured
-RESTful Web Services. Eve offers native support for MongoDB, and SQL backends
-via community extensions.
+Eve 是一个为人类设计的开源 Python REST API 框架。它可以让你不费吹灰之力构建和部署高定制化，全特性的 RESTful Web 服务。Eve 提供对 MongoDB 的原生支持，并通过社区扩展支持 SQL 后端。
 
-Eve is Simple
+Eve 是简单的
 -------------
 .. code-block:: python
 
@@ -29,74 +26,64 @@ Eve is Simple
     app = Eve()
     app.run()
 
-The API is now live, ready to be consumed:
+现在 API 已经激活，随时准备被调用:
 
 .. code-block:: console
 
     $ curl -i http://example.com/people
     HTTP/1.1 200 OK
 
-All you need to bring your API online is a database, a configuration file
-(defaults to ``settings.py``) and a launch script.  Overall, you will find that
-configuring and fine-tuning your API is a very simple process.
+要让你的 API 上线，你只需要一个数据库，一个配置文件(默认 ``settings.py``) 和一个启动脚本。总体上你会发现，配置和微调你的 API 是个非常简单的过程。
 
-`Check out the Eve Website <http://python-eve.org/>`_
+`去 Eve 网站 <http://python-eve.org/> 看看`_
 
-Features
+特性
 --------
 * Emphasis on REST
-* Full range of CRUD operations
-* Customizable resource endpoints
-* Customizable, multiple item endpoints
-* Filtering and Sorting
-* Pagination
+* 全部 CRUD 操作
+* 可定制的资源终结点
+* 可定制的，多数据项终结点
+* 过滤和排序
+* 分页
 * HATEOAS
-* JSON and XML Rendering
-* Conditional Requests
-* Data Integrity and Concurrency Control
-* Bulk Inserts
-* Data Validation
-* Extensible Data Validation
-* Resource-level Cache Control
-* API Versioning
-* Document Versioning
-* Authentication
-* CORS Cross-Origin Resource Sharing
+* JSON 和 XML 渲染
+* 条件化请求
+* 数据完整性和并发控制
+* 批量插入
+* 数据验证
+* 可扩展的数据验证
+* 资源级缓存控制
+* API 版本控制
+* 文档版本控制
+* 身份验证
+* CORS 跨域资源共享
 * JSONP
-* Read-only by default
-* Default Values
-* Predefined Database Filters
-* Projections
-* Embedded Resource Serialization
-* Event Hooks
-* Rate Limiting
-* Custom ID Fields
-* File Storage
+* 默认只读
+* 默认值
+* 预定义的数据库过滤器
+* 投影
+* 内嵌的资源序列化
+* 事件钩子
+* 限速
+* 自定义 ID 字段
+* 文件存储
 * GeoJSON
-* Internal Resources
-* Enhanced Logging
-* Operations Log
-* MongoDB Aggregation Framework
-* MongoDB and SQL Support
-* Powered by Flask
+* 内部资源
+* 加强版日志记录
+* 操作日志
+* MongoDB 聚合框架
+* MongoDB 和 SQL 支持
+* 由 Flask 提供支持
 
-Funding
+资金提供
 -------
-Eve REST framework is a open source, collaboratively funded project. If you run
-a business and are using Eve in a revenue-generating product, it would make
-business sense to sponsor Eve development: it ensures the project that your
-product relies on stays healthy and actively maintained. Individual users are
-also welcome to make a recurring pledge or a one time donation if Eve has
-helped you in your work or personal projects.
+Eve REST 框架是一个开源的合作资助项目。如果你在做生意，并在一个可以创造利润的产品中使用 Eve，那么赞助 Eve 开发是很有商业思维的：它确保你产品所依赖的项目保持在健康和活跃维护状态。如果 Eve 对你的工作和私人项目提供过帮助，也欢迎个人用户作出长期的承诺或一次性的捐赠。
 
-Every single sign-up makes a significant impact towards making Eve possible. To
-learn more, check out our `funding page`_.
+每一个注册将产生一个有特殊意义的强大作用力，使 Eve 成为可能。要了解更多，请瞧瞧我们的 `funding page`_.
 
-License
+许可证
 -------
-Eve is a `Nicola Iarocci`_ open source project,
-distributed under the `BSD license
-<https://github.com/pyeve/eve/blob/master/LICENSE>`_.
+Eve 是一个 `Nicola Iarocci` _开源项目，基于 `BSD 许可证 <https://github.com/pyeve/eve/blob/master/LICENSE>` 分发_.
 
 .. _`Nicola Iarocci`: http://nicolaiarocci.com
 .. _`funding page`: http://python-eve.org/funding

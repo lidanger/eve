@@ -1,9 +1,9 @@
-Eve Changelog
+Eve 更新日志
 =============
 
-Here you can see the full list of changes between each Eve release.
+在这里，你可以看到每一个 Eve 发布版本之间变化的完整列表。
 
-In Development
+开发中
 ---------------
 
 - Fix crash when trying to ignore a nested field that doesn't exist (`#1263`_)
@@ -13,22 +13,22 @@ In Development
 Version 0.9
 -----------
 
-Released on April 11, 2019.
+2019 年 4 月 11 日发布。
 
-Breaking changes
+突破性变化
 ~~~~~~~~~~~~~~~~
 - Werkzeug v0.15.1+ is required. You want to upgrade, otherwise your Eve
   environment is likely to break. For the full story, see `#1245`_ and
   `#1251`_.
 
-New
+新特性
 ~~~
 - HATEOAS support added to aggregation results (`#1208`_)
 - ``on_fetched_diffs`` event hooks (`#1224`_)
 - Support for Mongo 3.6+ ``$expr`` query operator.
 - Support for Mongo 3.6+ ``$center`` query operator.
 
-Fixed
+修复问题
 ~~~~~
 - Insertion failure when replacing unknown field with dbref value (`#1255`_,
   `#1257`_)
@@ -57,7 +57,7 @@ Fixed
   instead (`#1202`_)
 - Documentation typos (`#1218`_, `#1240`_)
 
-Improved
+改进
 ~~~~~~~~
 - Eve package is now distributed as a Python wheel (`#1260`_)
 - Bump Werkzeug version to v0.15.1+ (`#1245`_, `#1251`_)
@@ -112,9 +112,9 @@ Improved
 Version 0.8.1
 -------------
 
-Released on October 4, 2018.
+2018 年 10 月 4 日发布。
 
-New
+新特性
 ~~~
 - Add support for Mongo ``$centerSphere`` query operator (`#1181`_)
 - ``NORMALIZE_DOTTED_FIELDS``. If ``True``, dotted fields are parsed and
@@ -125,7 +125,7 @@ New
 - ``normalize_dotted_fields``. Endpoint-level override
   for ``NORMALIZE_DOTTED_FIELDS``. (`#1173`_)
 
-Fixed
+修复问题
 ~~~~~
 - ``mongo_indexes``: "OperationFailure" when changing the keys of an existing
   index (`#1180`_)
@@ -142,7 +142,7 @@ Fixed
 - Replace the broken ``make audit`` shortcut with ``make check``, add the
   command to ``CONTRIBUTING.rst`` it was missing.  (`#1144`_)
 
-Improved
+改进
 ~~~~~~~~
 - Perform lint checks and fixes on staged files, as a pre-commit hook.
   (`#1157`_)
@@ -153,7 +153,7 @@ Improved
 - Install a bot that flags and closes stale issues/pull requests. (`#1145`_)
 - Only set the package version in ``__init__.py``. (`#1142`_)
 
-Docs
+文档
 ~~~~
 - Typos (`#1183`_, `#1184`_, `#1185`_)
 - Add ``MONGO_AUTH_SOURCE`` to Quickstart. (`#1168`_)
@@ -1814,7 +1814,7 @@ Released on January 22th 2013.
 Version 0.0.2
 ~~~~~~~~~~~~~
 
-Released on November 27th 2012.
+2012 年 11 月 27 日发布。
 
 - Homepage/api entry point resource links fixed. They had bad 'href'
   tags which also caused XML validation issues when processing responses
@@ -1828,6 +1828,6 @@ Released on November 27th 2012.
 Version 0.0.1
 ~~~~~~~~~~~~~
 
-Released on November 20th 2012.
+2012 年 11 月 20 日发布。
 
-- First public preview release.
+- 首个公开的预发布版本。

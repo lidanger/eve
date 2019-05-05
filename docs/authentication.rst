@@ -1,8 +1,8 @@
 .. _auth:
 
-Authentication and Authorization
+身份验证和授权
 ================================
-Introduction to Security
+安全保护介绍
 ------------------------
 Authentication is the mechanism whereby systems may securely identify their
 users. Eve supports several authentication schemes: Basic Authentication, Token
@@ -25,7 +25,7 @@ to implement authorization logic. No matter which authentication scheme you
 pick the only thing that you need to do in your subclass is override the
 ``check_auth()`` method.
 
-Global Authentication
+全局身份验证
 ---------------------
 To enable authentication for your API just pass the custom auth class on
 app instantiation. In our example we're going to use the ``BasicAuth`` base
@@ -78,7 +78,7 @@ If needed, this approach also allows to take the request ``method`` into
 consideration, for example to allow ``GET`` requests for everyone while forcing
 validation on edits (``POST``, ``PUT``, ``PATCH``, ``DELETE``).
 
-Endpoint-level Authentication
+终结点级别身份验证
 -----------------------------
 The *one class to bind them all* approach seen above is probably good for most
 use cases but as soon as authorization logic gets more complicated it could
@@ -118,7 +118,7 @@ There are other features and options that you can use to reduce complexity in
 your auth classes, especially (but not only) when using the global level
 authentication system. Lets review them.
 
-Global Endpoint Security
+全局终结点安全
 ------------------------
 You might want a public read-only API where only authorized users can write,
 edit and delete. You can achieve that by using the ``PUBLIC_METHODS`` and
@@ -137,7 +137,7 @@ items like ``/people/id``.
 
 .. _endpointsec:
 
-Custom Endpoint Security
+自定义终结点安全
 ------------------------
 Suppose that you want to allow public read access to only certain resources.
 You do that by declaring public methods at resource level, while declaring the
@@ -177,13 +177,13 @@ Effectively making `invoices` a restricted resource.
 
 .. _basic:
 
-Basic Authentication
+基本身份验证
 --------------------
 The ``eve.auth.BasicAuth`` class allows the implementation of Basic
 Authentication (RFC2617). It should be subclassed in order to implement custom
 authentication.
 
-Basic Authentication with bcrypt
+使用 bcrypt 的基本身份验证
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Encoding passwords with bcrypt_ is a great idea. It comes at the cost of
 performance, but that's precisely the point, as slow encoding means very good
@@ -234,7 +234,7 @@ resources/methods will be secured unless they are made explicitly public.
         app = Eve(auth=BCryptAuth)
         app.run()
 
-Basic Authentication with SHA1/HMAC
+使用 SHA1/HMAC 的基本身份验证
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 This script assumes that user accounts are stored in an `accounts` MongoDB
 collection, and that passwords are stored as SHA1/HMAC hashes. All API
@@ -277,7 +277,7 @@ resources/methods will be secured unless they are made explicitly public.
 
 .. _token:
 
-Token-Based Authentication
+基于令牌的身份验证
 --------------------------
 Token-based authentication can be considered a specialized version of Basic
 Authentication. The Authorization header tag will contain the auth token as the
@@ -322,13 +322,13 @@ resources and/or methods to public access -see docs).
         app = Eve(auth=TokenAuth)
         app.run()
 
-HMAC Authentication
+HMAC 身份验证
 -------------------
 The ``eve.auth.HMACAuth`` class allows for custom, Amazon S3-like, HMAC (Hash
 Message Authentication Code) authentication, which is basically a very secure
 custom authentication scheme built around the `Authorization` header.
 
-How HMAC Authentication Works
+HMAC 身份验证工作原理
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The server provides the client with a user id and a secret key through some
 out-of-band technique (e.g., the service sends the client an e-mail
@@ -362,7 +362,7 @@ said above, an email or plain old paper).
 
 The ``eve.auth.HMACAuth``  class also support access roles.
 
-HMAC Example
+HMAC 示例
 ~~~~~~~~~~~~
 The snippet below can also be found in the `examples/security` folder of the
 Eve `repository`_.
@@ -398,7 +398,7 @@ Eve `repository`_.
 
 .. _roleaccess:
 
-Role Based Access Control
+基于角色的访问控制
 -------------------------
 The code snippets above deliberately ignore the ``allowed_roles`` parameter.
 You can use this parameter to restrict access to authenticated users who also
@@ -461,7 +461,7 @@ unless they are made explicitly public.
 
 .. _user-restricted:
 
-User-Restricted Resource Access
+用户限制的资源访问
 -------------------------------
 When this feature is enabled, each stored document is associated with the
 account that created it. This allows the API to transparently serve only
@@ -522,7 +522,7 @@ BCrypt-authentication example from above:
 
 .. _authdrivendb:
 
-Auth-driven Database Access
+身份验证驱动的数据库访问
 ---------------------------
 Custom authentication classes can also set the database that should be used
 when serving the active request.
@@ -566,7 +566,7 @@ and endpoint-level ``mongo_prefix`` settings, what happens here is that the two
 users will always be served from their reserved databases, no matter the
 eventual database configuration for the endpoint.
 
-OAuth2 Integration
+OAuth2 集成
 ------------------
 Since you have total control over the Authorization process, integrating
 OAuth2 with Eve is easy. Make yourself comfortable with the topics illustrated

@@ -1,19 +1,15 @@
 .. _validation:
 
-Data Validation
+数据验证
 ===============
-Data validation is provided out-of-the-box. Your configuration includes
-a schema definition for every resource managed by the API. Data sent to the API
-to be inserted/updated will be validated against the schema, and a resource
-will only be updated if validation passes.
+数据验证被提供为开箱即用的模式。你的配置包含对每一个 API 管理的资源的模式定义。发送到 API 即将被插入/更新的数据会被模式验证，如果验证通过，一个资源只会被更新。
 
 .. code-block:: console
 
     $ curl -d '[{"firstname": "bill", "lastname": "clinton"}, {"firstname": "mitt", "lastname": "romney"}]' -H 'Content-Type: application/json' http://eve-demo.herokuapp.com/people
     HTTP/1.1 201 OK
 
-The response will contain a success/error state for each item provided in the
-request:
+响应将对请求中提供的每一项包含一个成功/错误状态:
 
 .. code-block:: javascript
 
@@ -31,33 +27,21 @@ request:
         ]
     ]
 
-In the example above, the first document did not validate so the whole request
-has been rejected.
+在上面的例子中，第一个文档未验证通过，因此整个请求已经被拒绝。
 
-When all documents pass validation and are inserted correctly the response
-status is ``201 Created``. If any document fails validation the response status
-is ``422 Unprocessable Entity``, or any other error code defined by
-``VALIDATION_ERROR_STATUS`` configuration.
+当所有文档通过验证并被正确地插入后，响应状态是 ``201 Created``。如果任何一个文档验证失败，响应状态是 ``422 Unprocessable Entity``，或者任何其他通过 ``VALIDATION_ERROR_STATUS`` 配置定义的错误代码。
 
-For information on how to define documents schema and standard validation
-rules, see :ref:`schema`.
+要获取如何定义文档模式和标准验证规则的信息，参考 :ref:`schema`。
 
-Extending Data Validation
+扩展数据验证
 -------------------------
-Data validation is based on the Cerberus_ validation system and it is therefore
-extensible. As a matter of fact, Eve's MongoDB data-layer itself extends
-Cerberus validation, implementing the ``unique`` and ``data_relation``
-constraints, the ``ObjectId`` data type and the ``decimal128`` on top of
-the standard rules.
+数据验证基于 Cerberus_ 验证系统，因此它是可扩展的。确切地说，Eve 的 MongoDB 数据层自己就扩展了 Cerberus 验证，在标准规则的基础上实现了 ``unique`` 和 ``data_relation`` 约束，``ObjectId`` 数据类型和 ``decimal128``。
 
 .. _custom_validation_rules:
 
-Custom Validation Rules
+自定义验证规则
 ------------------------
-Suppose that in your specific and very peculiar use case, a certain value can
-only be expressed as an odd integer. You decide to add support for a new
-``isodd`` rule to our validation schema. This is how you would implement
-that:
+假设在你指定和非常特殊的使用场景，一个特定的值只能被表达为一个奇数。你决定为我们的验证模式添加对一些 ``isodd`` 规则的支持。这是实现的办法:
 
 .. code-block:: python
 
@@ -73,10 +57,7 @@ that:
     if __name__ == '__main__':
         app.run()
 
-By subclassing the base Mongo validator class and then adding a custom
-``_validate_<rulename>`` method, you extended the available :ref:`schema`
-grammar and now the new custom rule ``isodd`` is available in your schema. You
-can now do something like:
+通过继承 Mongo 验证器基类然后添加一个自定义的 ``_validate_<rulename>`` 方法，你扩展了可用的 :ref:`schema` 语法，而现在，新的自定义规则 ``isodd`` 在你的模式种就可用了。你现在可以做某些事情，像:
 
 .. code-block:: python
 
@@ -87,14 +68,11 @@ can now do something like:
           }
     }
 
-Cerberus and Eve also offer `function-based validation`_ and `type coercion`_,
-lightweight alternatives to class-based custom validation.
+Cerberus 和 Eve 也提供 `function-based validation`_ 和 `type coercion`_，对基于类的自定义验证的轻量级替代品。
 
-Custom Data Types
+自定义数据类型
 -----------------
-You can also add new data types by simply adding ``_validate_type_<typename>``
-methods to your subclass. Consider the following snippet from the Eve source
-code.
+你也可以通过简单添加 ``_validate_type_<typename>`` 方法到你的子类来添加一个新数据类型。考虑如下来自 Eve 源代码的片段。
 
 .. code-block:: python
 
@@ -106,8 +84,7 @@ code.
         if isinstance(value, ObjectId):
             return True
 
-This method enables support for MongoDB ``ObjectId`` type in your schema,
-allowing something like this:
+这个方法在你的模式用启用对 MongoDB ``ObjectId`` 类型的支持，允许像这个的东西:
 
 .. code-block:: python
 
@@ -118,39 +95,25 @@ allowing something like this:
         },
     }
 
-You can also check the `source code`_ for Eve custom validation, where you will
-find more advanced use cases, such as the implementation of the ``unique`` and
-``data_relation`` constraints.
+你也可以在 `source code`_ 中查看 Eve 自定义验证，你会发现更多高级使用场景，诸如 ``unique`` 和 ``data_relation`` 约束的实现。
 
-For more information on
+有关更多信息
 
-.. note::
+.. 注意::
 
-    We have only scratched the surface of data validation. Please make sure
-    to check the Cerberus_ documentation for a complete list of available
-    validation rules and data types.
+    我们只是划破了数据验证的表面而已。请确保查看 Cerberus_ 文档来获取可用验证规则和数据类型的一个完整列表。
 
-    Also note that Cerberus requirement is pinned to version 0.9.2, which still
-    supports the ``validate_update`` method used for ``PATCH`` requests.
-    Upgrade to Cerberus 1.0+ is scheduled for Eve version 0.8.
+    也要注意所需的 Cerberus 定在版本 0.9.2，它仍然支持 ``validate_update`` 方法用于 ``PATCH`` 请求。Eve 0.8 版本升级到 Cerberus 1.0+ 已经在计划中。
 
 .. _unknown:
 
-Allowing the Unknown
+允许 Unknown
 --------------------
-Normally you don't want clients to inject unknown fields in your documents.
-However, there might be circumstances where this is desirable. During the
-development cycle, for example, or when you are dealing with very heterogeneous
-data. After all, not forcing normalized information is one of the selling
-points of MongoDB and many other NoSQL data stores.
+正常情况下，你不希望客户端注入未知字段到你的文档中。但是，可能存在希望这么做的状况。在开发周期中，例如，或者当你正在处理非常多样的数据。毕竟，非强制规范化的信息是 MongoDB 和 很多其他 NoSQL 数据存储的一项卖点。
 
-In Eve, you achieve this by setting the ``ALLOW_UNKNOWN`` option to ``True``.
-Once this option is enabled, fields matching the schema will be validated
-normally, while unknown fields will be quietly stored without a glitch. You
-can also enable this feature only for certain endpoints by setting the
-``allow_unknown`` local option.
+在 Eve 中，你可以通过设置 ``ALLOW_UNKNOWN`` 选项为 ``True`` 来实现这个。一旦这个选项启用，匹配模式的字段将被正常验证，而未知字段将被无差错地悄悄存储。你也可以通过设置 ``allow_unknown`` 本地选项只为特定终结点启用这项特性。
 
-Consider the following domain:
+考虑下面的域:
 
 .. code-block:: python
 
@@ -163,37 +126,27 @@ Consider the following domain:
             }
         }
 
-Normally you can only add (POST) or edit (PATCH) `firstnames` to the
-``/people`` endpoint. However, since ``allow_unknown`` has been enabled, even
-a payload like this will be accepted:
+正常情况下，你只可以添加 (POST) 或编辑 (PATCH) `firstnames` 到 ``/people`` 终结点。但是，由于 ``allow_unknown`` 已经启用，甚至像这样一个有效负载也会被接受:
 
 .. code-block:: console
 
     $ curl -d '[{"firstname": "bill", "lastname": "clinton"}, {"firstname": "bill", "age":70}]' -H 'Content-Type: application/json' http://eve-demo.herokuapp.com/people
     HTTP/1.1 201 OK
 
-.. admonition:: Please note
+.. 提示:: 请注意
 
-    Use this feature with extreme caution. Also be aware that, when this
-    option is enabled, clients will be capable of actually `adding` fields via
-    PATCH (edit).
+    要十分小心地使用这项特性。也要意识到，当这个选项启用时，客户端实际上将有能力通过 PATCH (编辑) `添加` 字段。
 
-``ALLOW_UNKNOWN`` is also useful for read-only APIs or endpoints that
-need to return the whole document, as found in the underlying database. In this
-scenario you don't want to bother with validation schemas. For the whole API
-just set ``ALLOW_UNKNOWN`` to ``True``, then ``schema: {}`` at every endpoint.
-For a single endpoint, use ``allow_unknown: True`` instead.
+``ALLOW_UNKNOWN`` 对只读 API 或需要返回在潜在数据库中找到的整个文档的终结点也很有用。在这个方案中，你不希望动用验证模式。对整个 API 来说，只要设置 ``ALLOW_UNKNOWN`` 为 ``True``，然后在每个终结点设置 ``schema: {}``。对单个终结点来说，使用 ``allow_unknown: True`` 代替。
 
 .. _schema_validation:
 
-Schema validation
+模式验证
 -----------------
 
-By default, schemas are validated to ensure they conform to the structure
-documented in :ref:`schema`.
+默认情况下，模式被验证以确保它们遵从记录在 :ref:`schema` 中的结构。
 
-In order to deal with non-conforming schemas, add
-:ref:`custom_validation_rules` for non-conforming keys used in the schema.
+要处理非标准的模式，请为模式中使用的非遵从键添加 :ref:`custom_validation_rules`。
 
 .. _Cerberus: http://python-cerberus.org
 .. _`source code`: https://github.com/pyeve/eve/blob/master/eve/io/mongo/validation.py

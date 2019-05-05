@@ -1,28 +1,23 @@
 .. _updates:
 
-Updates
+更新
 =======
-If you'd like to stay up to date on the community and development of Eve,
-there are several options:
+如果你想紧紧跟随 Eve 社区和开发，有几个选项:
 
-Blog
+博客
 ----
-`Eve News <http://blog.python-eve.org>`_ is the official blog of the Eve project.
+`Eve 新闻 <http://blog.python-eve.org>`_ 是 Eve 项目的官方博客。
 
 Twitter
 -------
-I often tweet about new features and releases of Eve. Follow `@nicolaiarocci
-<https://twitter.com/nicolaiarocci>`_.
+I 常常为 Eve 的新特性和发布发 tweet。关注 `@nicolaiarocci <https://twitter.com/nicolaiarocci>`_。
 
-Mailing List
+邮件列表
 ------------
-The `mailing list`_ is intended to be a low traffic resource for both
-developers/contributors and API maintainers looking for help or requesting
-feedback.
+`mailing list`_ 是为了成为一项同时为开发者/贡献者和 API 维护者提供寻求帮助或请求反馈的低流量资源。
 
 GitHub
 ------
-Of course the best way to track the development of Eve is through
-`the GitHub repo <https://github.com/pyeve/eve>`_.
+当然，跟踪 Eve 开发最好的方式是通过 ` GitHub 代码库 <https://github.com/pyeve/eve>`_。
 
 .. _`mailing list`: https://groups.google.com/forum/#!forum/python-eve

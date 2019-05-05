@@ -1,8 +1,6 @@
-Features
+特性
 ========
-Below is a list of main features that any EVE-powered APIs can expose. Most of
-these features can be experienced live by consuming the Demo API (see
-:ref:`demo`).
+下面是任何 EVE 支持的 API 可以暴露的主要特性的一个列表。这些特性中的大多数可以通过使用 Demo API (参考 :ref:`demo`) 来现场体验。
 
 Emphasis on REST
 ----------------
@@ -11,7 +9,7 @@ implementation. Fundamental REST_ principles like *separation of concerns*,
 *stateless and layered system*, *cacheability*, *uniform interface* have been
 kept into consideration while designing the core API.
 
-Full range of CRUD operations
+全部 CRUD 操作
 -----------------------------
 APIs can support the full range of CRUD_ operations. Within the same API, you
 can have a read-only resource accessible at one endpoint, along with a fully
@@ -29,7 +27,7 @@ Update  PATCH     Document
 Delete  DELETE    Collection/Document
 ======= ========= ===================
 
-Overriding HTTP Methods
+重写 HTTP 方法
 ~~~~~~~~~~~~~~~~~~~~~~~
 As a fallback for the odd client not supporting any of these methods, the API
 will gladly honor ``X-HTTP-Method-Override`` requests. For example a client not
@@ -39,7 +37,7 @@ a ``PATCH``, overriding the original request method.
 
 .. _resource_endpoints:
 
-Customizable resource endpoints
+自定义资源终结点
 -------------------------------
 By default, Eve will make known database collections available as resource
 endpoints (persistent identifiers in REST idiom). So a database ``people``
@@ -107,7 +105,7 @@ document being returned. The ``_links`` list provides HATEOAS_ directives.
 
 .. _subresources:
 
-Sub Resources
+子资源
 ~~~~~~~~~~~~~
 Endpoints support sub-resources so you could have something like:
 ``people/<contact_id>/invoices``. When setting the ``url`` rule for such an
@@ -212,7 +210,7 @@ resource alone is not necessarily a primary key by itself.
 
 .. _custom_item_endpoints:
 
-Customizable, multiple item endpoints
+自定义的多数据项终结点
 -------------------------------------
 Resources can or cannot expose individual item endpoints. API consumers could
 get access to ``people``, ``people/<ObjectId>`` and ``people/Doe``,
@@ -278,7 +276,7 @@ As you can see, item endpoints provide their own HATEOAS_ directives.
 
 .. _filters:
 
-Filtering
+筛选
 ---------
 Resource endpoints allow consumers to retrieve multiple documents. Query
 strings are supported, allowing for filtering and sorting. Both native Mongo
@@ -334,7 +332,7 @@ You also have the option to validate the incoming filters against the resource's
 schema and refuse to apply the filtering if any filters are invalid, by using the
 ``VALIDATE_FILTERING`` system setting (see :ref:`global`)
 
-Pretty Printing
+整齐打印
 ---------------
 You can pretty print the response by specifying a query parameter named
 ``pretty``:
@@ -373,7 +371,7 @@ You can pretty print the response by specifying a query parameter named
     }
 
 
-Sorting
+排序
 -------
 Sorting is supported as well:
 
@@ -413,7 +411,7 @@ endpoints (see ``default_sort`` in :ref:`domain`).
 
 .. _pagination:
 
-Pagination
+分页
 ----------
 Resource pagination is enabled by default in order to improve performance and
 preserve bandwidth. When a consumer requests a resource, the first N items
@@ -481,7 +479,7 @@ mean that the *people* endpoint is located at ``examples.com/api/v1/people``.
 Please note that ``next``, ``previous``, ``last`` and ``related`` items will only be
 included when appropriate.
 
-Disabling HATEOAS
+禁用 HATEOAS
 ~~~~~~~~~~~~~~~~~
 HATEOAS can be disabled both at the API and/or resource level. Why would you
 want to turn HATEOAS off? Well, if you know that your client application is not
@@ -490,7 +488,7 @@ performance.
 
 .. _rendering:
 
-Rendering
+渲染
 ---------
 Eve responses are automatically rendered as JSON (the default) or XML,
 depending on the request ``Accept`` header. Inbound documents (for inserts and
@@ -525,7 +523,7 @@ Please note that at least one renderer must always be enabled.
 
 .. _conditional_requests:
 
-Conditional Requests
+带条件的请求
 --------------------
 Each resource representation provides information on the last time it was
 updated (``Last-Modified``), along with an hash value computed on the
@@ -547,7 +545,7 @@ or the ``If-None-Match`` header:
 
 .. _concurrency:
 
-Data Integrity and Concurrency Control
+数据完整性和并发控制
 --------------------------------------
 API responses include a ``ETag`` header which also allows for proper
 concurrency control. An ``ETag`` is a hash value representing the current state
@@ -599,7 +597,7 @@ subsequent `conditional requests`_.
 Concurrency control applies to all edition methods: ``PATCH`` (edit), ``PUT``
 (replace), ``DELETE`` (delete).
 
-Disabling concurrency control
+禁用并发控制
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 If your use case requires, you can opt to completely disable concurrency
 control. ETag match checks can be disabled by setting the ``IF_MATCH``
@@ -614,7 +612,7 @@ the ``If-Match`` header will not be processed as conditional.
 
 .. _bulk_insert:
 
-Bulk Inserts
+批量插入
 ------------
 A client may submit a single document for insertion:
 
@@ -682,7 +680,7 @@ In case of successful multiple inserts, keep in mind that the ``Location``
 header only returns the URI of the first created document.
 
 
-Data Validation
+数据验证
 ---------------
 Data validation is provided out-of-the-box. Your configuration includes
 a schema definition for every resource managed by the API. Data sent to the API
@@ -723,7 +721,7 @@ is ``422 Unprocessable Entity``, or any other error code defined by
 
 For more information see :ref:`validation`.
 
-Extensible Data Validation
+扩展性的数据验证
 --------------------------
 Data validation is based on the Cerberus_ validation system and therefore it is
 extensible, so you can adapt it to your specific use case. Say that your API can
@@ -734,7 +732,7 @@ a matter of fact, Eve's MongoDB data-layer itself extends Cerberus
 validation by implementing the ``unique`` schema field constraint. For more
 information see :ref:`validation`.
 
-Editing a Document (PATCH)
+编辑一个文档 (PATCH)
 --------------------------
 Clients can edit a document with the ``PATCH`` method, while ``PUT`` will
 replace it. ``PATCH`` cannot remove a field, but only update its value.
@@ -773,7 +771,7 @@ email'}`` can be used to update the ``email`` field in the ``contact`` subdocume
 
 .. _cache_control:
 
-Resource-level Cache Control
+资源级缓存控制
 ----------------------------
 You can set global and individual cache-control directives for each resource.
 
@@ -792,7 +790,7 @@ The response above includes both ``Cache-Control`` and ``Expires`` headers.
 These will minimize load on the server since cache-enabled consumers will
 perform resource-intensive request only when really needed.
 
-API Versioning
+API 版本控制
 --------------
 I'm not too fond of API versioning. I believe that clients should be
 intelligent enough to deal with API updates transparently, especially since
@@ -803,7 +801,7 @@ between versions: caching, URIs, schemas, validation, and so on. URI versioning
 
 .. _document_versioning:
 
-Document Versioning
+文档版本控制
 -------------------
 Eve supports automatic version control of documents. By default, this setting
 is turned off, but it can be turned globally or configured individually for
@@ -855,7 +853,7 @@ possibility of holing stale ``_latest_version`` data.
 For more information see and :ref:`global` and :ref:`domain`.
 
 
-Authentication
+身份验证
 --------------
 Customizable Basic Authentication (RFC-2617), Token-based authentication and
 HMAC-based Authentication are supported. OAuth2 can be easily integrated. You
@@ -864,7 +862,7 @@ commands, like allowing open read-only access while restricting edits, inserts
 and deletes to authorized users. Role-based access control is supported as
 well. For more information see :ref:`auth`.
 
-CORS Cross-Origin Resource Sharing
+CORS 跨域资源共享
 ----------------------------------
 Eve-powered APIs can be accessed by the JavaScript contained in web pages.
 Disabled by default, CORS_ allows web pages to work with REST APIs, something
@@ -874,7 +872,7 @@ CORS requests. A list of regular expressions may be defined in ``X_DOMAINS_RE``,
 anchor and escape the regexes properly, for example
 ``X_DOMAINS_RE = ['^http://sub-\d{3}\.example\.com$']``.
 
-JSONP Support
+JSONP 支持
 -------------
 In general you don't really want to add JSONP when you can enable CORS instead:
 
@@ -899,18 +897,18 @@ back a response wrapped with said argument value. For example if you set
 Requests with no ``callback`` argument will be served with no JSONP.
 
 
-Read-only by default
+默认只读
 --------------------
 If all you need is a read-only API, then you can have it up and running in
 a matter of minutes.
 
-Default and Nullable Values
+默认的和可为空的值
 ---------------------------
 Fields can have default values and nullable types. When serving POST (create)
 requests, missing fields will be assigned the configured default values. See
 ``default`` and ``nullable`` keywords in :ref:`schema` for more information.
 
-Predefined Database Filters
+预定义的数据库过滤器
 ---------------------------
 Resource endpoints will only expose (and update) documents that match
 a predefined filter. This allows for multiple resource endpoints to seamlessly
@@ -925,7 +923,7 @@ hypothetical ``people`` collection on the database being used by both the
 
 .. _projections:
 
-Projections
+投影
 -----------
 This feature allows you to create dynamic views of collections and documents,
 or more precisely, to decide what fields should or should not be returned,
@@ -957,7 +955,7 @@ allow for mixing of inclusive and exclusive selections.
 
 .. _embedded_docs:
 
-Embedded Resource Serialization
+内嵌资源序列化
 -------------------------------
 If a document field is referencing a document in another resource, clients can
 request the referenced document to be embedded within the requested document.
@@ -1033,7 +1031,7 @@ and ``VERSION``. With ``'field': '_id'`` in the data_relation definition above
 and ``VERSION = '_version'`` in the Eve config, the value of the data_relation
 in this scenario would be a dictionary with fields ``_id`` and ``_version``.
 
-Predefined Resource Serialization
+预定义的资源序列化
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 It is also possible to elect some fields for predefined resource
 serialization. If the listed fields are embeddable and they are actually referencing
@@ -2350,14 +2348,14 @@ since it is possible to setup multiple endpoints all serving from the same
 datasource (see :ref:`source`), similar functionality can be easily achieved.
 
 
-MongoDB and SQL Support
+MongoDB 和 SQL 支持
 ------------------------
 Support for single or multiple MongoDB database/servers comes out of the box.
 An SQLAlchemy extension provides support for SQL backends. Additional data
 layers can can be developed with relative ease. Visit the `extensions page`_
 for a list of community developed data layers and extensions.
 
-Powered by Flask
+Flask 技术支持
 ----------------
 Eve is based on the Flask_ micro web framework. Actually, Eve itself is
 a Flask subclass, which means that Eve exposes all of Flask functionalities and

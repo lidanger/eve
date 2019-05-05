@@ -1,18 +1,17 @@
 .. _license:
 
-Licensing
+许可
 =========
 
-Also see :ref:`authors`.
+也参考 :ref:`authors`.
 
-BSD License
+BSD 许可
 -----------
 
 .. include:: ../LICENSE
 
-Artwork License
+Artwork 许可
 ---------------
-Eve artwork 2013 by Roberto Pasini "Kalamun" released under the `Creative
-Commons BY-SA`_ license.
+Eve 由 Roberto Pasini "Kalamun" 在 2013 年设计，基于 `Creative Commons BY-SA`_ 许可发布。
 
 .. _`Creative Commons BY-SA`: https://github.com/pyeve/eve/blob/master/artwork/LICENSE

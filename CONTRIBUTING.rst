@@ -1,106 +1,93 @@
-How to contribute
+如何参与
 =================
 
-Contributions are welcome! Not familiar with the codebase yet? No problem!
-There are many ways to contribute to open source projects: reporting bugs,
-helping with the documentation, spreading the word and of course, adding
-new features and patches.
+欢迎参与! 还不熟悉基础代码? 没问题!有很多参与到开源项目的方式: 报告 bugs，帮助完善文档，传播信息，当然，还有添加新特性和补丁。
 
-Support questions
+支持问题
 -----------------
 
-Please, don't use the issue tracker for this. Use one of the following
-resources for questions about your own code:
+请，不要使用问题跟踪器来做这件事。使用以下资源中的一项来提出关于你自己代码的问题:
 
-* Ask on `Stack Overflow`_. Search with Google first using: ``site:stackoverflow.com eve {search term, exception message, etc.}``
-* The `mailing list`_ is intended to be a low traffic resource for both developers/contributors and API maintainers looking for help or requesting feedback.
-* The IRC channel ``#python-eve`` on FreeNode.
+* 在 `Stack Overflow`_ 上提问。首先使用: ``site:stackoverflow.com eve {search term, exception message, etc.}`` 在 Google 搜索。
+* `邮件列表`_ 是为了成为一项同时为开发者/贡献者和 API 维护者提供寻求帮助或请求反馈的低流量资源。
+* FreeNode 上的 IRC 频道 ``#python-eve``。
 
 .. _Stack Overflow: https://stackoverflow.com/questions/tagged/eve?sort=linked
-.. _`mailing list`: https://groups.google.com/forum/#!forum/python-eve
+.. _`邮件列表`: https://groups.google.com/forum/#!forum/python-eve
 
-Reporting issues
+报告问题
 ----------------
 
-- Describe what you expected to happen.
-- If possible, include a `minimal, complete, and verifiable example`_ to help
-  us identify the issue. This also helps check that the issue is not with your
-  own code.
-- Describe what actually happened. Include the full traceback if there was an
-  exception.
-- List your Python and Eve versions. If possible, check if this issue is
-  already fixed in the repository.
+- 描述你所期望发生的。
+- 如果可能的话，包含一个 `最小的，完整的，可验证的例子`_ 来帮助我们识别问题。这也会帮助检查问题是否跟你自己的代码无关。
+- 描述实际上发生了什么。如果出现异常的话，包含全过程跟踪回溯。
+- 列出你的 Python 和 Eve 版本。如果可能的话，在代码库中检查这个问题是否已经被修复了。
 
-.. _minimal, complete, and verifiable example: https://stackoverflow.com/help/mcve
+.. _最小的，完整的，可验证的例子: https://stackoverflow.com/help/mcve
 
-Submitting patches
+提交补丁
 ------------------
 
-- Include tests if your patch is supposed to solve a bug, and explain
-  clearly under which circumstances the bug happens. Make sure the test fails
-  without your patch.
-- Enable and install pre-commit_ to ensure styleguides and codechecks are
-  followed. CI will reject a change that does not conform to the guidelines.
+- 如果你的补丁目的是解决一个 bug，请包含测试，并解释清楚在什么条件下 bug 会出现。确保如果没有你的补丁，测试会失败。
+- 启用和安装 pre-commit_ 来确保遵守了风格指南和代码检查。CI 会拒绝一个没有遵守行为准则的修改。
 
 .. _pre-commit: https://pre-commit.com/
 
-First time setup
+首次安装
 ~~~~~~~~~~~~~~~~
 
-- Download and install the `latest version of git`_.
-- Configure git with your `username`_ and `email`_::
+- 下载安装 `最新版本的 git`_。
+- 使用你的 `用户名`_ and `电子邮件`_ 配置 git ::
 
         git config --global user.name 'your name'
         git config --global user.email 'your email'
 
-- Make sure you have a `GitHub account`_.
-- Fork Eve to your GitHub account by clicking the `Fork`_ button.
-- `Clone`_ your GitHub fork locally::
+- 确保你有一个 `GitHub 账户`_。
+- 通过点击 `Fork`_ 按钮 Fork Eve 到你的 GitHub 账户。
+- `Clone`_ 你的 GitHub fork 到本地::
 
         git clone https://github.com/{username}/eve
         cd eve
 
-- Add the main repository as a remote to update later::
+- 添加主代码库为 remote 以便稍后更新::
 
         git remote add pyeve https://github.com/pyeve/eve
         git fetch pyeve
 
-- Create a virtualenv::
+- 创建一个 virtualenv::
 
         python3 -m venv env
         . env/bin/activate
         # or "env\Scripts\activate" on Windows
 
-- Install Eve in editable mode with development dependencies::
+- 在可编辑模式安装 Eve 和开发依赖项::
 
         pip install -e ".[dev]"
 
-- Install pre-commit_ and then activate its hooks. pre-commit is a framework for managing and maintaining multi-language pre-commit hooks. Eve uses pre-commit to ensure code-style and code formatting is the same::
+- 安装 pre-commit_ 然后激活它的 hooks。pre-commit 是一个用于管理和维护多语言 pre-commit hooks 的框架。Eve 使用 pre-commit 来确保相同的编码风格和编码格式::
 
     $ pip install --user pre-commit
     $ pre-commit install
 
-  Afterwards, pre-commit will run whenever you commit.
+  以后，只要你一提交 pre-commit 就会运行。
 
 
-.. _GitHub account: https://github.com/join
-.. _latest version of git: https://git-scm.com/downloads
-.. _username: https://help.github.com/articles/setting-your-username-in-git/
-.. _email: https://help.github.com/articles/setting-your-email-in-git/
+.. _GitHub 账户: https://github.com/join
+.. _最新版本的 git: https://git-scm.com/downloads
+.. _用户名: https://help.github.com/articles/setting-your-username-in-git/
+.. _电子邮件: https://help.github.com/articles/setting-your-email-in-git/
 .. _Fork: https://github.com/pallets/flask/fork
 .. _Clone: https://help.github.com/articles/fork-a-repo/#step-2-create-a-local-clone-of-your-fork
 
-Start coding
+开始写代码
 ~~~~~~~~~~~~
 
-- Create a branch to identify the issue you would like to work on (e.g.
-  ``fix_for_#1280``)
-- Using your favorite editor, make your changes, `committing as you go`_.
-- Follow `PEP8`_.
-- Include tests that cover any code changes you make. Make sure the test fails
-  without your patch. `Run the tests. <contributing-testsuite_>`_.
-- Push your commits to GitHub and `create a pull request`_.
-- Celebrate 🎉
+- 创建一个分支来标识你想解决的问题 (例如 ``fix_for_#1280``)
+- 使用你最喜欢的编辑器，做出修改，`committing as you go`_.
+- 遵行 `PEP8`_.
+- 包含覆盖你做出的任何代码变化的测试。确保如果没有你的补丁，测试会失败。`运行测试。<contributing-testsuite_>`_。
+- 推送你的提交到 GitHub 并 `生成一个 pull 请求`_.
+- 庆祝 🎉
 
 .. _committing as you go: http://dont-be-afraid-to-commit.readthedocs.io/en/latest/git/commandlinegit.html#commit-your-changes
 .. _PEP8: https://pep8.org/
@@ -108,74 +95,57 @@ Start coding
 
 .. _contributing-testsuite:
 
-Running the tests
+运行测试
 ~~~~~~~~~~~~~~~~~
 
-You should have both Python 2.7 and 3.6 available in your system. Now
-running tests is as simple as issuing this command::
+你应该在你的系统中同时安装 Python 2.7 和 3.6。现在，运行测试就像发出这个命令一样简单::
 
     $ tox -e linting,py27,py36
 
-This command will run tests via the "tox" tool against Python 2.7 and 3.6 and
-also perform "lint" coding-style checks.
+这个命令将通过的 "tox" 工具运行 Python 2.7 和 3.6 测试，也执行 "lint" 代码风格检查。
 
-You can pass different options to ``tox``. For example, to run tests on Python
-2.7 and pass options to pytest (e.g. enter pdb on failure) to pytest you can
-do::
+你可以为 ``tox`` 传递不同的选项。例如，要在 Python 2.7 中运行测试并传递选项到 pytest (例如，失败时进入 pdb) 来 pytest 你可以做的::
 
     $ tox -e py27 -- --pdb
 
-Or to only run tests in a particular test module on Python 3.6::
+或者只是在 Python 3.6 中运行特定测试模块::
 
     $ tox -e py36 -- -k TestGet
 
-Travis-CI will run the full suite when you submit your pull request. The full
-test suite takes a long time to run because it tests multiple combinations of
-Python and dependencies. You need to have Python 2.7, 3.4, 3.5, 3.6, and PyPy
-installed to run all of the environments. Then run::
+当你提交你的 pull 请求时，Travis-CI 会运行全套。全套测试需要运行很长时间，因为它测试多个 Python 和依赖项的组合。你需要安装 Python 2.7, 3.4, 3.5, 3.6 和 PyPy 来支持所有的环境。然后运行::
 
     tox
 
-Please note that you need an active MongoDB instance running on localhost in
-order for the tests run. Also, be advived that in order to execute the
-:ref:`ratelimiting` tests you need a running Redis_ server. The Rate-Limiting
-tests are silently skipped if any of the two conditions are not met.
+请注意，为了运行测试，你需要有一个 MongoDB 实例运行在本地。也要注意，为了执行 :ref:`ratelimiting` 测试，你需要一个运行中的 Redis_ 服务器。如果这两项条件中的任一个没有满足，会默默跳过限速测试。
 
-Building the docs
+构建文档
 ~~~~~~~~~~~~~~~~~
-Build the docs in the ``docs`` directory using Sphinx::
+使用 Sphinx 构建 ``docs`` 文件夹下的文档::
 
     cd docs
     make html
 
-Open ``_build/html/index.html`` in your browser to view the docs.
+在你的浏览器中打开 ``_build/html/index.html`` 查看文档。
 
-Read more about `Sphinx <http://www.sphinx-doc.org>`_.
+阅读更多关于 `Sphinx <http://www.sphinx-doc.org>`_ 的信息。
 
-make targets
+生成目标
 ~~~~~~~~~~~~
-Eve provides a ``Makefile`` with various shortcuts. They will ensure that
-all dependencies are installed.
+Eve 通过各种快捷方式提供一个 ``Makefile``。它们将确认所有依赖都已经安装。
 
-- ``make test`` runs the basic test suite with ``pytest``
-- ``make test-all`` runs the full test suite with ``tox``
-- ``make docs`` builds the HTML documentation
-- ``make check`` performs some checks on the package
-- ``make install-dev`` install Eve in editable mode with all development dependencies.
+- ``make test`` 使用 ``pytest`` 运行基本测试套件
+- ``make test-all`` 使用 ``tox`` 运行全部测试套件 
+- ``make docs`` 构建 HTML 文档
+- ``make check`` 对包进行一些检查
+- ``make install-dev`` 在可编辑模式安装 Eve 和所有开发依赖项。
 
-First time contributor?
+第一次当贡献者?
 -----------------------
-It's alright. We've all been there. See next chapter.
+没问题。我们都已经在那里了。看看下一章。
 
-Don't know where to start?
+不知道从哪里开始?
 --------------------------
-There are usually several TODO comments scattered around the codebase, maybe
-check them out and see if you have ideas, or can help with them. Also, check
-the `open issues`_ in case there's something that sparks your interest. And
-what about documentation? I suck at English, so if you're fluent with it (or
-notice any typo and/or mistake), why not help with that? In any case, other
-than GitHub help_ pages, you might want to check this excellent `Effective
-Guide to Pull Requests`_
+通常在基础代码周围分散着几个 TODO 注释，或许检查它们，看看是否有些想法或是否能帮助改善它们。也可以看看那些能引起你的兴趣的 `open issues`_。再者，文档怎么样? 我英语很糟糕，因此如果你的英语流利 (或者通知任何排版问题或错误)，为什么不帮助改善它呢? 在任何情况下，除了 GitHub help_ 页面，你可能想试试这个出色的 `Effective Guide to Pull Requests`_
 
 .. _`the repository`: http://github.com/pyeve/eve
 .. _AUTHORS: https://github.com/pyeve/eve/blob/master/AUTHORS

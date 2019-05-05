@@ -1,17 +1,13 @@
-REST API for Humans
+Eve REST API for Humans
 ===================
-I have been introducing Eve at several conferences and meetups. A few people
-suggested that I post the slides on the Eve website, so here it is: a quick
-rundown on Eve features, along with a few code snippets and examples. Hopefully
-it will do a good job in letting you decide whether Eve is valid solution for
-your use case.
+我已经在几个会议和会谈中介绍了 Eve。一些人建议我发送幻灯片到 Eve 网站，好吧，这就是: 对 Eve 特性的一段简洁描述，伴随少许代码片段和示例。希望它在让你决定 Eve 对你的使用场景是否是一个有效的解决放方案方面做得不错。
 
 - `REST API for Humans @ SpeakerDeck <https://speakerdeck.com/nicola/eve-rest-api-for-humans>`_
 
 
-Conferences
+会议
 ------------
-Eve REST API for Humans™ has been presented at the following events so far:
+目前，Eve REST API for Humans™ 已经在以下事件中展现:
 
 - PyConWeb 2018, Munich
 - PyCon Belarus 2018, Kiev
@@ -24,7 +20,7 @@ Eve REST API for Humans™ has been presented at the following events so far:
 - PyCon Sweden 2014, Stockholm
 - FOSDEM 2014, Brussels
 
-Want this talk delivered at your conference? Get in touch_!
+希望这次谈话在你的会议中分发? 取得 联系_!
 
 
-.. _touch: mailto:nicola@nicolaiarocci.com
+.. _联系: mailto:nicola@nicolaiarocci.com

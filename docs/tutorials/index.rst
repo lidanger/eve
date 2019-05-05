@@ -1,6 +1,6 @@
 .. _tutorials:
 
-Tutorials
+教程
 =========
 
 .. toctree::
@@ -9,10 +9,8 @@ Tutorials
    account_management
    custom_idfields
 
-Learn Eve at TalkPython Training
+在 TalkPython Training 上学习 Eve
 --------------------------------
-There is a 5 hours-long Eve course available for you at the fine TalkPython
-Training website. The teacher is Nicola, Eve author and maintainer. Taking this
-course will directly support the project.
+在不错的 TalkPython Training 网站，有一个 5 小时长的 Eve 课程对你可用。老师是 Nicola，Eve 的作者和维护者。上这节课会直接支持这个项目。
 
-- `Take the Eve Course at TalkPython Training <https://training.talkpython.fm/courses/explore_eve/eve-building-restful-mongodb-backed-apis-course>`_
+- `在 TalkPython Training <https://training.talkpython.fm/courses/explore_eve/eve-building-restful-mongodb-backed-apis-course>上 Eve 课程`_ 

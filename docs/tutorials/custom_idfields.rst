@@ -1,48 +1,30 @@
 .. _custom_ids:
 
-Handling custom ID fields
+处理自定义 ID 字段
 =========================
 
-When it comes to individual document endpoints, in most cases you don't have
-anything to do besides defining the parent resource endpoint. So let's say that
-you configure a ``/invoices`` endpoint, which will allow clients to query the
-underlying `invoices` database collection. The ``/invoices/<ObjectId>``
-endpoint will be made available by the framework, and will be used by clients to
-retrieve and/or edit individual documents. By default, Eve provides this feature
-seamlessly when ``ID_FIELD`` fields are of ``ObjectId`` type.
+当来到单个文档终结点时，在大多数情况下，除了定义父资源节点外，你不用做任何事情。因此，比如说，你配置了一个 ``/invoices`` 终结点，它允许客户端查询潜在的 `invoices` 数据库集合。``/invoices/<ObjectId>`` 终结点将被框架设为可用，并被客户端用于获取和/或编辑单个文档。默认情况下，当 ``ID_FIELD`` 字段是 ``ObjectId`` 类型时，Eve 可以天衣无缝地提供这个特性。
 
-However, you might have collections where your unique identifier is not an
-``ObjectId``, and you still want individual document endpoints to work
-properly. Don't worry, it's doable, it only requires a little tinkering.
+但是，你可能有唯一标识不是一个 ``ObjectId`` 的结合，而你仍然希望单个文档终结点正确运行。不要担心，它是可以实现的，只需要一点小修补。
 
-Handling ``UUID`` fields
+处理 ``UUID`` 字段
 ------------------------
-In this tutorial we will consider a scenario in which one of our database
-collections (invoices) uses UUID fields as unique identifiers. We want our API to
-expose a document endpoint like ``/invoices/uuid``, which translates to something like:
+在这篇教程中，我们将考虑一个方案，在这个方案中，我们数据库集合 (invoices) 中的一个使用 UUID 字段作为唯一标识。我们希望我们的 API 暴露一个文档终结点，类似 ``/invoices/uuid``，翻译过来像:
 
 ``/invoices/48c00ee9-4dbe-413f-9fc3-d5f12a91de1c``.
 
-These are the steps we need to follow:
+这些是我们需要按着做的步骤:
 
-1. Craft a custom JSONEncoder that is capable of serializing UUIDs as strings
-   and pass it to our Eve application.
-2. Add support for a new ``uuid`` data type so we can properly validate
-   incoming uuid values.
-3. Configure our invoices endpoint so Eve knows how to properly parse UUID
-   urls.
+1. 精心制作一个自定义的能将 UUID 序列化为字符串的 JSONEncoder，并将它传递给我们的 Eve 应用程序。
+2. 对新的 ``uuid`` 数据类型添加支持，这样我们就可以正确地验证收到的 uuid 值。
+3. 配置我们的 invoices 终结点，这样 Eve 才知道如何正确解析 UUID urls。
 
-Custom JSONEncoder
+自定义 JSONEncoder
 ~~~~~~~~~~~~~~~~~~
-The Eve default JSON serializer is perfectly capable of serializing common data
-types like ``datetime`` (serialized to a RFC1123 string, like ``Sat, 23 Feb 1985
-12:00:00 GMT``) and ``ObjectId`` values (also serialized to strings).
+Eve 的默认 JSON 序列化器完美胜任普通数据类型的序列化，像 ``datetime`` (序列化为一个 RFC1123 字符串，像 ``Sat, 23 Feb 1985
+12:00:00 GMT``) 和 ``ObjectId`` 值 (也序列化为字符串)。
 
-Since we are adding support for an unknown data type, we also need to instruct
-our Eve instance on how to properly serialize it. This is as easy as
-subclassing a standard ``JSONEncoder`` or, even better, Eve's own
-``BaseJSONEncoder``, so our custom serializer will preserve all of Eve's
-serialization magic:
+由于我们正在添加对未知数据类型的支持，我们也需要告诉我们的 Eve 实例如何正确地序列化它。这就像继承一个标准的 ``JSONEncoder`` 一样简单，或者，甚至更简单。由于继承自 Eve 自己的 ``BaseJSONEncoder``，我们的自定义序列化器会保留 Eve 所有的序列化逻辑:
 
 .. code-block:: python
 
@@ -50,9 +32,8 @@ serialization magic:
     from uuid import UUID
 
     class UUIDEncoder(BaseJSONEncoder):
-        """ JSONEconder subclass used by the json render function.
-        This is different from BaseJSONEoncoder since it also addresses
-        encoding of UUID
+        """ JSONEconder 子类，由 json 渲染函数使用。
+        它不同于 BaseJSONEoncoder，因为它也可以处理 UUID 编码的地址
         """
 
         def default(self, obj):
@@ -64,14 +45,9 @@ serialization magic:
                 return super(UUIDEncoder, self).default(obj)
 
 
-``UUID`` Validation
+``UUID`` 验证
 ~~~~~~~~~~~~~~~~~~~
-By default Eve creates a unique identifier for each newly inserted document,
-and that is of ``ObjectId`` type. This is not what we want to happen at this
-endpoint. Here we want the client itself to provide the unique identifiers, and
-we also want to validate that they are of UUID type. In order to achieve that,
-we first need to extend our data validation layer (see :ref:`validation` for
-details on custom validation):
+默认情况下，Eve 为每一个新插入的文档创建一个唯一标识，当然了，是 ``ObjectId`` 类型。在这个终结点上这不是我们希望发生的。在这里，我们希望客户端自己提供唯一索引，而且我们也希望验证它们是 UUID 类型。为了实现这个，我们首先需要扩展我们的数据验证层 (查看 :ref:`validation` 获取关于自定义验证的详细信息):
 
 .. code-block:: python
 
@@ -80,7 +56,7 @@ details on custom validation):
 
     class UUIDValidator(Validator):
         """
-        Extends the base mongo validator adding support for the uuid data-type
+        扩展基本的 mongo 验证器，添加对 uuid 数据类型的支持
         """
         def _validate_type_uuid(self, value):
             try:
@@ -90,18 +66,15 @@ details on custom validation):
 
 ``UUID`` URLs
 ~~~~~~~~~~~~~
-Now Eve is capable of rendering and validating UUID values but it still doesn't know
-which resources are going to use these features. We also need to set
-``item_url`` so uuid formed urls can be properly parsed. Let's pick our
-``settings.py`` module and update the API domain accordingly:
+现在，Eve 已经能胜任渲染和验证 UUID 值了，但是它仍然不知道哪个资源将使用这些特性。我们也需要设置 ``item_url``，这样 uuid 格式的 urls 可以被正确地解析。让我们选择我们的 ``settings.py`` 模块并更新对应的 API 域:
 
 .. code-block:: python
 
     invoices = {
-        # this resource item endpoint (/invoices/<id>) will match a UUID regex.
+        # 这个资源项终结点 (/invoices/<id>) 将匹配一个 UUID regex.
         'item_url': 'regex("[a-f0-9]{8}-?[a-f0-9]{4}-?4[a-f0-9]{3}-?[89ab][a-f0-9]{3}-?[a-f0-9]{12}")',
         'schema': {
-            # set our _id field of our custom uuid type.
+            # 将我们的 _id 字段设置为我们的自定义 uuid 类型.
             '_id': {'type': 'uuid'},
         },
     }
@@ -110,25 +83,18 @@ which resources are going to use these features. We also need to set
         'invoices': invoices
     }
 
-If all your API resources are going to support uuid as unique document
-identifiers then you might just want to set the global ``ITEM_URL`` to the uuid
-regex in order to avoid setting it for every single resource endpoint.
+如果你所有的 API 资源都要支持 uuid 作为唯一文档标识，那你可能只需要设置全局的 ``ITEM_URL`` 为 uuid regex，避免每一个资源终结点都要设置。
 
-Passing the ``UUID`` juice to Eve
+将 ``UUID`` juice 传递给 Eve
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Now all the missing pieces are there we only need to instruct Eve on how to
-use them. Eve needs to know about the new data type when its building the
-URL map, so we need to pass our custom classes right at the beginning, when we
-are instancing the application:
+现在，所有丢失的碎片都找到了，我们只需要告诉 Eve 如何使用它们就行了。Eve 需要在构建 URL 映射时了解新数据类型，因此当我们实例化应用程序时，我们需要在刚开始就传递我们的自定义类:
 
 .. code-block:: python
 
     app = Eve(json_encoder=UUIDEncoder, validator=UUIDValidator)
 
 
-Remember, if you are using custom ``ID_FIELD`` values then you should not rely
-on MongoDB (and Eve) to auto-generate the ``ID_FIELD`` for you. You are
-supposed to pass the value, like so:
+记住，如果你正在使用自定义 ``ID_FIELD`` 值，那么你不应该依赖 MongoDB (和 Eve) 来为你自动生成 ``ID_FIELD``。你应该像这样传递值:
 
 ::
 

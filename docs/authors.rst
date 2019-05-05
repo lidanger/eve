@@ -1,5 +1,5 @@
 .. _authors:
 
-Authors
+作者
 =======
 .. include:: ../AUTHORS

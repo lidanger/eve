@@ -1,21 +1,20 @@
 .. _quickstart:
 
-Quickstart
+快死入门
 ==========
 
-Eager to get started?  This page gives a first introduction to Eve.
+渴望入门？让此页面对 Eve 作一个首次介绍。
 
-Prerequisites
+先决条件
 -------------
-- You already have Eve installed. If you do not, head over to the
-  :ref:`install` section.
-- MongoDB is installed_.
-- An instance of MongoDB is running_.
+- 你已经安装了 Eve。如果没有，掉头转到 :ref:`install` 节。
+- 安装了 MongoDB_。
+- MongoDB 的一个实例正在运行_。
 
-A Minimal Application
+一个最小的应用程序
 ---------------------
 
-A minimal Eve application looks something like this::
+一个最小的 Eve 应用程序看起来像这个样子::
 
     from eve import Eve
     app = Eve()
@@ -23,25 +22,22 @@ A minimal Eve application looks something like this::
     if __name__ == '__main__':
         app.run()
 
-Just save it as run.py. Next, create a new text file with the following
-content:
+保存为 run.py 就行了。下一步，创建一个新文本文件，加入如下内容:
 
 ::
 
     DOMAIN = {'people': {}}
 
-Save it as settings.py in the same directory where run.py is stored. This
-is the Eve configuration file, a standard Python module, and it is telling Eve
-that your API is comprised of just one accessible resource, ``people``.
+在存储 run.py 的同一文件夹下保存为 settings.py。这是 Eve 的配置文件，一个标准 Python 模块，它告诉 Eve 你的 API 由单个可访问的资源构成，``people``。
 
-Now your are ready to launch your API.
+现在，准备启动你的 API。
 
 .. code-block:: console
 
     $ python run.py
      * Running on http://127.0.0.1:5000/
 
-Now you can consume the API:
+现在，你可以使用 API 了:
 
 .. code-block:: console
 
@@ -52,8 +48,7 @@ Now you can consume the API:
     Server: Eve/0.0.5-dev Werkzeug/0.8.3 Python/2.7.3
     Date: Wed, 27 Mar 2013 16:06:44 GMT
 
-Congratulations, your GET request got a nice response back. Let's look at the
-payload:
+恭喜，你的 GET 请求得到一个不错的响应返回。让我们看看这个载体（payload）:
 
 ::
 
@@ -68,11 +63,9 @@ payload:
       }
     }
 
-API entry points adhere to the :ref:`hateoas_feature` principle and provide
-information about the resources accessible through the API. In our case
-there's only one child resource available, that being ``people``.
+API 入口点符合 :ref:`hateoas_feature` 规范并提供关于 API 资源可用性的信息。在我们的例子中，只有一个子资源可用，那就是 ``people``。
 
-Try requesting ``people`` now:
+现在试试请求 ``people``:
 
 .. code-block:: console
 
@@ -94,13 +87,9 @@ Try requesting ``people`` now:
       }
     }
 
-This time we also got an ``_items`` list. The ``_links`` are relative to the
-resource being accessed, so you get a link to the parent resource (the home
-page) and to the resource itself. If you got a timeout error from pymongo, make
-sure the prerequistes are met. Chances are that the ``mongod`` server process
-is not running.
+这一次我们也得到一个 ``_items`` 列表。``_links`` 是对获取到的资源的关联，这样你得到一个父资源 (主页) 和资源自己的链接。如果你从 pymongo 得到一个超时错误，请检查先决条件时候满足。很可能发生的情况是 ``mongod`` 服务器进程未运行。
 
-By default Eve APIs are read-only:
+默认情况下，Eve API 是只读的:
 
 .. code-block:: console
 
@@ -110,69 +99,51 @@ By default Eve APIs are read-only:
     <h1>Method Not Allowed</h1>
     <p>The method DELETE is not allowed for the requested URL.</p>
 
-Since we didn't provide any database detail in settings.py, Eve has no clue
-about the real content of the ``people`` collection (it might even be
-non-existent) and seamlessly serves an empty resource, as we don't want to let
-API users down.
+由于我们没有在 settings.py 中提供任何数据库详情，Eve 没有关于 ``people`` 集合 (甚至很可能不存在) 真正内容的线索，只能天衣无缝地提供一个空资源，因为我们不想让 API 用户失望。
 
-Database Interlude
+数据库插曲（Interlude）
 ------------------
-Let's connect to a database by adding the following lines to settings.py:
+让我们通过添加如下行到 settings.py 连接到一个数据库:
 
 ::
 
-    # Let's just use the local mongod instance. Edit as needed.
+    # 让我们仅仅使用本地 mongod 实例。按需要的编辑。
 
-    # Please note that MONGO_HOST and MONGO_PORT could very well be left
-    # out as they already default to a bare bones local 'mongod' instance.
+    # 请注意，MONGO_HOST 就 MONGO_PORT 可以很好的省略，因为它们已经默认为本地 'mongod' 实例。
     MONGO_HOST = 'localhost'
     MONGO_PORT = 27017
 
-    # Skip these if your db has no auth. But it really should.
+    # 如果你的数据库未启用认证，跳过这些。但是实际上应该是需要的。
     MONGO_USERNAME = '<your username>'
     MONGO_PASSWORD = '<your password>'
-    MONGO_AUTH_SOURCE = 'admin'  # needed if --auth mode is enabled
+    MONGO_AUTH_SOURCE = 'admin'  # 在 --auth 模式启用的情况下需要
 
     MONGO_DBNAME = 'apitest'
 
-Due to MongoDB *laziness*, we don't really need to create the database
-collections. Actually we don't even need to create the database: GET requests
-on an empty/non-existent DB will be served correctly (``200 OK`` with an empty
-collection); DELETE/PATCH/PUT will receive appropriate responses (``404 Not
-Found`` ), and POST requests will create database and collections as needed.
-However, such an auto-managed database will perform very poorly since it lacks
-indexes and any sort of optimization.
+由于 MongoDB 的 *laziness*，我们并不需要真正创建数据库集合。实际上我们甚至不需要创建数据库：对一个空/不存在的数据库的 GET 请求会被精确的对待 (``200 OK`` 对一个空集合); DELETE/PATCH/PUT 会收到一个合适的响应 (``404 Not Found``)，而 POST 请求会根据需要创建数据库和集合。
+但是，这样一个自动管理的数据库性能很差，因为它缺少索引和各种优化。
 
-A More Complex Application
+一个更复杂的应用程序
 --------------------------
-So far our API has been read-only. Let's enable the full spectrum of CRUD
-operations:
+目前为止，我们的 API 是只读的了。让我们启用完整的 CRUD 操作:
 
 ::
 
-    # Enable reads (GET), inserts (POST) and DELETE for resources/collections
-    # (if you omit this line, the API will default to ['GET'] and provide
-    # read-only access to the endpoint).
+    # 启用对资源/集合的读 (GET)，插入 (POST) 和 DELETE (如果你忽略这一行，API 将默认为 ['GET'] 并对终结点提供只读访问)。
     RESOURCE_METHODS = ['GET', 'POST', 'DELETE']
 
-    # Enable reads (GET), edits (PATCH), replacements (PUT) and deletes of
-    # individual items  (defaults to read-only item access).
+    # 启用对单个数据项的读 (GET)，编辑 (PATCH)，替代 (PUT) 和删除 (默认为只读的数据项访问)。
     ITEM_METHODS = ['GET', 'PATCH', 'PUT', 'DELETE']
 
-``RESOURCE_METHODS`` lists methods allowed at resource endpoints (``/people``)
-while ``ITEM_METHODS`` lists the methods enabled at item endpoints
-(``/people/<ObjectId>``). Both settings have a global scope and will apply to
-all endpoints.  You can then enable or disable HTTP methods at individual
-endpoint level, as we will soon see.
+``RESOURCE_METHODS`` 列出了资源终结点 (``/people``) 允许的方法，而 ``ITEM_METHODS`` 列出了数据项终结点 (``/people/<ObjectId>``) 启用的方法。这两个设置都是全局作用域，适用于所有的终结点。然后，你可以在单个终结点级别启用或禁用 HTTP 方法，就像我们很快会看到的样子。
 
-Since we are enabling editing we also want to enable proper data validation.
-Let's define a schema for our ``people`` resource.
+由于我们正在启用编辑，我们也项启用恰当的数据验证。
+让我们为我们的 ``people`` 资源定义一个模式。
 
 ::
 
     schema = {
-        # Schema definition, based on Cerberus grammar. Check the Cerberus project
-        # (https://github.com/pyeve/cerberus) for details.
+        # 模式定义，基于 Cerberus 语法。找 Cerberus 项目 (https://github.com/pyeve/cerberus) 获取详细信息。
         'firstname': {
             'type': 'string',
             'minlength': 1,
@@ -183,16 +154,15 @@ Let's define a schema for our ``people`` resource.
             'minlength': 1,
             'maxlength': 15,
             'required': True,
-            # talk about hard constraints! For the purpose of the demo
-            # 'lastname' is an API entry-point, so we need it to be unique.
+            # 这才叫硬性约束! 由于演示 'lastname' 是一个 API 入口点，所以我么需要它是唯一的。
             'unique': True,
         },
-        # 'role' is a list, and can only contain values from 'allowed'.
+        # 'role' 是一个列表，只能包含 'allowed' 中的值。
         'role': {
             'type': 'list',
             'allowed': ["author", "contributor", "copy"],
         },
-        # An embedded 'strongly-typed' dictionary.
+        # 一个内嵌的 'strongly-typed' 字典。
         'location': {
             'type': 'dict',
             'schema': {
@@ -205,46 +175,40 @@ Let's define a schema for our ``people`` resource.
         },
     }
 
-For more information on validation see :ref:`validation`.
+更多关于验证的信息，请参考 :ref:`validation`。
 
-Now let's say that we want to further customize the ``people`` endpoint. We want
-to:
+现在，比如说，我们想进一步自定义 ``people`` 终结点。我们想：
 
-- set the item title to ``person``
-- add an extra :ref:`custom item endpoint <custom_item_endpoints>` at ``/people/<lastname>``
-- override the default :ref:`cache control directives <cache_control>`
-- disable DELETE for the ``/people`` endpoint (we enabled it globally)
+- 设置项标题为 ``person``
+- 在 ``/people/<lastname>`` 添加另一个 :ref:`custom item endpoint <custom_item_endpoints>`
+- 重写默认的 :ref:`cache control directives <cache_control>`
+- 对 ``/people`` 终结点禁用 DELETE (全局启用)
 
-Here is how the complete ``people`` definition looks in our updated settings.py
-file:
+这里是我们更新后的 settings.py 文件中完整的 ``people`` 定义看起来的样子:
 
 ::
 
     people = {
-        # 'title' tag used in item links. Defaults to the resource title minus
-        # the final, plural 's' (works fine in most cases but not for 'people')
+        # 'title' 标签用于数据项链接中。默认为资源标题减去最后的复数形式 's' (大多数情况下工作良好，除了 'people')
         'item_title': 'person',
 
-        # by default the standard item entry point is defined as
-        # '/people/<ObjectId>'. We leave it untouched, and we also enable an
-        # additional read-only entry point. This way consumers can also perform
-        # GET requests at '/people/<lastname>'.
+        # 默认标准数据项入口点被定义为 '/people/<ObjectId>'。我们让它原封不动，再启用一个另外的只读入口点。这样适用者也可以通过 '/people/<lastname>' 执行 GET 请求。
         'additional_lookup': {
             'url': 'regex("[\w]+")',
             'field': 'lastname'
         },
 
-        # We choose to override global cache-control directives for this resource.
+        # 我们选择重写对这个资源的全局缓存控制指令。
         'cache_control': 'max-age=10,must-revalidate',
         'cache_expires': 10,
 
-        # most global settings can be overridden at resource level
+        # 大多数全局设置都可以再资源即便被重写
         'resource_methods': ['GET', 'POST'],
 
         'schema': schema
     }
 
-Finally we update our domain definition:
+最后我们更新我们的域定义：
 
 ::
 
@@ -252,17 +216,14 @@ Finally we update our domain definition:
         'people': people,
     }
 
-Save settings.py and launch run.py. We can now insert documents at the
-``people`` endpoint:
+保存 settings.py，启动 run.py。现在我们可以在 ``people`` 终结点插入文档:
 
 .. code-block:: console
 
     $ curl -d '[{"firstname": "barack", "lastname": "obama"}, {"firstname": "mitt", "lastname": "romney"}]' -H 'Content-Type: application/json'  http://127.0.0.1:5000/people
     HTTP/1.0 201 OK
 
-We can also update and delete items (but not the whole resource since we
-disabled that). We can also perform GET requests against the new ``lastname``
-endpoint:
+我们也可以更细和删除数据项 (但不能删除整个资源，因为我们禁用了它)。我们也可以对新的 ``lastname`` 终结点执行 GET 请求:
 
 .. code-block:: console
 
@@ -289,14 +250,10 @@ endpoint:
         }
     }
 
-Cache directives and item title match our new settings. See :doc:`features` for
-a complete list of features available and more usage examples.
+缓存指令和项标题符合我们的新设置。查看 :doc:`features` 获取可用特性和更多用法示例的完整列表。
 
-.. note::
-    All examples and code snippets are from the :ref:`demo`, which is a fully
-    functional API that you can use to experiment on your own, either on the
-    live instance or locally (you can use the sample client app to populate
-    and/or reset the database).
+.. 注意::
+    所有的示例和代码片段都来源于 :ref:`demo`，它是一个完整的实用性 API，可以用于在现场实例或本地实例进行独立的试验(你可以实用样例客户端应用来输入数据或者重置数据库)。
 
 .. _`installed`: http://docs.mongodb.org/manual/installation/
 .. _running: http://docs.mongodb.org/manual/tutorial/manage-mongodb-processes/
