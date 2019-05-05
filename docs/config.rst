@@ -45,7 +45,7 @@
 
     # 我们希望同时在本地和 Heroku 上无缝运行，因此:
     if os.environ.get('PORT'):
-        # 我们驻在 Heroku 上! 使用 MongoHQ 沙盒作为我们地后端.
+        # 我们驻在 Heroku 上! 使用 MongoHQ 沙盒作为我们的后端.
         MONGO_HOST = 'alex.mongohq.com'
         MONGO_PORT = 10047
         MONGO_USERNAME = '<user>'
@@ -70,16 +70,13 @@
 .. tabularcolumns:: |p{6.5cm}|p{8.5cm}|
 
 =================================== =========================================
-``URL_PREFIX``                      URL prefix for all API endpoints. Will be
-                                    used in conjunction with ``API_VERSION`` to
-                                    build API endpoints (e.g., ``api`` will be
-                                    rendered to ``/api/<endpoint>``).  Defaults
-                                    to ``''``.
+``URL_PREFIX``                      用于所有 API 终结点的 URL 前缀。与 ``API_VERSION`` 
+                                    结合，用于构建 API 终结点 (例如，``api`` 会被
+                                    渲染到 ``/api/<endpoint>``)。默认为 ``''``。
 
-``API_VERSION``                     API version. Will be used in conjunction with
-                                    ``URL_PREFIX`` to build API endpoints
-                                    (e.g., ``v1`` will be rendered to
-                                    ``/v1/<endpoint>``). Defaults to ``''``.
+``API_VERSION``                     API 版本。与 ``URL_PREFIX`` 结合，用于构建 API 
+                                    终结点 (例如，``v1`` 会被渲染到 ``/v1/<endpoint>``)。
+                                    默认为 ``''``。
 
 ``ALLOWED_FILTERS``                 List of fields on which filtering is allowed.
                                     Entries in this list work in a hierarchical
@@ -1355,9 +1352,9 @@
 
 ::
 
-    # add the schema to the 'people' resource definition
+    # 添加模式到 'people' 资源定义
     people['schema'] = schema
-    # update the domain
+    # 更新域
     DOMAIN['people'] = people
 
 .. _datasource:
@@ -1369,56 +1366,44 @@
 .. tabularcolumns:: |p{6.5cm}|p{8.5cm}|
 
 =============================== ==============================================
-``source``                      Name of the database collection consumed by the
-                                resource.  If omitted, the resource name is
-                                assumed to also be a valid collection name. See
-                                :ref:`source`.
+``source``                      资源使用的数据库集合的名称。如果忽略，资源名称也会被
+                                假定为一个有效的集合名称。参考 :ref:`source`。
 
-``filter``                      Database query used to retrieve and validate
-                                data. If omitted, by default the whole
-                                collection is retrieved. See :ref:`filter`.
+``filter``                      数据库查询，用于获取和验证数据。如果忽略，默认获取
+                                整个集合。参考 :ref:`filter`。
 
-``projection``                  Fieldset exposed by the endpoint. If omitted,
-                                by default all fields will be returned to the
-                                client. See :ref:`projection`.
+``projection``                  终结点暴露的字段集合。如果忽略，默认返回所有字段到
+                                客户端。参考 :ref:`projection`。
 
-``default_sort``                Default sorting for documents retrieved at the
-                                endpoint. If omitted, documents will be
-                                returned with the default database order.
-                                A valid statement would be:
+``default_sort``                从这个终结点获取的文档的默认排序。如果忽略，文档会按
+                                默认的数据库次序返回。一个有效的语句是:
 
                                 ``'datasource': {'default_sort': [('name',
                                 1)]}``
 
-                                For more information on sort and filters see
-                                :ref:`filters`.
+                                要获取更多关于排序和过滤的信息，参考 :ref:`filters`。
 
-``aggregation``                 Aggregation pipeline and options. When used all
-                                other ``datasource`` settings are ignored,
-                                except ``source``. The endpoint will be
-                                read-only and no item lookup will be available.
-                                Defaults to ``None``.
+``aggregation``                 聚合管道和选项。使用后，所有其他的 ``datasource`` 
+                                配置会被忽略，除了 ``source``。终结点将是只读的，
+                                而且数据项搜索不可用。默认为 ``None``。
 
-                                This is a dictionary with one or more of the
-                                following keys:
+                                这是一个字典，包含一个或更多以下的键:
 
-                                - ``pipeline``. The aggregation pipeline.
-                                  Syntax must match the one supported by
-                                  PyMongo. For more information see `PyMongo
-                                  Aggregation Examples`_ and the official
-                                  `MongoDB Aggregation Framework`_
-                                  documentation.
+                                - ``pipeline``. 聚合管道。语法必须匹配 PyMongo
+                                支持的那个。要获取更多信息，参考 
+                                `PyMongo Aggregation Examples`_ 和 官方的 
+                                `MongoDB Aggregation Framework`_ 文档。
 
-                                - ``options``. Aggregation options. Must be
-                                  a dictionary with one or more of these keys:
+                                - ``options``. 聚合选项。必须是一个字典，包含
+                                一个或更多这些键:
 
                                     - ``allowDiskUse`` (bool)
                                     - ``maxTimeMS`` (int)
                                     - ``batchSize`` (int)
                                     - ``useCursor`` (bool)
 
-                                You only need to set ``options`` if you want to
-                                change any of `PyMongo aggregation defaults`_.
+                                如果你想改变任何 `PyMongo aggregation defaults`_，
+                                你只需要设置 ``options``。
 
 =============================== ==============================================
 
