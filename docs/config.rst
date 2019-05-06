@@ -78,41 +78,26 @@
                                     终结点 (例如，``v1`` 会被渲染到 ``/v1/<endpoint>``)。
                                     默认为 ``''``。
 
-``ALLOWED_FILTERS``                 List of fields on which filtering is allowed.
-                                    Entries in this list work in a hierarchical
-                                    way. This means that, for instance, filtering
-                                    on ``'dict.sub_dict.foo'`` is allowed if
-                                    ``ALLOWED_FILTERS`` contains any of
+``ALLOWED_FILTERS``                 允许过滤的字段列表。这个列表中的项按等级工作。
+                                    这意味着，举个例子，如果 ``ALLOWED_FILTERS`` 包含
                                     ``'dict.sub_dict.foo``, ``'dict.sub_dict'``
-                                    or ``'dict'``. Instead filtering on
-                                    ``'dict'`` is allowed if ``ALLOWED_FILTERS``
-                                    contains ``'dict'``.
-                                    Can be set to ``[]`` (no filters allowed)
-                                    or ``['*']`` (filters allowed on every
-                                    field). Unless your API is comprised of
-                                    just one endpoint, this global setting
-                                    should be used as an on/off switch,
-                                    delegating explicit whitelisting at the
-                                    local level (see ``allowed_filters``
-                                    below). Defaults to ``['*']``.
+                                    或 ``'dict'`` 中的一个，那么 ``'dict.sub_dict.foo'``
+                                    上的过滤是允许的。相反，如果 ``ALLOWED_FILTERS``
+                                    包含 ``'dict'``， ``'dict'`` 上的过滤是允许的。
+                                    可以被设置为 ``[]`` (不允许任何过滤器)，或
+                                    ``['*']`` (每个字段都允许过滤)。默认为 ``['*']``。
 
-                                    *Please note:* If API scraping or DB DoS
-                                    attacks are a concern, then globally
-                                    disabling filters and whitelisting valid
-                                    ones at the local level is the way to go.
+                                    *请注意:* 如果担心 API 破坏或 DB DoS 攻击，那么
+                                    全局禁用过滤器，并在本地级别把有效的列为白名单是可行的。
 
-``VALIDATE_FILTERS``                Whether to validate the filters against the
-                                    resource schema. Invalid filters will throw
-                                    an exception. Defaults to ``False``.
+``VALIDATE_FILTERS``                是否通过资源模式验证过滤器。无效的过滤器会抛出一个异常。
+                                    默认为 ``False``.
 
-                                    Word of caution: validation on filter
-                                    expressions involving fields with custom
-                                    rules or types might have a considerable
-                                    impact on performance. This is the case,
-                                    for example, with ``data_relation``-rule
-                                    fields. Consider excluding heavy-duty
-                                    fields from filters (see
-                                    ``ALLOWED_FILTERS``).
+                                    警告: 对涉及自定义规则或类型的过滤器
+                                    表达式的验证可能会对性能造成很大影响。
+                                    这是一个例子，例如，带有 ``data_relation`` 规则
+                                    的字段。考虑从过滤器中排除任务繁重的字段 (参考
+                                    ``ALLOWED_FILTERS``)。
 
 ``SORTING``                         如果 ``GET`` 请求支持排序，``True``，否则，``False``。
                                     可以被资源配置重载。默认为 ``True``。
@@ -120,620 +105,430 @@
 ``PAGINATION``                      如果 ``GET`` 请求启用了分页，``True``，否则，``False``。
                                     可以被资源配置重载。默认为 ``True``。
 
-``PAGINATION_LIMIT``                Maximum value allowed for QUERY_MAX_RESULTS
-                                    query parameter. Values exceeding the
-                                    limit will be silently replaced with this
-                                    value. You want to aim for a reasonable
-                                    compromise between performance and transfer
-                                    size. Defaults to 50.
+``PAGINATION_LIMIT``                QUERY_MAX_RESULTS 查询参数允许的最大值。
+                                    超出限制的值会被悄悄替换为这个值。
+                                    你希望在性能和传输大小之间做一个明智的妥协。
+                                    默认为 50.
 
 ``PAGINATION_DEFAULT``              QUERY_MAX_RESULTS 的默认值。默认为 25。
 
-``OPTIMIZE_PAGINATION_FOR_SPEED``   Set this to ``True`` to improve pagination
-                                    performance. When optimization is active no
-                                    count operation, which can be slow on large
-                                    collections, is performed on the database.
-                                    This does have a few consequences.
-                                    Firstly, no document count is returned.
-                                    Secondly, ``HATEOAS`` is less accurate: no
-                                    last page link is available, and next page
-                                    link is always included, even on last page.
-                                    On big collections, switching this feature
-                                    on can greatly improve performance.
-                                    Defaults to ``False`` (slower performance;
-                                    document count included; accurate
-                                    ``HATEOAS``).
+``OPTIMIZE_PAGINATION_FOR_SPEED``   要改善分页性能设置这个为 ``True``。当激活优化时，
+                                    在数据库中没有进行在大型集合很慢的计数操作。
+                                    这确实有些后果。首先，不会返回文档计数。
+                                    第二，``HATEOAS`` 时精度很低的: 没有最后一页链接可用，
+                                    而下一页链接总是包含的，即使在最后一页。
+                                    在大型集合中，打开这项特性可以大幅改善性能。
+                                    默认为 ``False`` (性能更慢;
+                                    包含文档计数; 精确的 ``HATEOAS``)。
 
-``QUERY_WHERE``                     Key for the filters query parameter. Defaults to ``where``.
+``QUERY_WHERE``                     用于过滤查询参数的键。默认为 ``where``。
 
-``QUERY_SORT``                      Key for the sort query parameter. Defaults to ``sort``.
+``QUERY_SORT``                      用于排序查询参数的键。默认为 ``sort``。
 
-``QUERY_PROJECTION``                Key for the projections query parameter. Defaults to ``projection``.
+``QUERY_PROJECTION``                用于投影查询参数的键。默认为 ``projection``。
 
-``QUERY_PAGE``                      Key for the pages query parameter. Defaults to ``page``.
+``QUERY_PAGE``                      用于分页查询参数的键。默认为 ``page``。
 
-``QUERY_MAX_RESULTS``               Key for the max results query parameter. Defaults to ``max_results``.
+``QUERY_MAX_RESULTS``               用于最大结果数目的查询参数的键。默认为 ``max_results``。
 
-``QUERY_EMBEDDED``                  Key for the embedding query parameter. Defaults to ``embedded``.
+``QUERY_EMBEDDED``                  用于内嵌查询参数的键。默认为 ``embedded``。
 
-``QUERY_AGGREGATION``               Key for the aggregation query parameter.
-                                    Defaults to ``aggregate``.
+``QUERY_AGGREGATION``               用于聚合查询参数的键。默认为 ``aggregate``。
 
-``DATE_FORMAT``                     A Python date format used to parse and render
-                                    datetime values. When serving requests,
-                                    matching JSON strings will be parsed and
-                                    stored as ``datetime`` values. In
-                                    responses, ``datetime`` values will be
-                                    rendered as JSON strings using this format.
-                                    Defaults to the RFC1123 (ex RFC 822)
-                                    standard ``a, %d %b %Y %H:%M:%S GMT``
-                                    ("Tue, 02 Apr 2013 10:29:13 GMT").
+``DATE_FORMAT``                     一个用于解析和渲染时间值的 Python 日期格式。
+                                    处理请求时，匹配的 JSON 字符串会被解析和存储为
+                                    ``datetime`` 值。在响应中，``datetime`` 值会被
+                                    渲染为这个格式的 JSON 字符串。
+                                    默认为 RFC1123 (上一个为 RFC 822) 标准
+                                    ``a, %d %b %Y %H:%M:%S GMT``
+                                    ("Tue, 02 Apr 2013 10:29:13 GMT")。
 
-``RESOURCE_METHODS``                A list of HTTP methods supported at resource
-                                    endpoints. Allowed values: ``GET``,
-                                    ``POST``, ``DELETE``. ``POST`` is used for
-                                    insertions. ``DELETE`` will delete *all*
-                                    resource contents (enable with caution).
-                                    Can be overridden by resource settings.
-                                    Defaults to ``['GET']``.
+``RESOURCE_METHODS``                资源终结点支持的一组 HTTP 方法。允许的值: ``GET``,
+                                    ``POST``, ``DELETE``。``POST`` 用于插入。
+                                    ``DELETE`` 将删除*所有*资源终结点 (谨慎启用)。
+                                    可以被资源配置重载。默认为 ``['GET']``。
 
-``PUBLIC_METHODS``                  资源终结点支持的 HTTP 方法的列表，开放到公开访问，甚至启用了 :ref:`auth`。
+``PUBLIC_METHODS``                  资源终结点支持的一组 HTTP 方法，即使启用了 :ref:`auth`，也保持开放公共权限。
                                     可以被资源配置重载。默认为 ``[]``。
 
-``ITEM_METHODS``                    A list of HTTP methods supported at item
-                                    endpoints. Allowed values: ``GET``,
-                                    ``PATCH``, ``PUT`` and ``DELETE``. ``PATCH``
-                                    or, for clients not supporting PATCH,
-                                    ``POST`` with the ``X-HTTP-Method-Override``
-                                    header tag, is used for item updates;
-                                    ``DELETE`` for item deletion. Can be
-                                    overridden by resource settings. Defaults to
-                                    ``['GET']``.
-
-``PUBLIC_ITEM_METHODS``             A list of HTTP methods supported at item
-                                    endpoints, left open to public access when
-                                    when :ref:`auth` is enabled. Can be
-                                    overridden by resource settings. Defaults
-                                    to ``[]``.
-
-``ALLOWED_ROLES``                   A list of allowed `roles` for resource
-                                    endpoints. Can be overridden by resource
-                                    settings. See :ref:`auth` for more
-                                    information. Defaults to ``[]``.
-
-``ALLOWED_READ_ROLES``              A list of allowed `roles` for resource
-                                    endpoints with GET and OPTIONS methods.
-                                    Can be overridden by resource
-                                    settings. See :ref:`auth` for more
-                                    information. Defaults to ``[]``.
-
-``ALLOWED_WRITE_ROLES``             A list of allowed `roles` for resource
-                                    endpoints with POST, PUT and DELETE
-                                    methods. Can be overridden by resource
-                                    settings. See :ref:`auth` for more
-                                    information. Defaults to ``[]``.
-
-``ALLOWED_ITEM_ROLES``              A list of allowed `roles` for item endpoints.
-                                    See :ref:`auth` for more information. Can
-                                    be overridden by resource settings.
-                                    Defaults to ``[]``.
-
-``ALLOWED_ITEM_READ_ROLES``         A list of allowed `roles` for item endpoints
-                                    with GET and OPTIONS methods.
-                                    See :ref:`auth` for more information. Can
-                                    be overridden by resource settings.
-                                    Defaults to ``[]``.
-
-``ALLOWED_ITEM_WRITE_ROLES``        A list of allowed `roles` for item endpoints
-                                    with PUT, PATCH and DELETE methods.
-                                    See :ref:`auth` for more information. Can
-                                    be overridden by resource settings.
-                                    Defaults to ``[]``.
-
-``ALLOW_OVERRIDE_HTTP_METHOD``      Enables / Disables global the possibility
-                                    to override the sent method with a header
-                                    ``X-HTTP-METHOD-OVERRIDE``.
-
-``CACHE_CONTROL``                   Value of the ``Cache-Control`` header field
-                                    used when serving ``GET`` requests (e.g.,
-                                    ``max-age=20,must-revalidate``). Leave
-                                    empty if you don't want to include cache
-                                    directives with API responses. Can be
-                                    overridden by resource settings. Defaults
-                                    to ``''``.
-
-``CACHE_EXPIRES``                   Value (in seconds) of the ``Expires`` header
-                                    field used when serving ``GET`` requests.
-                                    If set to a non-zero value, the header will
-                                    always be included, regardless of the
-                                    setting of ``CACHE_CONTROL``. Can be
-                                    overridden by resource settings. Defaults
-                                    to 0.
-
-``X_DOMAINS``                       CORS (Cross-Origin Resource Sharing) support.
-                                    Allows API maintainers to specify which
-                                    domains are allowed to perform CORS
-                                    requests. Allowed values are: ``None``,
-                                    a list of domains, or ``'*'`` for
-                                    a wide-open API. Defaults to ``None``.
-
-``X_DOMAINS_RE``                    The same setting as ``X_DOMAINS``, but a list
-                                    of regexes is allowed. This is useful for
-                                    websites with dynamic ranges of
-                                    subdomains. Make sure to properly anchor and
-                                    escape the regexes. Invalid
-                                    regexes (such as ``'*'``) are ignored.
-                                    Defaults to ``None``.
-
-``X_HEADERS``                       CORS (Cross-Origin Resource Sharing) support.
-                                    Allows API maintainers to specify which
-                                    headers are allowed to be sent with CORS
-                                    requests. Allowed values are: ``None`` or
-                                    a list of headers names. Defaults to
-                                    ``None``.
-
-``X_EXPOSE_HEADERS``                CORS (Cross-Origin Resource Sharing) support.
-                                    Allows API maintainers to specify which
-                                    headers are exposed within a CORS response.
-                                    Allowed values are: ``None`` or
-                                    a list of headers names. Defaults to
-                                    ``None``.
-
-``X_ALLOW_CREDENTIALS``             CORS (Cross-Origin Resource Sharing) support.
-                                    Allows API maintainers to specify if cookies can
-                                    be sent by clients.
-                                    The only allowed value is: ``True``, any other
-                                    will be ignored. Defaults to
-                                    ``None``.
-
-``X_MAX_AGE``                       CORS (Cross-Origin Resource Sharing)
-                                    support. Allows to set max age for the
-                                    access control allow header. Defaults to
-                                    21600.
-
-
-``LAST_UPDATED``                    Name of the field used to record a document's
-                                    last update date. This field is
-                                    automatically handled by Eve. Defaults to
-                                    ``_updated``.
-
-``DATE_CREATED``                    Name for the field used to record a document
-                                    creation date. This field is automatically
-                                    handled by Eve. Defaults to ``_created``.
-
-``ID_FIELD``                        Name of the field used to uniquely identify
-                                    resource items within the database. You
-                                    want this field to be properly indexed on
-                                    the database. Can be overridden by resource
-                                    settings. Defaults to ``_id``.
-
-``ITEM_LOOKUP``                     ``True`` if item endpoints should be generally
-                                    available across the API, ``False``
-                                    otherwise. Can be overridden by resource
-                                    settings. Defaults to ``True``.
-
-``ITEM_LOOKUP_FIELD``               Document field used when looking up a resource
-                                    item. Can be overridden by resource
-                                    settings. Defaults to ``ID_FIELD``.
-
-``ITEM_URL``                        URL rule used to construct default item
-                                    endpoint URLs. Can be overridden by
-                                    resource settings. Defaults
-                                    ``regex("[a-f0-9]{24}")`` which is MongoDB
-                                    standard ``Object_Id`` format.
-
-``ITEM_TITLE``                      Title to be used when building item references,
-                                    both in XML and JSON responses. Defaults to
-                                    resource name, with the plural 's' stripped
-                                    if present. Can and most likely will be
-                                    overridden when configuring single resource
-                                    endpoints.
-
-``AUTH_FIELD``                      Enables :ref:`user-restricted`. When the
-                                    feature is enabled, users can only
-                                    read/update/delete resource items created
-                                    by themselves. The keyword contains the
-                                    actual name of the field used to store the
-                                    id of the user who created the resource
-                                    item. Can be overridden by resource
-                                    settings. Defaults to ``None``, which
-                                    disables the feature.
-
-``ALLOW_UNKNOWN``                   When ``True``, this option will allow insertion
-                                    of arbitrary, unknown fields to any API
-                                    endpoint. Use with caution. See
-                                    :ref:`unknown` for more information.
-                                    Defaults to ``False``.
-
-``PROJECTION``                      When ``True``, this option enables the
-                                    :ref:`projections` feature. Can be
-                                    overridden by resource settings. Defaults
-                                    to ``True``.
-
-``EMBEDDING``                       When ``True``, this option enables the
-                                    :ref:`embedded_docs` feature. Defaults to
-                                    ``True``.
-
-``BANDWIDTH_SAVER``                 When ``True``, POST, PUT, and PATCH responses
-                                    only return automatically handled fields
-                                    and ``EXTRA_RESPONSE_FIELDS``. When
-                                    ``False``, the entire document will be
-                                    sent. Defaults to ``True``.
-
-``EXTRA_RESPONSE_FIELDS``           Allows to configure a list of additional
-                                    document fields that should be provided
-                                    with every POST response. Normally only
-                                    automatically handled fields (``ID_FIELD``,
-                                    ``LAST_UPDATED``, ``DATE_CREATED``,
-                                    ``ETAG``) are included in response
-                                    payloads. Can be overridden by resource
-                                    settings. Defaults to ``[]``, effectively
-                                    disabling the feature.
-
-``RATE_LIMIT_GET``                  A tuple expressing the rate limit on GET
-                                    requests. The first element of the tuple is
-                                    the number of requests allowed, while the
-                                    second is the time window in seconds. For
-                                    example, ``(300, 60 * 15)`` would set
-                                    a limit of 300 requests every 15 minutes.
-                                    Defaults to ``None``.
-
-``RATE_LIMIT_POST``                 A tuple expressing the rate limit on POST
-                                    requests. The first element of the tuple is
-                                    the number of requests allowed, while the
-                                    second is the time window in seconds. For
-                                    example ``(300, 60 * 15)`` would set
-                                    a limit of 300 requests every 15 minutes.
-                                    Defaults to ``None``.
-
-``RATE_LIMIT_PATCH``                A tuple expressing the rate limit on PATCH
-                                    requests. The first element of the tuple is
-                                    the number of requests allowed, while the
-                                    second is the time window in seconds. For
-                                    example ``(300, 60 * 15)`` would set
-                                    a limit of 300 requests every 15 minutes.
-                                    Defaults to ``None``.
-
-``RATE_LIMIT_DELETE``               A tuple expressing the rate limit on DELETE
-                                    requests. The first element of the tuple is
-                                    the number of requests allowed, while the
-                                    second is the time window in seconds. For
-                                    example ``(300, 60 * 15)`` would set
-                                    a limit of 300 requests every 15 minutes. Defaults to
-                                    ``None``.
-
-``DEBUG``                           ``True`` to enable Debug Mode, ``False``
-                                    otherwise.
-
-``ERROR``                           Allows to customize the error_code field. Defaults
-                                    to ``_error``.
-
-``HATEOAS``                         When ``False``, this option disables
-                                    :ref:`hateoas_feature`. Defaults to ``True``.
-
-``ISSUES``                          Allows to customize the issues field. Defaults
-                                    to ``_issues``.
-
-``STATUS``                          Allows to customize the status field. Defaults
-                                    to ``_status``.
-
-``STATUS_OK``                       Status message returned when data validation is
-                                    successful. Defaults to ``OK``.
-
-``STATUS_ERR``                      Status message returned when data validation
-                                    failed. Defaults to ``ERR``.
-
-``ITEMS``                           Allows to customize the items field. Defaults
-                                    to ``_items``.
-
-``META``                            Allows to customize the meta field. Defaults
-                                    to ``_meta``
-
-``INFO``                            String value to include an info section, with the
-                                    given INFO name, at the Eve homepage (suggested
-                                    value ``_info``). The info section will include
-                                    Eve server version and API version (API_VERSION,
-                                    if set).  ``None`` otherwise, if you do not want
-                                    to expose any server info. Defaults to ``None``.
-
-``LINKS``                           Allows to customize the links field. Defaults
-                                    to ``_links``.
-
-``ETAG``                            Allows to customize the etag field. Defaults
-                                    to ``_etag``.
-
-``IF_MATCH``                        ``True`` to enable concurrency control, ``False``
-                                    otherwise. Defaults to ``True``. See
-                                    :ref:`concurrency`.
-
-``ENFORCE_IF_MATCH``                ``True`` to always enforce concurrency control when
-                                    it is enabled, ``False`` otherwise. Defaults to
-                                    ``True``. See :ref:`concurrency`.
-
-``RENDERERS``                       Allows to change enabled renderers. Defaults to
-                                    ``['eve.render.JSONRenderer', 'eve.render.XMLRenderer']``.
-
-``JSON_SORT_KEYS``                  ``True`` to enable JSON key sorting, ``False``
-                                    otherwise. Defaults to ``False``.
-
-``JSON_REQUEST_CONTENT_TYPES``      Supported JSON content types. Useful when
-                                    you need support for vendor-specific json
-                                    types. Please note: responses will still
-                                    carry the standard ``application/json``
-                                    type. Defaults to ``['application/json']``.
-
-``VALIDATION_ERROR_STATUS``         The HTTP status code to use for validation errors.
-                                    Defaults to ``422``.
-
-``VERSIONING``                      Enabled documents version control when
-                                    ``True``. Can be overridden by resource
-                                    settings. Defaults to ``False``.
-
-``VERSIONS``                        Suffix added to the name of the primary
-                                    collection to create the name of the shadow
-                                    collection to store document versions.
-                                    Defaults to ``_versions``. When
-                                    ``VERSIONING`` is enabled , a collection
-                                    such as ``myresource_versions`` would be
-                                    created for a resource with a datasource of
-                                    ``myresource``.
-
-``VERSION_PARAM``                   The URL query parameter used to access the
-                                    specific version of a document. Defaults to
-                                    ``version``. Omit this parameter to get the
-                                    latest version of a document or use
-                                    `?version=all`` to get a list of all
-                                    version of the document. Only valid for
-                                    individual item endpoints.
-
-``VERSION``                         Field used to store the version number of a
-                                    document. Defaults to ``_version``.
-
-``LATEST_VERSION``                  Field used to store the latest version number
-                                    of a document. Defaults to
-                                    ``_latest_version``.
-
-``VERSION_ID_SUFFIX``               Used in the shadow collection to store the
-                                    document id. Defaults to ``_document``. If
-                                    ``ID_FIELD`` is set to ``_id``, the
-                                    document id will be stored in field
-                                    ``_id_document``.
-
-``MONGO_URI``                       A `MongoDB URI`_ which is used in preference
-                                    of the other configuration variables.
-
-``MONGO_HOST``                      MongoDB server address. Defaults to ``localhost``.
-
-``MONGO_PORT``                      MongoDB port. Defaults to ``27017``.
-
-``MONGO_USERNAME``                  MongoDB user name.
-
-``MONGO_PASSWORD``                  MongoDB password.
-
-``MONGO_DBNAME``                    MongoDB database name.
-
-``MONGO_OPTIONS``                   MongoDB keyword arguments to passed to
-                                    MongoClient class ``__init__``.
-                                    Defaults to ``{'connect': True, 'tz_aware': True, 'appname': 'flask_app_name'}``.
-                                    See `PyMongo mongo_client`_ for reference.
-
-``MONGO_AUTH_SOURCE``               MongoDB authorization database. Defaults to ``None``.
-
-``MONGO_AUTH_MECHANISM``            MongoDB authentication mechanism.
-                                    See `PyMongo Authentication Mechanisms`_.
-                                    Defaults to ``None``.
-
-``MONGO_AUTH_MECHANISM_PROPERTIES`` Specify MongoDB extra authentication mechanism properties
-                                    if required. Defaults to ``None``.
-
-``MONGO_QUERY_BLACKLIST``           A list of Mongo query operators that are not
-                                    allowed to be used in resource filters
-                                    (``?where=``). Defaults to ``['$where',
-                                    '$regex']``.
-
-                                    Mongo JavaScript operators are disabled by
-                                    default, as they might be used as vectors
-                                    for injection attacks. Javascript queries
-                                    also tend to be slow and generally can be
-                                    easily replaced with the (very rich) Mongo
-                                    query dialect.
-
-``MONGO_WRITE_CONCERN``             A dictionary defining MongoDB write concern
-                                    settings. All standard write concern
-                                    settings (w, wtimeout, j, fsync) are
-                                    supported. Defaults to ``{'w': 1}``, which
-                                    means 'do regular acknowledged writes'
-                                    (this is also the Mongo default).
-
-                                    Please be aware that setting 'w' to a value of
-                                    2 or greater requires replication to be
-                                    active or you will be getting 500 errors
-                                    (the write will still happen; Mongo will
-                                    just be unable to check that it's being
-                                    written to multiple servers).
-
-                                    Can be overridden at endpoint (Mongo
-                                    collection) level. See
-                                    ``mongo_write_concern`` below.
-
-``DOMAIN``                          A dict holding the API domain definition.
-                                    See `Domain Configuration`_.
-
-``EXTENDED_MEDIA_INFO``             A list of properties to forward from the file upload
-                                    driver.
-
-``RETURN_MEDIA_AS_BASE64_STRING``   Controls the embedding of the media type in
-                                    the endpoint response. This is useful when
-                                    you have other means of getting the binary
-                                    (like custom Flask endpoints) but still
-                                    want clients to be able to POST/PATCH it.
-                                    Defaults to ``True``.
-
-``RETURN_MEDIA_AS_URL``             Set it to ``True`` to enable serving media
-                                    files at a dedicated media endpoint.
-                                    Defaults to ``False``.
-
-``MEDIA_BASE_URL``                  Base URL to be used when
-                                    ``RETURN_MEDIA_AS_URL`` is active. Combined
-                                    with ``MEDIA_ENDPOINT`` and ``MEDIA_URL``
-                                    dictates the URL returned for media files.
-                                    If ``None``, which is the default value,
-                                    the API base address will be used instead.
-
-``MEDIA_ENDPOINT``                  The media endpoint to be used when
-                                    ``RETURN_MEDIA_AS_URL`` is enabled.
-                                    Defaults to ``media``.
-
-``MEDIA_URL``                       Format of a file url served at the
-                                    dedicated media endpoints. Defaults to
-                                    ``regex("[a-f0-9]{24}")``.
-
-``MULTIPART_FORM_FIELDS_AS_JSON``   In case you are submitting your resource as
-                                    ``multipart/form-data`` all form data fields
-                                    will be submitted as strings, breaking any
-                                    validation rules you might have on the
-                                    resource fields. If you want to treat all
-                                    submitted form data as JSON strings you will
-                                    have to activate this setting. In that case
-                                    field validation will continue working
-                                    correctly. Read more about how the fields
-                                    should be formatted at
-                                    :ref:`multipart`. Defaults to ``False``.
-
-``AUTO_COLLAPSE_MULTI_KEYS``        If set to ``True``, multiple values sent
-                                    with the same key, submitted using the
-                                    ``application/x-www-form-urlencoded`` or
-                                    ``multipart/form-data`` content types,
-                                    will automatically be converted to a list of
-                                    values.
-
-                                    When using this together with
-                                    ``AUTO_CREATE_LISTS`` it becomes possible
-                                    to use lists of media fields.
-
-                                    Defaults to ``False``
-
-``AUTO_CREATE_LISTS``               When submitting a non ``list`` type value
-                                    for a field with type ``list``,
-                                    automatically create a one element list
-                                    before running the validators.
-
-                                    Defaults to ``False``
-
-``OPLOG``                           Set it to ``True`` to enable the :ref:`oplog`.
-                                    Defaults to ``False``.
-
-``OPLOG_NAME``                      This is the name of the database collection
-                                    where the :ref:`oplog` is stored. Defaults
-                                    to ``oplog``.
-
-``OPLOG_METHODS``                   List of HTTP methods which operations
-                                    should be logged in the :ref:`oplog`.
-                                    Defaults to ``['DELETE', 'POST', 'PATCH',
-                                    'PUT']``.
-
-``OPLOG_CHANGE_METHODS``            List of HTTP methods which operations
-                                    will include changes into the :ref:`oplog` entry.
-                                    Defaults to ``['DELETE','PATCH', 'PUT']``.
-
-``OPLOG_ENDPOINT``                  Name of the :ref:`oplog` endpoint. If the
-                                    endpoint is enabled it can be configured
-                                    like any other API endpoint. Set it to
-                                    ``None`` to disable the endpoint. Defaults
-                                    to ``None``.
-
-``OPLOG_AUDIT``                     Set it to ``True`` to enable the audit
-                                    feature. When audit is enabled client IP
-                                    and document changes are also logged to the
-                                    :ref:`oplog`. Defaults to ``True``.
-
-``OPLOG_RETURN_EXTRA_FIELD``        When enabled, the optional ``extra`` field
-                                    will be included in the payload returned by
-                                    the ``OPLOG_ENDPOINT``. Defaults to
-                                    ``False``.
-
-``SCHEMA_ENDPOINT``                 Name of the :ref:`schema_endpoint`. Defaults
-                                    to ``None``.
-
-``HEADER_TOTAL_COUNT``              Custom header containing total count of
-                                    items in response payloads for collection
-                                    ``GET`` requests. This is handy for ``HEAD``
-                                    requests when client wants to know items
-                                    count without retrieving response body.
-                                    An example use case is to get the count
-                                    of unread posts using ``where`` query without
-                                    loading posts themselves. Defaults to
-                                    ``X-Total-Count``.
-
-``JSONP_ARGUMENT``                  This option will cause the response to be
-                                    wrapped in a JavaScript function call if
-                                    the argument is set in the request. For
-                                    example if you set ``JSON_ARGUMENT
-                                    = 'callback'``, then all responses to
-                                    ``?callback=funcname`` requests will be
-                                    wrapped in a ``funcname`` call. Defaults to
-                                    ``None``.
-
-``BULK_ENABLED``                    Enables bulk insert when set to ``True``.
-                                    See :ref:`bulk_insert` for more
-                                    information. Defaults to ``True``.
-
-``SOFT_DELETE``                     Enables soft delete when set to ``True``.
-                                    See :ref:`soft_delete` for more
-                                    information. Defaults to ``False``.
-
-``DELETED``                         Field name used to indicate if a document
-                                    has been deleted when ``SOFT_DELETE``
-                                    is enabled. Defaults to ``_deleted``.
-
-``SHOW_DELETED_PARAM``              The URL query parameter used to include
-                                    soft deleted items in resource level GET
-                                    responses. Defaults to 'show_deleted'.
-
-``STANDARD_ERRORS``                 This is a list of HTTP error codes for
-                                    which a standard API response will be
-                                    provided. Canonical error response includes
-                                    a JSON body with actual error code and
-                                    description. Set this to an empty list if
-                                    you want to disable canonical responses
-                                    altogether. Defaults to ``[400, 401, 403,
-                                    404, 405, 406, 409, 410, 412, 422, 428]``
-
-``VALIDATION_ERROR_AS_STRING``      If ``True`` even single field errors will
-                                    be returned in a list. By default single
-                                    field errors are returned as strings while
-                                    multiple field errors are bundled in a
-                                    list. If you want to standardize the field
-                                    errors output, set this setting to ``True``
-                                    and you will always get a list of field
-                                    issues. Defaults to ``False``.
-
-``UPSERT_ON_PUT``                   ``PUT`` attempts to create a document if it
-                                    does not exist. The URL endpoint will be
-                                    used as ``ID_FIELD`` value (if ``ID_FIELD``
-                                    is included with the payload, it will be
-                                    ignored). Normal validation rules apply.
-                                    The response will be a ``201 Created`` on
-                                    successful creation. Response payload will
-                                    be identical the one you would get by
-                                    performing a single document POST to the
-                                    resource endpoint. Set to ``False`` to
-                                    disable this feature, and a ``404`` will be
-                                    returned instead. Defaults to ``True``.
-
-``MERGE_NESTED_DOCUMENTS``          If ``True``, updates to nested fields are
-                                    merged with the current data on ``PATCH``.
-                                    If ``False``, the updates overwrite the
-                                    current data. Defaults to ``True``.
-
-``NORMALIZE_DOTTED_FIELDS``         If ``True``, dotted fields are parsed
-                                    and processed as subdocument fields. If
-                                    ``False``, dotted fields are left unparsed
-                                    and unprocessed, and the payload is passed
-                                    to the underlying data-layer as-is. Please
-                                    note that with the default Mongo layer,
-                                    setting this to ``False`` will result in an
-                                    error. Defaults to ``True``.
+``ITEM_METHODS``                    数据项终结点支持的一组 HTTP 方法。允许的值: ``GET``,
+                                    ``PATCH``, ``PUT`` 和 ``DELETE``。``PATCH`` 或者，对于不支持 PATCH 的客户端，使用 ``X-HTTP-Method-Override`` 头部标记的 ``POST``，被用于数据项更新；``DELETE`` for item deletion. 可以被资源配置重载。默认为 ``['GET']``。
+
+``PUBLIC_ITEM_METHODS``             数据项终结点支持的一组 HTTP 方法，当启用 :ref:`auth` 时，保持开放公共权限。
+                                    可以被资源配置重载。默认为 ``[]``。
+
+``ALLOWED_ROLES``                   资源终结点允许的一组 `roles`。可以被资源配置重载。
+                                    查看 :ref:`auth` 获取更多信息。默认为 ``[]``。
+
+``ALLOWED_READ_ROLES``              带有 GET 和 OPTIONS 方法的资源终结点允许的一组 `roles`。
+                                    可以被资源配置重载。查看 :ref:`auth` 获取更多信息。
+                                    默认为 ``[]``。
+
+``ALLOWED_WRITE_ROLES``             带有 POST，PUT 和 DELETE 方法的终结点允许的一组 `roles`。
+                                    可以被资源配置重载。查看 :ref:`auth` 获取更多信息。
+                                    默认为 ``[]``.
+
+``ALLOWED_ITEM_ROLES``              数据项终结点允许的一组 `roles`。
+                                    查看 :ref:`auth` 获取更多信息。
+                                    可以被资源配置重载。默认为 ``[]``.
+
+``ALLOWED_ITEM_READ_ROLES``         带有 GET 和 OPTIONS 方法的数据项终结点允许的一组 `roles`。
+                                    查看 :ref:`auth` 获取更多信息。
+                                    可以被资源配置重载。默认为 ``[]``.
+
+``ALLOWED_ITEM_WRITE_ROLES``        带有 POST，PUT 和 DELETE 方法的数据项终结点允许的一组 `roles`。
+                                    查看 :ref:`auth` 获取更多信息。
+                                    可以被资源配置重载。默认为 ``[]``.
+
+``ALLOW_OVERRIDE_HTTP_METHOD``      全局启用 / 禁用使用 ``X-HTTP-METHOD-OVERRIDE`` 头
+                                    重载发送方法的可能性。
+
+``CACHE_CONTROL``                   ``Cache-Control`` 头字段值，用于处理 ``GET``
+                                    请求 (例如，``max-age=20,must-revalidate``)。
+                                    如果你不希望在 API 响应中包含缓存指令，请留空。 
+                                    可以被资源配置重载。默认为 ``''``。
+
+``CACHE_EXPIRES``                   ``Expires`` 头字段值 (单位，秒)，用于处理 ``GET``
+                                    请求。如果设置为非零值，总是会包含头，无视
+                                    ``CACHE_CONTROL`` 的配置。 
+                                    可以被资源配置重载。默认为 0。
+
+``X_DOMAINS``                       CORS (跨域资源共享) 支持。允许 API 维护者
+                                    指定哪个域允许执行 CORS 请求。允许的值为: 
+                                    ``None``, 域列表，或对一个完全开放的 API ``'*'``
+                                    默认为 ``None``.
+
+``X_DOMAINS_RE``                    与 ``X_DOMAINS`` 相同，除了允许一个正则表达式列表。
+                                    这对带有动态子域的网站很有用。确保正确 anchor 和
+                                    escape 正则表达式。忽略无效的正则表达式
+                                    (such as ``'*'``)。默认为 ``None``。
+
+``X_HEADERS``                       CORS (跨域资源共享) 支持。允许 API 维护者
+                                    指定哪个头可以通过 CORS 请求发送。
+                                    允许的值为: ``None`` 或头名称列表。
+                                    默认为 ``None``。
+
+``X_EXPOSE_HEADERS``                CORS (跨域资源共享) 支持。允许 API 维护者指定
+                                    哪个头被暴露在 CORS 响应中。
+                                    允许的值为: ``None`` 或头名称列表。
+                                    默认为 ``None``。
+
+``X_ALLOW_CREDENTIALS``             CORS (跨域资源共享) 支持。允许 API 维护者指定
+                                    客户端是否可以发送 cookies。仅有的允许的值为: 
+                                    ``True``，任何其他值都会被忽略。默认为 ``None``。
+
+``X_MAX_AGE``                       CORS (跨域资源共享) 支持。允许为访问控制允许头设置最大
+                                    年龄。默认为 21600。
+
+
+``LAST_UPDATED``                    用于记录文档的最后更新日期的字段名称。
+                                    这个字段由 Eve 自动处理。默认为 ``_updated``。
+
+``DATE_CREATED``                    用于记录文档创建日期的字段名称。
+                                    这个字段由 Eve 自动处理。默认为 ``_created``。
+
+``ID_FIELD``                        用于在数据库中唯一标识数据项资源的字段名称。
+                                    你希望这个字段在数据库中被恰当地索引。
+                                    可以被资源配置重载。默认为 ``_id``。
+
+``ITEM_LOOKUP``                     如果数据项终结点应该是跨 API普遍可用的 ``True``，
+                                    否则 ``False``。可以被资源配置重载。默认为 ``True``。
+
+``ITEM_LOOKUP_FIELD``               用于搜索数据项资源的文档字段。
+                                    可以被资源配置重载。默认为 ``ID_FIELD``。
+
+``ITEM_URL``                        用于创建默认数据项终结点 URL 的 URL 规则。
+                                    可以被资源配置重载。默认为
+                                    ``regex("[a-f0-9]{24}")``，即 MongoDB 的
+                                    标准 ``Object_Id`` 格式。
+
+``ITEM_TITLE``                      由于构建数据项引用的标题，在 XML 和 JSON 响应中
+                                    都有效。默认为资源名称去除复数形式 's'，如果存在的话。
+                                    可以而且很可能会在配置单个资源终结点时被重载。
+
+``AUTH_FIELD``                      启用 :ref:`user-restricted`。当此特性启用时，
+                                    用户只能 read/update/delete 他们自己创建的数据项资源。
+                                    关键字包含字段的真实名称，用于存储创建数据项资源的用户 id。
+                                    可以被资源配置重载。默认为 ``None``，即禁用特性。
+
+``ALLOW_UNKNOWN``                   为 ``True`` 时，这个选项会允许任意的，未知字段插入到任何 API 终结点。
+                                    谨慎使用。查看 :ref:`unknown` 获取更多信息。
+                                    默认为 ``False``。
+
+``PROJECTION``                      为 ``True`` 时，这个选项启用 :ref:`projections` 特性。
+                                    可以被资源配置重载。默认为 ``True``。
+
+``EMBEDDING``                       为 ``True`` 时，这个选项启用 :ref:`embedded_docs` 特性。
+                                    默认为 ``True``。
+
+``BANDWIDTH_SAVER``                 为 ``True`` 时，POST, PUT, 和 PATCH 响应
+                                    只会返回自动处理了的字段和 ``EXTRA_RESPONSE_FIELDS``。
+                                    为 ``False`` 时，整个文档都会被发送。
+                                    默认为 ``True``。
+
+``EXTRA_RESPONSE_FIELDS``           允许配置一个额外的应该在每个 POST 响应中提供的文档字段列表。
+                                    正常情况下，只有自动处理的字段 (``ID_FIELD``,
+                                    ``LAST_UPDATED``, ``DATE_CREATED``, ``ETAG``) 
+                                    被包含在响应载体中。可以被资源配置重载。
+                                    默认为 ``[]``, 实际上就是禁用这项特性。
+
+``RATE_LIMIT_GET``                  一个表示对 GET 请求速度限制的元组。元组的
+                                    第一个元素时允许的请求数目，而第二个是以秒为单位
+                                    的时间窗口。例如 ``(300, 60 * 15)`` 将设置
+                                    一个上限，每 15 分钟 300 个请求。默认为 ``None``。
+
+``RATE_LIMIT_POST``                 一个表示对 POST 请求速度限制的元组。元组的
+                                    第一个元素时允许的请求数目，而第二个是以秒为单位
+                                    的时间窗口。例如 ``(300, 60 * 15)`` 将设置
+                                    一个上限，每 15 分钟 300 个请求。默认为 ``None``。
+
+``RATE_LIMIT_PATCH``                一个表示对 PATCH 请求速度限制的元组。元组的
+                                    第一个元素时允许的请求数目，而第二个是以秒为单位
+                                    的时间窗口。例如 ``(300, 60 * 15)`` 将设置
+                                    一个上限，每 15 分钟 300 个请求。默认为 ``None``。
+
+``RATE_LIMIT_DELETE``               一个表示对 DELETE 请求速度限制的元组。元组的
+                                    第一个元素时允许的请求数目，而第二个是以秒为单位
+                                    的时间窗口。例如 ``(300, 60 * 15)`` 将设置
+                                    一个上限，每 15 分钟 300 个请求。默认为 ``None``。
+
+``DEBUG``                           要启用调试模式，``True``，否则 ``False``。
+
+``ERROR``                           允许定制错误代码字段。默认为 ``_error``。
+
+``HATEOAS``                         为 ``False`` 时，这个选项禁用 :ref:`hateoas_feature`。默认为 ``True``。
+
+``ISSUES``                          允许定制问题字段 field。默认为 ``_issues``。
+
+``STATUS``                          允许定制状态字段。默认为 ``_status``。
+
+``STATUS_OK``                       数据验证成功时的状态消息。默认为 ``OK``。
+
+``STATUS_ERR``                      数据验证失败时的状态消息。默认为 ``ERR``。
+
+``ITEMS``                           允许定制数据项字段。默认为 ``_items``。
+
+``META``                            允许定制元数据字段。默认为 ``_meta``。
+
+``INFO``                            字符串值，通过给定的 INFO 名称在 Eve 主页 (suggested
+                                    value ``_info``) 包含一个信息节。信息节将包含 
+                                    Eve 服务器版本和 API 版本 (API_VERSION，
+                                    如果设置了的话)。否则 ``None``，如果你不想暴露
+                                    任何服务器信息的话。默认为 ``None``。
+
+``LINKS``                           允许定制链接字段。默认为 ``_links``。
+
+``ETAG``                            允许定制 etag 字段。默认为 ``_etag``。
+
+``IF_MATCH``                        要启用并发控制 ``True``，否则 ``False``。
+                                    默认为 ``True``。参考 :ref:`concurrency`。
+
+``ENFORCE_IF_MATCH``                要在启用时一直强制并发控制 ``True``，否则 ``False``。
+                                    默认为 ``True``。参考 :ref:`concurrency`。
+
+``RENDERERS``                       允许改变启用的渲染器。默认为
+                                    ``['eve.render.JSONRenderer', 'eve.render.XMLRenderer']``。
+
+``JSON_SORT_KEYS``                  要启用 JSON 键排序 ``True``，否则 ``False``。
+                                    默认为 ``False``。
+
+``JSON_REQUEST_CONTENT_TYPES``      支持 JSON 内容类型。在你需要支持厂家特定的 json
+                                    类型时很有用。请注意: 响应仍会携带标准的
+                                    ``application/json`` 类型时很有用。
+                                    默认为 ``['application/json']``。
+
+``VALIDATION_ERROR_STATUS``         用于验证错误的 HTTP 状态代码。默认为 ``422``。
+
+``VERSIONING``                      为 ``True`` 时， 启用文档版本控制。
+                                    可以被资源配置重载。默认为 ``False``。
+
+``VERSIONS``                        添加到基本集合名称的后缀，用于创建存储文档版本的
+                                    影子集合的名称。默认为 ``_versions``。当启用
+                                    ``VERSIONING`` 时，会为一个，诸如，数据源为
+                                    ``myresource`` 的资源创建一个集合
+                                    ``myresource_versions``。
+
+``VERSION_PARAM``                   URL 查询参数，用于访问指定版本的文档。默认为
+                                    ``version``。忽略这个参数以获取最新版本的文档，
+                                    或者使用 ``?version=all`` 来获取所有版本文档的列表。
+                                    只对单个数据项终结点有效。
+
+``VERSION``                         用于存储文档版本号的字段。默认为 ``_version``。
+
+``LATEST_VERSION``                  用于存储文档最新版本号的字段。默认为 ``_latest_version``。
+
+``VERSION_ID_SUFFIX``               在影子集合中，用于存储文档 id 的字段。
+                                    默认为 ``_document``。如果 ``ID_FIELD`` 被设置
+                                    为 ``_id``，文档 id 会被存储在字段
+                                    ``_id_document`` 中。
+
+``MONGO_URI``                       `MongoDB URI`_，用在不喜欢使用其他配置变量的情况下。
+
+``MONGO_HOST``                      MongoDB 服务器地址。默认为 ``localhost``。
+
+``MONGO_PORT``                      MongoDB 端口。默认为 ``27017``。
+
+``MONGO_USERNAME``                  MongoDB 用户名。
+
+``MONGO_PASSWORD``                  MongoDB 密码。
+
+``MONGO_DBNAME``                    MongoDB 数据库名称。
+
+``MONGO_OPTIONS``                   要传递给 MongoClient 类 ``__init__`` 的 MongoDB 关键字参数。
+                                    默认为 ``{'connect': True, 'tz_aware': True, 'appname': 'flask_app_name'}``。
+                                    查看 `PyMongo mongo_client`_ 作为参考。
+
+``MONGO_AUTH_SOURCE``               MongoDB 身份验证数据库。默认为 ``None``。
+
+``MONGO_AUTH_MECHANISM``            MongoDB 身份验证机制。参考 `PyMongo Authentication Mechanisms`_。
+                                    默认为 ``None``。
+
+``MONGO_AUTH_MECHANISM_PROPERTIES`` 指定 MongoDB 额外身份验证机制属性，如果需要的话。
+                                    默认为 ``None``。
+
+``MONGO_QUERY_BLACKLIST``           一组不允许用在资源过滤器 (``?where=``) 中的 Mongo 查询运算符。
+                                    默认为 ``['$where', '$regex']``。
+
+                                    Mongo JavaScript 运算符默认是禁用的，
+                                    因为它们可以被用作注入攻击的载体。
+                                    Javascript 查询也比较慢，通常可以轻易被
+                                    (非常丰富) Mongo 查询语言取代。
+
+``MONGO_WRITE_CONCERN``             一个定义 MongoDB 写关注的配置的字典。支持
+                                    所有标准写入关注配置 (w, wtimeout, j, fsync)。
+                                    默认为 ``{'w': 1}``，意味着 '进行常规已确认写入'
+                                    (这也是 Mongo 的默认项)。
+
+                                    请意识到，设置 'w' 为值 2 或 更大值，需要激活复制机制，
+                                    不然你会得到 500 错误 (写入仍然会发生；
+                                    Mongo 只是无法检查，它是否正在写入到多个服务器。)。
+
+                                    可以在终结点 (Mongo 集合) 级别被重载。
+                                    参考下面的 ``mongo_write_concern``。
+
+``DOMAIN``                          一个保存 API 域定义的字典。参考 `Domain Configuration`_。
+
+``EXTENDED_MEDIA_INFO``             转自文件上传驱动的一组属性。
+
+``RETURN_MEDIA_AS_BASE64_STRING``   控制终结点响应中的媒体类型的 embedding。
+                                    当你有其他获取二进制的方式
+                                    (like custom Flask endpoints) 但仍然希望客户端
+                                    可以 POST/PATCH 它的时候很有用。默认为 ``True``.
+
+``RETURN_MEDIA_AS_URL``             要启用将媒体文件保存在一个专用的媒体节点的话，设置它为 ``True``。
+                                    默认为 ``False``。
+
+``MEDIA_BASE_URL``                  激活 ``RETURN_MEDIA_AS_URL`` 时，使用的基准 URL。
+                                    结合 ``MEDIA_ENDPOINT`` 和 ``MEDIA_URL`` 决定
+                                    了媒体文件返回的 URL。如果为 ``None``，也就是默认值，
+                                    会使用 API 基准地址作为替代。
+
+``MEDIA_ENDPOINT``                  媒体终结点，当 ``RETURN_MEDIA_AS_URL`` 启用时使用。
+                                    默认为 ``media``。
+
+``MEDIA_URL``                       在专用的媒体终结点提供的文件 url 格式。
+                                    默认为 ``regex("[a-f0-9]{24}")``。
+
+``MULTIPART_FORM_FIELDS_AS_JSON``   如果你在将你的资源提交为 ``multipart/form-data``，
+                                    所有表单数据字段都将被提交为字符串，打破任何
+                                    你可能在资源字段上设置的验证规则。如果你希望
+                                    将所有提交的表单数据当作 JSON 字符串，你将需要
+                                    激活这个配置。在那种情况下，字段验证继续正常工作。
+                                    在 :ref:`multipart` 阅读更多关于字段应该如何被格式化
+                                    的信息。默认为 ``False``。
+
+``AUTO_COLLAPSE_MULTI_KEYS``        如果设置为 ``True``，使用同一个键发送的多个值，
+                                    使用 ``application/x-www-form-urlencoded`` 或
+                                    ``multipart/form-data`` 提交的内容类型，
+                                    将自动被转换为值列表。
+
+                                    当和 ``AUTO_CREATE_LISTS`` 一起使用时，
+                                    使用媒体字段列表成为可能。
+
+                                    默认为 ``False``
+
+``AUTO_CREATE_LISTS``               当为 ``list`` 类型字段提交一个非 ``list`` 类型值时，
+                                    在运行测试器前，自动创建一个单元素列表。
+
+                                    默认为 ``False``
+
+``OPLOG``                           要启用 :ref:`oplog` 的话，设置它为 ``True``。
+                                    默认为 ``False``。
+
+``OPLOG_NAME``                      这是存储 :ref:`oplog` 的数据库集合名称。
+                                    默认为 ``oplog``。
+
+``OPLOG_METHODS``                   操作会应该被记录进 :ref:`oplog` 的 HTTP 方法列表。
+                                    默认为 ``['DELETE', 'POST', 'PATCH', 'PUT']``。
+
+``OPLOG_CHANGE_METHODS``            操作会包含变化进 :ref:`oplog` 的 HTTP 方法列表。
+                                    默认为 ``['DELETE','PATCH', 'PUT']``。
+
+``OPLOG_ENDPOINT``                  :ref:`oplog` 终结点的名称。如果这个终结点被启用，
+                                    它可以像任何其他 API 终结点一样被配置。设置它为
+                                    ``None`` 来禁用这个终结点。默认为 ``None``。
+
+``OPLOG_AUDIT``                     设置为 ``True`` 以启用审计特性。当审计启用时，
+                                    客户端 IP 和文档变化也会被记录到 :ref:`oplog`。
+                                    默认为 ``True``。
+
+``OPLOG_RETURN_EXTRA_FIELD``        当启用时，可选的 ``extra`` 字段将被包含在载体中，
+                                    由 ``OPLOG_ENDPOINT`` 返回。默认为 ``False``。
+
+``SCHEMA_ENDPOINT``                 :ref:`schema_endpoint` 的名称。默认为 ``None``。
+
+``HEADER_TOTAL_COUNT``              自定义的头部，在集合 ``GET`` 请求的响应载体中
+                                    包含数据项的总数。这对客户端希望知道数据项数目
+                                    而不想获取响应体的 ``HEAD`` 请求很方便。
+                                    一个使用场景例子是使用 ``where`` 查询获取未读的文章
+                                    而不用加载文章本身。默认为 ``X-Total-Count``。
+
+``JSONP_ARGUMENT``                  这个选项会导致响应被封装在一个 JavaScript 函数调用中，
+                                    如果在请求中设置了参数的话。例如，如果你设置
+                                    ``JSON_ARGUMENT = 'callback'``，那么所有对
+                                    ``?callback=funcname`` 请求的响应都会被封装在一个
+                                    ``funcname`` 调用中。默认为 ``None``。
+
+``BULK_ENABLED``                    设置为 ``True`` 时启用批量插入。查看 :ref:`bulk_insert`
+                                    获取更多信息。默认为 ``True``。
+
+``SOFT_DELETE``                     设置为 ``True`` 时启用软删除。查看 :ref:`soft_delete`
+                                    获取更多信息。默认为 ``False``。
+
+``DELETED``                         文档字段，用于当 ``SOFT_DELETE`` 启用时指示一个文档是否已经被删除。
+                                    默认为 ``_deleted``。
+
+``SHOW_DELETED_PARAM``              URL 查询参数，用于包含软删除的数据项在资源级别的 GET 响应中。
+                                    默认为 'show_deleted'。
+
+``STANDARD_ERRORS``                 这是一组一个标准 API 响应会提供的 HTTP 错误代码。
+                                    经典的错误响应包括一个带有真实错误代码和描述的 JSON 体，
+                                    如果你希望禁用全部经典响应，设置这个为空列表。
+                                    默认为 ``[400, 401, 403, 404, 405, 406, 409, 410, 412, 422, 428]``
+
+``VALIDATION_ERROR_AS_STRING``      如果为 ``True``，即便单个字段错误也会以列表的形式返回。
+                                    默认情况下，单个字段错误以字符串的形式返回，
+                                    而多个字段错误被捆在一个列表中。如果你希望规格化
+                                    字段错误输出，设置这项配置为 ``True``，这样你总是
+                                    会得到一个文档字段列表。默认为 ``False``。
+
+``UPSERT_ON_PUT``                   为 ``True`` 时，``PUT`` 在文档不存在时尝试创建它。
+                                    URL 终结点将被用作 ``ID_FIELD`` 值 (如果 ``ID_FIELD``
+                                    包含在载体中，它就会被忽略)。正常的验证规则适用。
+                                    成功创建时，响应将会是一个 ``201 Created``。
+                                    响应负载与你通过执行单文档 POST 到资源终结点得到
+                                    将是同一个。设置为 ``False`` 来禁用这项特性，相反，
+                                    这样会返回一个 ``404``。默认为 ``True``。
+
+``MERGE_NESTED_DOCUMENTS``          如果为 ``True``，``PATCH`` 对嵌套字段的更新是
+                                    融合当前的数据。如果为 ``False``，更新会重写当前的数据。
+                                    默认为 ``True``。
+
+``NORMALIZE_DOTTED_FIELDS``         如果为 ``True``，带点的字段被解析和处理为子文档字段。
+                                    如果为 ``False``，带点的字段被保留为解析和处理的，
+                                    载体被原封不动地传递给潜在的数据层。请注意，
+                                    使用默认的 Mongo 层时，设置这个为 ``False`` 会
+                                    导致错误。默认为 ``True``。
 
 =================================== =========================================
 
@@ -764,40 +559,29 @@
 .. tabularcolumns:: |p{6.5cm}|p{8.5cm}|
 
 =============================== ===============================================
-``url``                         The endpoint URL. If omitted the resource key
-                                of the ``DOMAIN`` dict will be used to build
-                                the URL. As an example, ``contacts`` would make
-                                the `people` resource available at
-                                ``/contacts`` (instead of ``/people``). URL can
-                                be as complex as needed and can be nested
-                                relative to another API endpoint (you can have
-                                a ``/contacts`` endpoint and then
-                                a ``/contacts/overseas`` endpoint. Both are
-                                independent of each other and freely
-                                configurable).
+``url``                         终结点 URL。如果忽略的话，``DOMAIN`` 字典的资源键将被用于构建 URL。
+                                作为一个例子，``contacts`` 将使 `people` 资源在
+                                ``/contacts`` (而不是 ``/people``) 可用。URL 可以
+                                是要多复杂有多复杂，可以嵌套关联到另一个 API 终结点
+                                (你可以有一个 ``/contacts`` 终结点，接着有一个
+                                ``/contacts/overseas`` 终结点。两者是彼此独立，
+                                可自由配置的)。
 
-                                You can also use regexes to setup
-                                subresource-like endpoints. See
-                                :ref:`subresources`.
+                                你也可以使用正则表达式来创建类似子资源的终结点。
+                                参考 :ref:`subresources`。
 
-``allowed_filters``             List of fields on which filtering is allowed.
-                                Entries in this list work in a hierarchical
-                                way. This means that, for instance, filtering
-                                on ``'dict.sub_dict.foo'`` is allowed if
-                                ``allowed_filters`` contains any of
+``allowed_filters``             允许使用过滤器的一组索引。这个列表中的项按等级工作。
+                                这意味着，举个例子，如果 ``allowed_filters`` 包含
                                 ``'dict.sub_dict.foo``, ``'dict.sub_dict'``
-                                or ``'dict'``. Instead filtering on
-                                ``'dict'`` is allowed if ``allowed_filters``
-                                contains ``'dict'``.
-                                Can be set to ``[]`` (no filters allowed), or
-                                ``['*']`` (fields allowed on every field).
-                                Defaults to ``['*']``.
+                                或 ``'dict'`` 中的一个，那么 ``'dict.sub_dict.foo'``
+                                上的过滤是允许的。相反，如果 ``allowed_filters``
+                                包含 ``'dict'``， ``'dict'`` 上的过滤是允许的。
+                                可以被设置为 ``[]`` (不允许任何过滤器)，或
+                                ``['*']`` (每个字段都允许过滤)。默认为 ``['*']``。
 
-                                *Please note:* If API scraping or DB DoS
-                                attacks are a concern, then globally disabling
-                                filters (see ``ALLOWED_FILTERS`` above) and
-                                then whitelisting valid ones at the local level
-                                is the way to go.
+                                *请注意:* 如果担心 API 破坏或 DB DoS 攻击，那么
+                                全局禁用过滤器 (参考上面的 ``ALLOWED_FILTERS``)，
+                                然后再本地基本列出有效白名单是可行的方式。
 
 ``sorting``                     如果启用了排序，``True``，否则 ``False``。本地
                                 重载 ``SORTING``。
@@ -805,271 +589,183 @@
 ``pagination``                  如果启用了分页，``True``，否则 ``False``。本地
                                 重载 ``PAGINATION``。
 
-``resource_methods``            A list of HTTP methods supported at resource
-                                endpoint. Allowed values: ``GET``, ``POST``,
-                                ``DELETE``. Locally overrides
-                                ``RESOURCE_METHODS``.
+``resource_methods``            资源终结点支持的一组 HTTP 方法。允许的值为: ``GET``, ``POST``,
+                                ``DELETE``。本地重载 ``RESOURCE_METHODS``。
 
-                                *Please note:* if you're running version 0.0.5
-                                or earlier use the now unsupported ``methods``
-                                keyword instead.
+                                *请注意:* 如果在允许版本 0.0.5 或更早版本，
+                                请使用目前不支持的 ``methods`` 关键字来代替它。
 
-``public_methods``              A list of HTTP methods supported at resource
-                                endpoint, open to public access even when
-                                :ref:`auth` is enabled. Locally overrides
-                                ``PUBLIC_METHODS``.
+``public_methods``              资源终结点支持的一组 HTTP 方法，即使启用了 :ref:`auth`，
+                                也会开放为公共权限。本地重载 ``PUBLIC_METHODS``。
 
-``item_methods``                A list of HTTP methods supported at item
-                                endpoint. Allowed values: ``GET``, ``PATCH``,
-                                ``PUT`` and ``DELETE``. ``PATCH`` or, for
-                                clients not supporting PATCH, ``POST`` with
-                                the ``X-HTTP-Method-Override`` header tag.
-                                Locally overrides ``ITEM_METHODS``.
+``item_methods``                数据项终结点支持的一组 HTTP 方法。允许的值: ``GET``, ``PATCH``,
+                                ``PUT`` 和 ``DELETE``。``PATCH`` 或者，对不支持
+                                PATCH 的客户端来说，带有 ``X-HTTP-Method-Override`` 标记的 ``POST``。
+                                本地重载 ``ITEM_METHODS``.
 
-``public_item_methods``         A list of HTTP methods supported at item
-                                endpoint, left open to public access when
-                                :ref:`auth` is enabled. Locally overrides
-                                ``PUBLIC_ITEM_METHODS``.
+``public_item_methods``         数据项终结点支持的一组 HTTP 方法，当启用 :ref:`auth` 时， 
+                                开放为公共权限。贝蒂重载 ``PUBLIC_ITEM_METHODS``。
 
-``allowed_roles``               A list of allowed `roles` for resource
-                                endpoint. See :ref:`auth` for more
-                                information. Locally overrides
-                                ``ALLOWED_ROLES``.
+``allowed_roles``               资源终结点允许的一组 `roles`。查看 :ref:`auth` 
+                                获取更多信息。本地重载 ``ALLOWED_ROLES``。
 
-``allowed_read_roles``          A list of allowed `roles` for resource
-                                endpoint with GET and OPTIONS methods.
-                                See :ref:`auth` for more
-                                information. Locally overrides
-                                ``ALLOWED_READ_ROLES``.
+``allowed_read_roles``          带有 GET 和 OPTIONS 方法的资源终结点允许的一组 `roles`。
+                                查看 :ref:`auth` 获取更多信息。
+                                本地重载 ``ALLOWED_READ_ROLES``。
 
-``allowed_write_roles``         A list of allowed `roles` for resource
-                                endpoint with POST, PUT and DELETE.
-                                See :ref:`auth` for more
-                                information. Locally overrides
-                                ``ALLOWED_WRITE_ROLES``.
+``allowed_write_roles``         带有 POST, PUT 和 DELETE 方法的资源终结点允许的一组 `roles`。
+                                查看 :ref:`auth` 获取更多信息。
+                                本地重载 ``ALLOWED_WRITE_ROLES``。
 
-``allowed_item_read_roles``     A list of allowed `roles` for item endpoint
-                                with GET and OPTIONS methods.
-                                See :ref:`auth` for more information.
-                                Locally overrides ``ALLOWED_ITEM_READ_ROLES``.
+``allowed_item_read_roles``     带有 GET 和 OPTIONS 方法的数据项终结点允许的一组 `roles`。
+                                查看 :ref:`auth` 获取更多信息。
+                                本地重载 ``ALLOWED_ITEM_READ_ROLES``。
 
 
-``allowed_item_write_roles``    A list of allowed `roles` for item endpoint
-                                with PUT, PATH and DELETE methods.
-                                See :ref:`auth` for more information.
-                                Locally overrides ``ALLOWED_ITEM_WRITE_ROLES``.
+``allowed_item_write_roles``    带有 PUT，PATH 和 DELETE 方法的资源终结点允许的一组 `roles`。
+                                查看 :ref:`auth` 获取更多信息。
+                                本地重载 ``ALLOWED_ITEM_WRITE_ROLES``。
 
-``allowed_item_roles``          A list of allowed `roles` for item endpoint.
-                                See :ref:`auth` for more information.
-                                Locally overrides ``ALLOWED_ITEM_ROLES``.
+``allowed_item_roles``          数据项终结点允许的一组 `roles`。
+                                查看 :ref:`auth` 获取更多信息。
+                                本地重载 ``ALLOWED_ITEM_ROLES``。
 
-``cache_control``               Value of the ``Cache-Control`` header field
-                                used when serving ``GET`` requests. Leave empty
-                                if you don't want to include cache directives
-                                with API responses. Locally overrides
-                                ``CACHE_CONTROL``.
+``cache_control``               处理 ``GET`` 请求时，使用的 ``Cache-Control`` 头字段值。
+                                如果你不希望在 API 响应中包含缓存指令的话，留空。
+                                本地重载 ``CACHE_CONTROL``。
 
-``cache_expires``               Value (in seconds) of the ``Expires`` header
-                                field used when serving ``GET`` requests. If
-                                set to a non-zero value, the header will
-                                always be included, regardless of the setting
-                                of ``CACHE_CONTROL``. Locally overrides
-                                ``CACHE_EXPIRES``.
+``cache_expires``               处理 ``GET`` 请求时，使用的 ``Expires`` 头字段值 (单位，秒)。
+                                如果设置为非零值，总是会包含头部，无视 ``CACHE_CONTROL`` 的设置。
+                                本地重载 ``CACHE_EXPIRES``。
 
-``id_field``                    Field used to uniquely identify resource items
-                                within the database. Locally overrides
-                                ``ID_FIELD``.
+``id_field``                    用于在数据库中唯一标识资源数据项的字段。本地重载 ``ID_FIELD``。
 
-``item_lookup``                 ``True`` if item endpoint should be available,
-                                ``False`` otherwise. Locally overrides
-                                ``ITEM_LOOKUP``.
+``item_lookup``                 如果数据项终结点应该可用，``True``，否则 ``False``。
+                                本地重载 ``ITEM_LOOKUP``。
 
-``item_lookup_field``           Field used when looking up a resource
-                                item. Locally overrides ``ITEM_LOOKUP_FIELD``.
+``item_lookup_field``           搜索资源数据项时使用的字段。本地重载 ``ITEM_LOOKUP_FIELD``。
 
 ``item_url``                    用于创建数据项终结点 URL 的规则。本地重载 ``ITEM_URL``。
 
-``resource_title``              Title used when building resource links
-                                (HATEOAS). Defaults to resource's ``url``.
+``resource_title``              构建资源链接 (HATEOAS) 时使用的标题。默认为资源的 ``url``。
 
-``item_title``                  Title to be used when building item references,
-                                both in XML and JSON responses. Overrides
-                                ``ITEM_TITLE``.
+``item_title``                  构建数据项引用时使用的标题，同时用于 XML 和 JSON 响应。
+                                重载 ``ITEM_TITLE``。
 
-``additional_lookup``           Besides the standard item endpoint which
-                                defaults to ``/<resource>/<ID_FIELD_value>``,
-                                you can optionally define a secondary,
-                                read-only, endpoint like
-                                ``/<resource>/<person_name>``. You do so by
-                                defining a dictionary comprised of two items
-                                `field` and `url`. The former is the name of
-                                the field used for the lookup. If the field
-                                type (as defined in the resource schema_) is
-                                a string, then you put a URL rule in `url`.  If
-                                it is an integer, then you just omit `url`, as
-                                it is automatically handled.  See the code
-                                snippet below for an usage example of this
-                                feature.
+``additional_lookup``           除了标准的数据项终结点，默认为 ``/<resource>/<ID_FIELD_value>``
+                                外，你可以随意定义第二个只读的终结点，类似
+                                ``/<resource>/<person_name>``。你通过定义一个
+                                由两个项目 `field` 和 `url` 组成的字典来做到这个。
+                                前者时用于搜索的字段名称。如果字段类型
+                                (像资源 schema_ 定义的那样) 是字符串，那么你在 `url`
+                                中放一个 URL 规则。如果是整数，那么你只需要忽略 `url`，
+                                因为它可以被自动处理。参考下面的代码片段，这个特性的用法示例。
 
-``datasource``                  明确地链接 API 资源到数据库集合。参考 `Advanced Datasource
-                                Patterns`_。
+``datasource``                  明确地链接 API 资源到数据库集合。参考 `Advanced Datasource Patterns`_。
 
-``auth_field``                  Enables :ref:`user-restricted`. When the
-                                feature is enabled, users can only
-                                read/update/delete resource items created by
-                                themselves. The keyword contains the actual
-                                name of the field used to store the id of
-                                the user who created the resource item. Locally
-                                overrides ``AUTH_FIELD``.
+``auth_field``                  启用 :ref:`user-restricted`。当特性启用时，
+                                用户只可以 read/update/delete 自己创建的资源项。
+                                关键字包含字段的实际名称，用于存储创建资源项的用户标识。
+                                本地重载 ``AUTH_FIELD``。
 
-``allow_unknown``               When ``True``, this option will allow insertion
-                                of arbitrary, unknown fields to the endpoint.
-                                Use with caution. Locally overrides
-                                ``ALLOW_UNKNOWN``. See :ref:`unknown` for more
-                                information. Defaults to ``False``.
+``allow_unknown``               为 ``True`` 时，这个选项将允许插入任意的未知字段到
+                                终结点。谨慎使用。本地重载 ``ALLOW_UNKNOWN``。
+                                查看 :ref:`unknown` 获取更多信息。默认为 ``False``。
 
-``transparent_schema_rules``    When ``True``, this option disables
-                                :ref:`schema_validation` for the endpoint.
+``transparent_schema_rules``    为 ``True`` 时，这个选项禁用终结点的 :ref:`schema_validation`。
 
-``projection``                  When ``True``, this option enables the
-                                :ref:`projections` feature. Locally overrides
-                                ``PROJECTION``. Defaults to ``True``.
+``projection``                  为 ``True`` 时，这个选项启用 :ref:`projections` 特性。
+                                本地重载 ``PROJECTION``。默认为 ``True``。
 
-``embedding``                   When ``True`` this option enables the
-                                :ref:`embedded_docs` feature. Defaults to
-                                ``True``.
+``embedding``                   为 ``True`` 时，这个选项启用 :ref:`embedded_docs` 特性。
+                                默认为 ``True``。
 
-``extra_response_fields``       Allows to configure a list of additional
-                                document fields that should be provided with
-                                every POST response. Normally only
-                                automatically handled fields (``ID_FIELD``,
+``extra_response_fields``       允许配置一组额外的应该在每个 POST 响应中提供的文档字段。
+                                正常情况下，只有自动处理的字段 (``ID_FIELD``,
                                 ``LAST_UPDATED``, ``DATE_CREATED``, ``ETAG``)
-                                are included in response payloads. Overrides
-                                ``EXTRA_RESPONSE_FIELDS``.
+                                被包含在响应载体中。重载 ``EXTRA_RESPONSE_FIELDS``。
 
-``hateoas``                     When ``False``, this option disables
-                                :ref:`hateoas_feature` for the resource.
-                                Defaults to ``True``.
+``hateoas``                     为 ``False`` 时，这个选项禁用资源的 :ref:`hateoas_feature`。
+                                默认为 ``True``。
 
-``mongo_write_concern``         A dictionary defining MongoDB write concern
-                                settings for the endpoint datasource. All
-                                standard write concern settings (w, wtimeout, j,
-                                fsync) are supported. Defaults to ``{'w': 1}``
-                                which means 'do regular acknowledged writes'
-                                (this is also the Mongo default.)
+``mongo_write_concern``         一个为终结点数据源定义 MongoDB 写关注配置的字典。支持
+                                所有标准写关注配置 (w, wtimeout, j, fsync)。默认为
+                                ``{'w': 1}``，这意味着 '进行常规已确认写入'
+                                (这也是 Mongo 的默认项)。
 
-                                Please be aware that setting 'w' to a value of
-                                2 or greater requires replication to be active
-                                or you will be getting 500 errors (the write
-                                will still happen; Mongo will just be unable
-                                to check that it's being written to multiple
-                                servers.)
+                                请意识到，设置 'w' 为值 2 或 更大值，需要激活复制机制，
+                                不然你会得到 500 错误 (写入仍然会发生；
+                                Mongo 只是无法检查，它是否正在写入到多个服务器。)。
 
-``mongo_prefix``                Allows overriding of the default ``MONGO``
-                                prefix, which is used when retrieving MongoDB
-                                settings from configuration.
+``mongo_prefix``                允许重载默认的 ``MONGO`` 前缀，用于从配置中获取 MongoDB 设置。
 
-                                For example if ``mongo_prefix`` is set to
-                                ``MONGO2`` then, when serving requests for the
-                                endpoint, ``MONGO2`` prefixed settings will
-                                be used to access the database.
+                                例如，如果 ``mongo_prefix`` 设置为 ``MONGO2``，那么，
+                                当处理终结点请求时，``MONGO2`` 前缀设置将被用于访问数据库。
 
-                                This allows for eventually serving data from
-                                a different database/server at every endpoint.
+                                这允许在每个终结点最终提供来自不同数据库/服务器的数据。
 
-                                See also: :ref:`authdrivendb`.
+                                请查阅: :ref:`authdrivendb`。
 
-``mongo_indexes``               Allows to specify a set of indexes to be
-                                created for this resource before the app is
-                                launched.
+``mongo_indexes``               允许为资源指定一组索引，在应用程序启动前创建。
 
-                                Indexes are expressed as a dict where keys are
-                                index names and values are either a list of
-                                tuples of (field, direction) pairs, or
-                                a tuple with a list of field/direction pairs
-                                *and* index options expressed as a dict, such
-                                as ``{'index name': [('field', 1)], 'index with
-                                args': ([('field', 1)], {"sparse": True})}``.
+                                索引被表示为一个字典，键为索引名称，值为 (field, direction) 
+                                二元组列表，或一个带有 field/direction 对列表的元组
+                                *以及* 表示为一个字典的索引选项，诸如，
+                                ``{'index name': [('field', 1)], 'index with
+                                args': ([('field', 1)], {"sparse": True})}``。
 
-                                Multiple pairs are used to create compound
-                                indexes. Direction takes all kind of values
-                                supported by PyMongo, such as ``ASCENDING``
-                                = 1 and ``DESCENDING`` = -1. All index options
-                                such as ``sparse``, ``min``, ``max``,
-                                etc. are supported (see PyMongo_ documentation.)
+                                多个键值对用于创建复合索引。方向可以取 PyMongo 支持的任何值，
+                                诸如，``ASCENDING`` = 1 和 ``DESCENDING`` = -1。
+                                支持所有索引选项，诸如，``sparse``, ``min``, ``max``,
+                                等等 (参考 PyMongo_ 文档)。
 
-                                *Please note:* keep in mind that index design,
-                                creation and maintenance is a very important
-                                task and should be planned and executed with
-                                great care. Usually it is also a very resource
-                                intensive operation. You might therefore want
-                                to handle this task manually, out of the
-                                context of API instantiation. Also remember
-                                that, by default, any already exsistent index
-                                for which the definition has been changed, will
-                                be dropped and re-created.
+                                *请注意:* 记住，索引的设计，创建和维护时非常重要的任务，
+                                应该小心翼翼的计划和执行。通常它也是一个非常资源密集的操作。
+                                你可能因此希望脱离 API 实例化上下文，手工处理这个任务。
+                                也要记住，默认情况下，任何已经存在的索引，如果定义发生变化，
+                                会被删除重建。
 
-``authentication``              A class with the authorization logic for the
-                                endpoint. If not provided the eventual
-                                general purpose auth class (passed as
-                                application constructor argument) will be used.
-                                For details on authentication and authorization
-                                see :ref:`auth`.  Defaults to ``None``,
+``authentication``              一个带有用于终结点身份验证逻辑的类。如果未提供的话，
+                                将使用最终的通用的身份验证类 (作为应用程序构造参数传递)。
+                                要获取更多关于身份验证和授权的详细信息，参考 :ref:`auth`。
+                                默认为 ``None``。
 
-``embedded_fields``             A list of fields for which :ref:`embedded_docs`
-                                is enabled by default. For this feature to work
-                                properly fields in the list must be
-                                ``embeddable``, and ``embedding`` must be
-                                active for the resource.
+``embedded_fields``             默认启用了 :ref:`embedded_docs` 的一组字段。
+                                要让这个特性工作正常，列表中的字段必须是 ``embeddable``，
+                                而资源也必须激活 ``embedding``。
 
-``query_objectid_as_string``    When enabled the Mongo parser will avoid
-                                automatically casting electable strings to
-                                ObjectIds. This can be useful in those rare
-                                occurrences where you have string fields in the
-                                database whose values can actually be casted to
-                                ObjectId values, but shouldn't. It effects
-                                queries (``?where=``) and parsing of payloads.
-                                Defaults to ``False``.
+``query_objectid_as_string``    启用后，Mongo 解析器将避免自动转换合格的字符串为 ObjectIds。
+                                这个可能在那些很少发生的情况下很有用，比如，你的数据库里
+                                有值实际上可以但又不应该转换为 ObjectId 值的字符串字段。
+                                它对查询和解析载体有效。默认为 ``False``。
 
-``internal_resource``           When ``True``, this option makes the resource
-                                internal. No HTTP action can be performed on
-                                the endpoint, which is still accessible from
-                                the Eve data layer. See
-                                :ref:`internal_resources` for more
-                                information. Defaults to ``False``.
+``internal_resource``           为 ``True`` 时，这个选项使资源成为内部得。
+                                在终结点上无法进行执行 HTTP 行为，但仍然可以被 Eve 
+                                数据层访问。查看 :ref:`internal_resources` 获取更多信息。
+                                默认为 ``False``。
 
-``etag_ignore_fields``          List of fields that
-                                should not be used to compute the ETag value.
-                                Defaults to ``None`` which means that by
-                                default all fields are included in the computation.
-                                It looks like ``['field1', 'field2',
-                                'field3.nested_field', ...]``.
+``etag_ignore_fields``          不应该用于计算 ETag 值得一组字段。默认为 ``None``，
+                                意思是，默认所有字段都被包含在计算中。看起来类似
+                                ``['field1', 'field2', 'field3.nested_field', ...]``。
 
-``schema``                      A dict defining the actual data structure being
-                                handled by the resource. Enables data
-                                validation. See `Schema Definition`_.
+``schema``                      一个定义资源处理的实际数据结构的字典。启用数据验证。
+                                参考 `Schema Definition`_。
 
-``bulk_enabled``                When ``True`` this option enables the
-                                :ref:`bulk_insert` feature for this resource.
-                                Locally overrides ``BULK_ENABLED``.
+``bulk_enabled``                为 ``True`` 时，这个选项启用这个资源的 :ref:`bulk_insert` 特性。
+                                本地重载 ``BULK_ENABLED``。
 
-``soft_delete``                 When ``True`` this option enables the
-                                :ref:`soft_delete` feature for this resource.
-                                Locally overrides ``SOFT_DELETE``.
+``soft_delete``                 为 ``True`` 时，这个选项启用这个资源的 :ref:`soft_delete` 特性。
+                                本地重载 ``SOFT_DELETE``。
 
-``merge_nested_documents``      If ``True``, updates to nested fields are
-                                merged with the current data on ``PATCH``.
-                                If ``False``, the updates overwrite the
-                                current data. Locally overrides
-                                ``MERGE_NESTED_DOCUMENTS``.
-``normalize_dotted_fields``     If ``True``, dotted fields are parsed and
-                                processed as subdocument fields. If ``False``,
-                                dotted fields are left unparsed and
-                                unprocessed, and the payload is passed to the
-                                underlying data-layer as-is. Please note that
-                                with the default Mongo layer, setting this to
-                                ``False`` will result in an error. Defaults to
-                                ``True``.
+``merge_nested_documents``      如果为 ``True``，``PATCH`` 对嵌套字段的更新是合并
+                                当前数据。如果为 ``False``，更新将重写当前数据。
+                                本地重载 ``MERGE_NESTED_DOCUMENTS``。
+
+``normalize_dotted_fields``     如果为 ``True``，带点的字段被解析和处理为子文档字段。
+                                如果为 ``False``， 带点的字段不解析不处理，
+                                载体按原样直接被传递到潜在的数据层。请注意，
+                                使用默认的 Mongo 层时，设置这个为 ``False`` 会导致错误。
+                                默认为 ``True``。
 
 =============================== ===============================================
 
@@ -1078,24 +774,23 @@
 ::
 
     people = {
-        # 'title' tag used in item links. Defaults to the resource title minus
-        # the final, plural 's' (works fine in most cases but not for 'people')
+        # 用在数据项链接中的 'title' 标签。默认为资源标题减去最后的复数形式 's'
+        # (在大多数场景工作良好，但不包括 'people')
         'item_title': 'person',
 
-        # by default, the standard item entry point is defined as
-        # '/people/<ObjectId>/'. We leave it untouched, and we also enable an
-        # additional read-only entry point. This way consumers can also perform
-        # GET requests at '/people/<lastname>'.
+        # 默认情况下，标准数据项入口点被定义为 '/people/<ObjectId>/'。
+        # 我们让它原封不动，然后我们再启用一个另外的只读入口点。这样，也可以在
+        # '/people/<lastname>' 执行 GET 请求.
         'additional_lookup': {
             'url': 'regex("[\w]+")',
             'field': 'lastname'
         },
 
-        # We choose to override global cache-control directives for this resource.
+        # 我们选择为这个资源重载全局缓存控制指令.
         'cache_control': 'max-age=10,must-revalidate',
         'cache_expires': 10,
 
-        # we only allow GET and POST at this resource endpoint.
+        # 在这个资源终结点上我们只允许 GET 和 POST。
         'resource_methods': ['GET', 'POST'],
     }
 
@@ -1107,7 +802,7 @@
 
 ::
 
-    # 'people' schema definition
+    # 'people' 模式定义
     schema = {
         'firstname': {
             'type': 'string',
@@ -1121,12 +816,12 @@
             'required': True,
             'unique': True,
         },
-        # 'role' is a list, and can only contain values from 'allowed'.
+        # 'role' 是一个列表，而且只能包含 'allowed' 中的值.
         'role': {
             'type': 'list',
             'allowed': ["author", "contributor", "copy"],
         },
-        # An embedded 'strongly-typed' dictionary.
+        # 一个内嵌的 '强类型' 字典.
         'location': {
             'type': 'dict',
             'schema': {
@@ -1144,21 +839,20 @@
 .. tabularcolumns:: |p{6.5cm}|p{8.5cm}|
 
 =============================== ==============================================
-``type``                        Field data type. Can be one of the following:
+``type``                        字段数据类型。可以时下面中的一项:
 
                                 - ``string``
                                 - ``boolean``
                                 - ``integer``
                                 - ``float``
-                                - ``number`` (integer and float values allowed)
+                                - ``number`` (允许整数和浮点数值)
                                 - ``datetime``
                                 - ``dict``
                                 - ``list``
                                 - ``media``
 
-                                If the MongoDB data layer is used then
-                                ``objectid``, ``dbref`` and geographic data
-                                structures are also allowed:
+                                如果使用了 MongoDB 数据层，那么 ``objectid``, ``dbref`` 和
+                                地理数据结构也是允许的:
 
                                 - ``objectid``
                                 - ``dbref``
@@ -1171,97 +865,73 @@
                                 - ``geometrycollection``
                                 - ``decimal``
 
-                                See :ref:`GeoJSON <geojson_feature>` for more
-                                information geo fields.
+                                查看 :ref:`GeoJSON <geojson_feature>` 获取更多关于地理字段的信息。
 
-``required``                    If ``True``, the field is mandatory on
-                                insertion.
+``required``                    如果为 ``True``，, 插入时字段是必需的。
 
-``readonly``                    If ``True``, the field is readonly.
+``readonly``                    如果为 ``True``，字段是只读的。
 
-``minlength``, ``maxlength``    Minimum and maximum length allowed for
-                                ``string`` and ``list`` types.
+``minlength``, ``maxlength``    ``string`` 和 ``list`` 类型允许的最小和最大长度。
 
-``min``, ``max``                Minimum and maximum values allowed for
-                                ``integer``, ``float`` and ``number`` types.
+``min``, ``max``                ``integer``, ``float`` 和 ``number`` 类型允许的最小和最大值。
 
-``allowed``                     List of allowed values for ``string`` and
-                                ``list`` types.
+``allowed``                     ``string`` 和 ``list`` 类型允许的值列表。
 
-``empty``                       Only applies to string fields. If ``False``,
-                                validation will fail if the value is empty.
-                                Defaults to ``True``.
+``empty``                       只用于字符串字段。如果为 ``False``，值为空时验证会失败。
+                                默认为 ``True``。
 
-``items``                       Defines a list of values allowed in a ``list``
-                                of fixed length, see `docs <http://docs.python-cerberus.org/en/latest/usage.html#items-list>`_.
+``items``                       定义一组在一个定长 ``list`` 中允许使用的值，
+                                参考 `docs <http://docs.python-cerberus.org/en/latest/usage.html#items-list>`_。
 
-``schema``                      Validation schema for ``dict`` types and
-                                arbitrary length ``list`` types. For details
-                                and usage examples, see `Cerberus documentation <http://docs.python-cerberus.org/en/latest/usage.html#schema-dict>`_.
+``schema``                      ``dict`` 类型和不定长 ``list`` 类型的验证模式。
+                                要获取详情和用法示例，参考 `Cerberus documentation <http://docs.python-cerberus.org/en/latest/usage.html#schema-dict>`_。
 
-``unique``                      The value of the field must be unique within
-                                the collection.
+``unique``                      字段的值在集合中必须是唯一的。
 
-                                Please note: validation constraints are checked
-                                against the database, and not between the
-                                payload documents themselves. This causes an
-                                interesting corner case: in the event of
-                                a multiple documents payload where two or more
-                                documents carry the same value for a field
-                                where the 'unique' constraint is set, the
-                                payload will validate successfully, as there
-                                are no duplicates in the database (yet).
+                                请注意: 验证约束是在数据库中检查，而不是在文档载体自己中。
+                                这导致一个有趣的偏僻场景: 在一个多文档载体中的两个或更多文档携带
+                                设置 'unique' 约束的字段为相同值事件中，
+                                载体会验证成功，因为在数据库中还没有副本。
 
-                                If this is an issue, the client can always send
-                                the documents one at a time for insertion, or
-                                validate locally before submitting the payload
-                                to the API.
+                                如果这是一个问题，客户端总是能在插入时发送文档一个，
+                                或者在提交载体到 API 之前，本地先验证一下。
 
-``unique_to_user``              The field value is unique to the user. This is
-                                useful when :ref:`user-restricted` is
-                                enabled on an endpoint. The rule will be
-                                validated against *user data only*. So in this
-                                scenario duplicates are allowed as long as they
-                                are stored by different users. Conversely,
-                                a single user cannot store duplicate values.
+``unique_to_user``              字段值对用户来说是唯一的。这在一个终结点启用了 :ref:`user-restricted` 
+                                时很有用。规则只会验证 *用户数据*。因此这个场景中，
+                                允许副本存在，只要它们被不同的用户存储。相反，
+                                单个用户无法存储重复的值。
 
-                                If URRA is not active on the endpoint, this
-                                rule behaves like ``unique``
+                                如果终结点上未激活 URRA，这条规则的行为就像 ``unique``。
 
-``data_relation``               Allows to specify a referential integrity rule
-                                that the value must satisfy in order to
-                                validate. It is a dict with four keys:
+``data_relation``               允许指定一个值必须满足用于验证的参照完整性规则。
+                                它是一个字典，带有四个键:
 
-                                - ``resource``: the name of the resource being referenced;
-                                - ``field``: the field name in the foreign resource;
-                                - ``embeddable``: set to ``True`` if clients can
-                                  request the referenced document to be embedded
-                                  with the serialization. See :ref:`embedded_docs`. Defaults to ``False``.
-                                - ``version``: set to ``True`` to require a
-                                  ``_version`` with the data relation. See :ref:`document_versioning`.
-                                  Defaults to ``False``.
+                                - ``resource``: 引用的资源名称;
+                                - ``field``: 外部资源中的字段名称;
+                                - ``embeddable``: 如果客户端可以请求引用的文档通过序列化内嵌，
+                                  设置为 ``True``。参考 :ref:`embedded_docs`。
+                                  默认为 ``False``。
+                                - ``version``: 设置为 ``True`` 来拥有一个
+                                  带数据关联的 ``_version``。参考 :ref:`document_versioning`。
+                                  默认为 ``False``。
 
-``nullable``                    If ``True``, the field value can be set to
-                                ``None``.
+``nullable``                    如果为 ``True``，字段值可以被设置为 ``None``。
 
-``default``                     The default value for the field. When serving
-                                POST and PUT requests, missing fields will be
-                                assigned the configured default values.
+``default``                     字段的默认值。当处理 POST 和 PUT 请求时，丢失的字段将被指定为配置的默认值。
 
-                                It works also for types ``dict`` and ``list``.
-                                The latter is restricted and works only for
-                                lists with schemas (list with a random number
-                                of elements and each element being a ``dict``)
+                                它对 ``dict`` 和 ``list`` 类型也有起作用。
+                                对后者的作用是有限，只对带有模式的列表
+                                (含有未知数量元素并且每个元素都是一个 ``dict`` 的列表) 起作用。
 
                                 ::
 
                                     schema = {
-                                      # Simple default
+                                      # 简单默认值
                                       'title': {
                                         'type': 'string',
                                         'default': 'M.'
                                       },
-                                      # Default in a dict
+                                      # 字典中的默认值
                                       'others': {
                                         'type': 'dict',
                                         'schema': {
@@ -1271,7 +941,7 @@
                                           }
                                         }
                                       },
-                                      # Default in a list of dicts
+                                      # 字典列表中的默认值
                                       'mylist': {
                                         'type': 'list',
                                         'schema': {
@@ -1287,53 +957,41 @@
                                       }
                                     }
 
-``versioning``                  Enabled documents version control when ``True``.
-                                Defaults to ``False``.
+``versioning``                  为 ``True`` 时，启用文档版本控制。默认为 ``False``。
 
-``versioned``                   If ``True``, this field will be included in the
-                                versioned history of each document when
-                                ``versioning`` is enabled. Defaults to ``True``.
+``versioned``                   如果为 ``True``，当启用 ``versioning``时，这个字段会被包含
+                                在每个文档的版本历史中。默认为 ``True``。
 
-``valueschema``                 Validation schema for all values of a ``dict``.
-                                The dict can have arbitrary keys, the values
-                                for all of which must validate with given
-                                schema. See `valueschema <http://docs.python-cerberus.org/en/latest/validation-rules.html#valueschema>`_ in Cerberus docs.
+``valueschema``                 对 ``dict`` 中所有值的验证模式。
+                                字典可以含有任意必须通过给定模式验证的键和值。
+                                参考 Cerberus 文档中的 `valueschema <http://docs.python-cerberus.org/en/latest/validation-rules.html#valueschema>`_。
 
-``keyschema``                   This is the counterpart to ``valueschema`` that
-                                validates the keys of a dict.   Validation
-                                schema for all values of a ``dict``. See
-                                `keyschema <http://docs.python-cerberus.org/en/latest/validation-rules.html#keyschema>`_ in Cerberus docs.
+``keyschema``                   与 ``valueschema`` 对应，验证字典中的键。
+                                对 ``dict`` 中所有值的验证模式。参考 Cerberus 文档中的
+                                `keyschema <http://docs.python-cerberus.org/en/latest/validation-rules.html#keyschema>`_ 。
 
 
-``regex``                       Validation will fail if field value does not
-                                match the provided regex rule. Only applies to
-                                string fields. See `regex <http://docs.python-cerberus.org/en/latest/validation-rules.html#regex>`_ in Cerberus docs.
+``regex``                       如果字段值未匹配提供的正则表达式，验证失败。
+                                只用于字符串字段。参考 Cerberus 文档中的 `regex <http://docs.python-cerberus.org/en/latest/validation-rules.html#regex>`_。
 
 
-``dependencies``                This rule allows a list of fields that must be
-                                present in order for the target field to be
-                                allowed. See `dependencies <http://docs.python-cerberus.org/en/latest/validation-rules.html#dependencies>`_  in Cerberus docs.
+``dependencies``                这条规则允许一组字段必须存在，以保证目标字段通过。
+                                参考 Cerberus 文档中的 `dependencies <http://docs.python-cerberus.org/en/latest/validation-rules.html#dependencies>`_ 。
 
-``anyof``                       This rule allows you to list multiple sets of
-                                rules to validate against. The field will be
-                                considered valid if it validates against one
-                                set in the list. See `*of-rules <http://docs.python-cerberus.org/en/latest/validation-rules.html#of-rules>`_ in Cerberus docs.
+``anyof``                       这条规则允许你列出多个用于验证的规则集合。
+                                如果列表中的一个集合验证通过，这个字段就被认为时有效的。
+                                参考 Cerberus 文档中的 `*of-rules <http://docs.python-cerberus.org/en/latest/validation-rules.html#of-rules>`_ 。
 
-``allof``                       Same as ``anyof``, except that all rule
-                                collections in the list must validate.
+``allof``                       与 ``anyof`` 相同，除了列表中的所有规则集合都必须验证。
 
-``noneof``                      Same as ``anyof``, except that it requires no
-                                rule collections in the list to validate.
+``noneof``                      与 ``anyof`` 相同，除了列表中的规则集合一个都不需要验证。
 
-``oneof``                       Same as ``anyof``, except that only one rule
-                                collections in the list can validate.
+``oneof``                       与 ``anyof`` 相同，除了列表中只有一个规则集合可以通过验证。
 
-``coerce``                      Type coercion allows you to apply a callable to
-                                a value before any other validators run. The
-                                return value of the callable replaces the new
-                                value in the document. This can be used to
-                                convert values or sanitize data before it is
-                                validated. See `value coercion <http://docs.python-cerberus.org/en/latest/normalization-rules.html#value-coercion>`_ in Cerberus docs.
+``coerce``                      类型胁迫，允许你在任何验证器运行前应用一个 callable 到一个值。
+                                callable 的返回值替换了文档中的新值。
+                                这个可以用于在验证之前转换值或净化数据。
+                                参考 Cerberus 文档中的 `value coercion <http://docs.python-cerberus.org/en/latest/normalization-rules.html#value-coercion>`_ 。
 
 =============================== ==============================================
 
