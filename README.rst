@@ -35,7 +35,7 @@ Eve 是简单的
 
 要让你的 API 上线，你只需要一个数据库，一个配置文件(默认 ``settings.py``) 和一个启动脚本。总体上你会发现，配置和微调你的 API 是个非常简单的过程。
 
-去 `Eve 网站 <http://python-eve.org/> `_看看
+去 `Eve 网站 <http://python-eve.org/>`_ 看看
 
 特性
 --------
@@ -83,7 +83,7 @@ Eve REST 框架是一个开源的合作资助项目。如果你在做生意，�
 
 许可证
 -------
-Eve 是一个 `Nicola Iarocci`_ 开源项目，基于 `BSD 许可证 <https://github.com/pyeve/eve/blob/master/LICENSE>`_分发.
+Eve 是一个 `Nicola Iarocci`_ 开源项目，基于 `BSD 许可证 <https://github.com/pyeve/eve/blob/master/LICENSE>`_ 分发。
 
 .. _`Nicola Iarocci`: http://nicolaiarocci.com
 .. _`funding page`: http://python-eve.org/funding
