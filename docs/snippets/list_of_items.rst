@@ -1,12 +1,12 @@
-Supporting both list-level and item-level CRUD operations
+同时对列表级和数据项级的 CRUD 操作的支持
 =========================================================
 by John Chang
 
-This is an example of how to implement a simple list of items that supports both list-level and item-level CRUD operations.
+这是一个例子，如何实现一个同时支持列表级和数据项级 CRUD 操作的简单数据项列表的例子。
 
-Specifically, it should be possible to use a single GET to get the entire list (including all items) but also a single POST to append an item (rather than PATCHing the list).
+确切地说，应该可以使用单个 GET 来获取整个列表 (包括所有数据项)，同时也可以使用单个 POST 来添加一个数据项 (而不是 PATCHing 列表)。
 
-The solution was to database event hooks to inject the embedded child documents (``items``) into the parent list before it's returned to the client and also delete the child items when the parent list is deleted. This works, although it results in two DB queries.
+这个解决方案是，在父列表被返回到客户端之前，使用数据库事件钩子来注入内嵌子文档 (``数据项``) 到它之中，也在父列表被删除时删除子数据项。这可以工作，但是它会导致两个 DB 查询。
 
 main.py
 -------
@@ -78,7 +78,7 @@ settings.py
         }
     }
 
-Usage
+用法
 -----
 .. code-block:: bash
 

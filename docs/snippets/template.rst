@@ -1,17 +1,16 @@
-Snippet Template
+片段模板
 ================
-by Firstname Lastname
+by 名字 姓氏
 
-This is a snippet template. Put your snippet explanation here. If this is going
-to be long, make sure to split it into paragraphs for enhanced reading
-experience. Make your code snippet follow, like so:
+这是一个片段模板。在这里放置你的片段说明。如果这正变得很长，请确保将它分成段落以增强阅读体验。
+下面写出你的代码片段，像这样:
 
 .. code-block:: python
 
     from eve import Eve
 
-    # just an example of a code snippet
+    # 只是一个代码片段示例
     app = Eve()
     app.run()
 
-Add closing comments as needed.
+根据需要添加即将关闭注释。

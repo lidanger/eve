@@ -1,19 +1,16 @@
-Using Eve Event Hooks from your Blueprint
+使用来自你的 Blueprint 的 Eve 事件钩子
 =========================================
 by Pau Freixes
 
-The use of Flask Blueprints_ helps us to extend our Eve applications with new
-endpoints that do not fit as a typical Eve resource. Pulling these endpoints
-out of the Eve scope allows us to write specific code in order to handle
-specific situations.
+使用 Flask Blueprints_ 帮助我们建立不适合作为典型的 Eve 资源的新终结点，以扩展我们
+的扩展我们的 Eve 应用程序。将这些终结点脱离 Eve 的范围允许我们编写特有的代码以处理
+特有的状况。
 
-In the context of a Blueprint we could expect Eve features not be available,
-but often that is not the case. We can continue to use a bunch of features,
-such as :ref:`eventhooks`.
+在 Blueprint 的上下文中， 我们可以预料到 Eve 特性不可用，但那常常不是实情。
+我们可以继续使用大量特性，诸如，:ref:`eve event-hooks`_。
 
-Next snippet displays how the ``users`` module has a blueprint which performs
-some custom actions and then uses the ``users_deleted`` signal to notify and
-invoke all callback functions which are registered to the Eve application.
+下面的片段显示 ``users`` 模块如何包含一个 blueprint，它执行一些自定义动作，然后
+使用 ``users_deleted`` 信号通知和唤醒所有注册到 Eve 应用程序的回调函数。
 
 .. code-block:: python
 
@@ -29,10 +26,9 @@ invoke all callback functions which are registered to the Eve application.
         # call Eve-hooks consumers for this  event
         getattr(app, "users_deleted")(username)
 
-Next snippet displays how the blueprint is binded over our main Eve application
-and how the specific ``set_username_as_none`` function is registered to be
-called each time an user is deleted using the Eve events, to update the
-properly MongoDB collection.
+下面的片段显示，blueprint 是如何被绑定到我们的 Eve 主应用程序，以及特有的
+``set_username_as_none`` 函数是如何被注册以确保在每次一个用户被删除时被调用，
+使用 Eve 事件来恰当地更新 MongoDB 集合。
 
 .. code-block:: python
 
@@ -49,9 +45,9 @@ properly MongoDB collection.
         )
 
     app = Eve()
-    # register the blueprint to the main Eve application
+    # 将 blueprint 注册到 Eve 主应用程序
     app.register_blueprint(blueprint)
-    # bind the callback function so it is invoked at each user deletion
+    # 绑定回调函数，这样在每个用户删除时它就会被调用
     app.users_deleted += set_username_as_none
     app.run()
 

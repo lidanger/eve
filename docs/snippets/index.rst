@@ -1,12 +1,11 @@
 .. _snippets:
 
-Snippets
+片段
 ========
 
-Welcome to the Eve snippet archive. This is the place where anyone can drop
-helpful pieces of code for others to use.
+欢迎来到 Eve 片段归档。这是任何人都可以放下有用的代码碎片，供其他人使用的地方。
 
-Available Snippets
+可用的片段
 ------------------
 
 .. toctree::
@@ -16,11 +15,10 @@ Available Snippets
    list_of_items
 
 
-Add your snippet
+添加你的片段
 ----------------
-Want to add your snippet? Just add your own .rst file to the `snippets folder`_
-(see the template below for reference), update the TOC in this page (see
-source_), and then submit a `pull request`_.
+希望添加你的片段? 只要添加你自己的 .rst 文件到 `snippets 文件夹`_
+(查看下面的模板作为参考)，更新这个页面中的 TOC (参考 source_)，然后提交一个 `pull request`_。
 
 .. toctree::
    :maxdepth: 2
@@ -29,5 +27,5 @@ source_), and then submit a `pull request`_.
 
 .. _template: https://raw.githubusercontent.com/pyeve/eve/master/docs/snippets/template.rst
 .. _`pull request`: https://github.com/pyeve/eve/pulls
-.. _`snippets folder`: https://github.com/pyeve/eve/tree/master/docs/snippets
+.. _`snippets 文件夹`: https://github.com/pyeve/eve/tree/master/docs/snippets
 .. _source: https://raw.githubusercontent.com/pyeve/eve/master/docs/snippets/index.rst

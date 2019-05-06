@@ -27,9 +27,8 @@ pick the only thing that you need to do in your subclass is override the
 
 全局身份验证
 ---------------------
-To enable authentication for your API just pass the custom auth class on
-app instantiation. In our example we're going to use the ``BasicAuth`` base
-class, which implements the :ref:`basic` scheme:
+要为你的 API 启用身份验证，只需要在应用程序实例化过程中传递自定义的身份验证类。
+在我们的例子中，我们将使用 ``BasicAuth`` 基类，它实现了 :ref:`basic` 模式:
 
 .. code-block:: python
 
@@ -43,8 +42,8 @@ class, which implements the :ref:`basic` scheme:
     app = Eve(auth=MyBasicAuth)
     app.run()
 
-All your API endpoints are now secured, which means that a client will need
-to provide the correct credentials in order to consume the API:
+你所有的 API 终结点现在都是受保护的，这意味着，为了使用 API，一个客户端需要提供
+正确的证书:
 
 .. code-block:: console
 
@@ -55,8 +54,7 @@ to provide the correct credentials in order to consume the API:
     $ curl -H "Authorization: Basic YWRtaW46c2VjcmV0" -i http://example.com
     HTTP/1.1 200 OK
 
-By default access is restricted to all endpoints for all HTTP verbs
-(methods), effectively locking down the whole API.
+默认情况下，通过所有 HTTP 动词（方法）对所有终结点的访问都是受限的，事实上锁定了整个 API。
 
 But what if your authorization logic is more complex, and you only want to
 secure some endpoints or apply different logics depending on the

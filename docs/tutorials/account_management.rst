@@ -13,22 +13,20 @@ APIs. This is the model followed by most social networks and service providers
 to create, edit and delete accounts while using the same API that is being
 consumed by the accounts themselves?
 
-In the following paragraphs we'll see a couple of possible Account Management
-implementations, both making intensive use of a host of Eve features such as
+在下面的段落中，我们将看到一对可能的账户管理实现，都密集使用很多 Eve 特性，诸如
 :ref:`endpointsec`, :ref:`roleaccess`, :ref:`user-restricted`,
-:ref:`eventhooks`.
+:ref:`eventhooks`。
 
-We assume that SSL/TLS is enabled, which means that our transport layer is
-encrypted, making both :ref:`basic` and :ref:`token` valid options to secure API
-endpoints.
+我们假定 SSL/TLS 是启用的，这意味着我们的传输层是加密的，使得 :ref:`basic` 
+和 :ref:`token` 都是保护 API 终结点的有效选项。
 
-Let's say we're upgrading the API we defined in the :ref:`quickstart` tutorial.
+比如说，我们在升级我们在 :ref:`quickstart` 教程中定义的 API。
 
 .. _accounts_basic:
 
 使用基本身份验证的账户
 -----------------------------------
-Our tasks are as follows:
+我们的任务是如下:
 
 1. Make an endpoint available for all account management activities
    (``/accounts``).
@@ -41,9 +39,8 @@ Our tasks are as follows:
 
 1. ``/accounts`` 终结点
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-The account management endpoint is no different than any other API endpoint.
-It is just a matter of declaring it in our settings file. Let's declare the
-resource schema first.
+账户管理终结点与任何其他 API 终结点没什么不同，它只是一个在我们的配置文件中声明的问题。
+让我们先声明资源模式。
 
 ::
 
@@ -59,7 +56,7 @@ resource schema first.
             },
         },
 
-Then, let's define the endpoint.
+然后，让我们定义终结点。
 
 ::
 
@@ -90,7 +87,7 @@ found by querying the resource endpoint (``/accounts?where={"username":
 hitting our new endpoint with a GET request we will obtain the bare account
 data, or a ``404 Not Found`` if the account does not exist.
 
-Once the endpoint has been configured, we need to add it to the API domain:
+一旦终结点已经配置好了，我们需要将它添加到 API 域:
 
 ::
 
@@ -101,9 +98,8 @@ Once the endpoint has been configured, we need to add it to the API domain:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 2a. Hard-coding our way in
 ''''''''''''''''''''''''''
-Securing the endpoint can be achieved by allowing only well-known `superusers`
-to operate on it. Our authentication class, which is defined in the launch
-script, can be hard-coded to handle the case:
+保护终结点可以通过只允许众所周知的 `superusers` 操作它来实现。我们定义在启用脚本中
+的身份验证类，可以被硬编码以处理实际情况:
 
 .. code-block:: python
 
@@ -147,7 +143,7 @@ Fortunately, the :ref:`roleaccess` feature can help us here. You see where we
 are going with this: the idea is that only accounts with `superuser` and
 `admin` roles will be granted access to the endpoint.
 
-Let's start by updating our resource schema.
+让我们从更新我们的资源模式开始。
 
 .. code-block:: python
    :emphasize-lines: 10-14
@@ -168,11 +164,11 @@ Let's start by updating our resource schema.
             }
         },
 
-We just added a new ``roles`` field which is a required list. From now on, one
-or more roles will have to be assigned on account creation.
+我们只添加一个新的 ``roles`` 字段，它是一个需要的列表。从现在开始，在账户创建过程中，
+一个或更多角色将必须被赋值。
 
-Now we need to restrict endpoint access to `superuser` and `admin` accounts
-only so let's update the endpoint definition accordingly.
+现在，我们只需要限制 `superuser` 和 `admin` 账户对终结点的权限，因此，让我们对应更新
+终结点定义。
 
 .. code-block:: python
    :emphasize-lines: 16
@@ -198,7 +194,7 @@ only so let's update the endpoint definition accordingly.
         'schema': schema,
     }
 
-Finally, a rewrite of our authentication class is in order.
+最后，轮到重写我们的身份验证类。
 
 .. code-block:: python
 
@@ -252,15 +248,15 @@ associated with the account that created it. This allows the API to transparentl
 serve only account-created documents on all kind of requests: read, edit, delete
 and of course create.
 
-There are only two things that we need to do in order to activate this feature:
+要激活这个特性，我们只需要做两件事情:
 
 1. Configure the name of the field that will be used to store the owner of the
    document;
 2. Set the document owner on each incoming POST request.
 
 
-Since we want to enable this feature for all of our API endpoints we'll just
-update our ``settings.py`` file by setting a proper ``AUTH_FIELD`` value:
+由于我们希望对我们所有的 API 终结点启用这项特性，我们只要通过设置一个正确
+的 ``AUTH_FIELD`` 只来更新我们的 ``settings.py`` 文件就行了:
 
 ::
 
@@ -268,8 +264,7 @@ update our ``settings.py`` file by setting a proper ``AUTH_FIELD`` value:
     AUTH_FIELD = 'user_id'
 
 
-Then, we want to update our authentication class to properly update the field's
-value:
+然后，我们希望更新我们的身份验证来正确更新字段的值:
 
 .. code-block:: python
    :emphasize-lines: 15-17
@@ -317,7 +312,7 @@ what we saw in :ref:`accounts_basic`, but there's one little caveat: tokens
 need to be generated and stored along with the account, and eventually returned
 to the client.
 
-In light of this, let's review our updated task list:
+根据这个，让我们回顾我们更新的任务列表:
 
 1. Make an endpoint available for all account management activities
    (``/accounts``).
@@ -329,10 +324,10 @@ In light of this, let's review our updated task list:
    tokens.
 6. Allow authenticated users to only access resources created by themselves
 
-1. The ``/accounts/`` endpoint
+1. ``/accounts/`` 终结点
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-This isn't any different than what we did in :ref:`accounts_basic`. We just
-need to add the `token` field to our schema:
+这跟我们在 :ref:`accounts_basic` 中做的没有什么不同。我们只需要添加 `token` 字段到
+我们的模式中:
 
 .. code-block:: python
    :emphasize-lines: 16-19
@@ -358,11 +353,10 @@ need to add the `token` field to our schema:
             }
         }
 
-2. Securing the ``/accounts/`` endpoint
+2. 保护 ``/accounts/`` 终结点
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-We defined the `roles` field for the `accounts` schema in the previous step.
-We also need to define the endpoint, making sure that we set the allowed
-user roles.
+我们在上一步为 `accounts` 模式定义了 `roles` 字段。我们也需要定义终结点，确保
+我们发送了允许的用户角色。
 
 .. code-block:: python
    :emphasize-lines: 16
@@ -388,8 +382,7 @@ user roles.
         'schema': schema,
     }
 
-And finally, here is our launch script which is, of course, using a ``TokenAuth``
-subclass this time around:
+最终，这是我们的启动脚本，当然了，这一次使用了一个 ``TokenAuth`` 子类:
 
 .. code-block:: python
 
@@ -413,7 +406,7 @@ subclass this time around:
         app = Eve(auth=RolesAuth)
         app.run()
 
-3. Building custom tokens on account creation
+3. 在账户创建中构建自定义令牌
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The code above has a problem: it won't authenticate anybody, as we aren't
 generating any token yet. Consequently, clients aren't getting their auth tokens
@@ -463,7 +456,7 @@ database insertion. We simply add (or replace in the unlikely case that the
 request contained it already) a token to every document, and we're done! For
 more information on callbacks, see `Event Hooks`_.
 
-4. Returning the token with the response
+4. 通过响应返回令牌
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Optionally, you might want to return the tokens with the response. Truth be
 told, this isn't a very good idea. You generally want to send access
@@ -510,21 +503,21 @@ From now on responses to POST requests aimed at the ``/accounts`` endpoint
 will include the newly generated auth token, allowing the client to consume
 other API endpoints right away.
 
-5. Securing other API endpoints
+5. 保护其他 API 终结点
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 As we've seen before, passing an authentication class to the ``Eve`` object
 enables authentication for all API endpoints. Again, you can still fine-tune
 security by allowing public access to certain endpoints or to certain HTTP
 methods. See :ref:`auth` for more details.
 
-6. Only allowing access to account resources
+6. 只允许访问账户资源
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 This is achieved with the :ref:`user-restricted` feature, as seen in
 :ref:`accounts_basic`. You might want to store the user token as your
 ``AUTH_FIELD`` value, but if you want user tokens to be easily revocable, then
 your best option is to use the account unique id for this.
 
-Basic vs Token: Final Considerations
+基本 vs 令牌: 最后的斟酌
 ------------------------------------
 Despite being a little more tricky to set up on the server side, Token
 Authentication offers significant advantages. First, you don't have passwords

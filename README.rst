@@ -79,11 +79,11 @@ Eve 是简单的
 -------
 Eve REST 框架是一个开源的合作资助项目。如果你在做生意，并在一个可以创造利润的产品中使用 Eve，那么赞助 Eve 开发是很有商业思维的：它确保你产品所依赖的项目保持在健康和活跃维护状态。如果 Eve 对你的工作和私人项目提供过帮助，也欢迎个人用户作出长期的承诺或一次性的捐赠。
 
-每一个注册将产生一个有特殊意义的强大作用力，使 Eve 成为可能。要了解更多，请瞧瞧我们的 `funding page`_.
+每一个注册将产生一个有特殊意义的强大作用力，使 Eve 成为可能。要了解更多，请瞧瞧我们的 `funding page`_。
 
 许可证
 -------
-Eve 是一个 `Nicola Iarocci` _开源项目，基于 `BSD 许可证 <https://github.com/pyeve/eve/blob/master/LICENSE>` 分发_.
+Eve 是一个 `Nicola Iarocci`_ 开源项目，基于 `BSD 许可证 <https://github.com/pyeve/eve/blob/master/LICENSE>`_ 分发.
 
 .. _`Nicola Iarocci`: http://nicolaiarocci.com
 .. _`funding page`: http://python-eve.org/funding
