@@ -1038,13 +1038,13 @@
 
                                 这是一个字典，包含一个或更多以下的键:
 
-                                - ``pipeline``. 聚合管道。语法必须匹配 PyMongo 
-                                支持的那个。要获取更多信息，参考 
+                                - ``pipeline``. 聚合管道。语法必须匹配 PyMongo 支持
+                                的那个。要获取更多信息，参考 
                                 `PyMongo Aggregation Examples`_ 和 官方的 
                                 `MongoDB Aggregation Framework`_ 文档。
 
-                                - ``options``. 聚合选项。必须是一个字典，包含
-                                一个或更多这些键:
+                                - ``options``. 聚合选项。必须是一个字典，包含一个或
+                                更多这些键:
 
                                     - ``allowDiskUse`` (bool)
                                     - ``maxTimeMS`` (int)
