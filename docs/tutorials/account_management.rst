@@ -4,14 +4,11 @@ RESTful 账户管理
 
     这篇教程假定你已经阅读了 :ref:`quickstart` 和 :ref:`auth` 指南。
 
-Except for the relatively rare occurence of open (and generally read-only) public
-APIs, most services are only accessible to authenticated users.  A common
-pattern is that users create their account on a website or with a mobile
-application.  Once they have an account, they are allowed to consume one or more
-APIs. This is the model followed by most social networks and service providers
-(Twitter, Facebook, Netflix, etc.) So how do you, the service provider, manage
-to create, edit and delete accounts while using the same API that is being
-consumed by the accounts themselves?
+除了相对稀有的事情，开放的 (并且通常只读) 公共 API，大多数服务只有授权的用户可以访问。
+一个通用模式是，用户在一个网站或移动应用上创建他们自己的账户。一旦他们有了账户，他们就
+被允许使用一个或更多 API。这是大多数社交网络和服务提供者 (Twitter, Facebook, Netflix
+等等) 使用的模型。因此，你，服务提供者，如何使用正在被账户它们自己使用的同一个 API 管理
+创建，编辑和删除账户等活动?
 
 在下面的段落中，我们将看到一对可能的账户管理实现，都密集使用很多 Eve 特性，诸如
 :ref:`endpointsec`, :ref:`roleaccess`, :ref:`user-restricted`,
@@ -28,14 +25,11 @@ consumed by the accounts themselves?
 -----------------------------------
 我们的任务是如下:
 
-1. Make an endpoint available for all account management activities
-   (``/accounts``).
-2. Secure the endpoint, so that it is only accessible to clients
-   that we control: our own website, mobile apps with account
-   management capabilities, etc.
-3. Make sure that all other API endpoints are only accessible to authenticated
-   accounts (created by means of the above mentioned endpoint).
-4. Allow authenticated users to only access resources created by themselves.
+1. 制作一个可以进行所有账户管理活动 (``/accounts``) 的终结点。
+2. 保护终结点，这样，它只能由我们控制的客户端: 我们自己的带有账户管理能力的网站，
+   移动应用等等，访问。
+3. 确保所有其他 API 终结点只能由授权的账户 (借助上面提到的终结点创建的) 访问。
+4. 使授权的用户只能访问他们自己创建的资源。
 
 1. ``/accounts`` 终结点
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -61,31 +55,27 @@ consumed by the accounts themselves?
 ::
 
     accounts = {
-        # the standard account entry point is defined as
-        # '/accounts/<ObjectId>'. We define  an additional read-only entry
-        # point accessible at '/accounts/<username>'.
+        # 标准的账户入口点定义为 '/accounts/<ObjectId>'。我们再定义一个额外的
+        # 可以在 '/accounts/<username>' 访问的只读入口点.
         'additional_lookup': {
             'url': 'regex("[\w]+")',
             'field': 'username',
         },
 
-        # We also disable endpoint caching as we don't want client apps to
-        # cache account data.
+        # 我们也禁用终结点缓存，因为我们不希望客户端应用程序缓存账户数据.
         'cache_control': '',
         'cache_expires': 0,
 
-        # Finally, let's add the schema definition for this endpoint.
+        # 最后，让我们为这个终结点添加模式定义.
         'schema': schema,
     }
 
-We defined an additional read-only entry point at ``/accounts/<username>``.
-This isn't really a necessity, but it can come in handy to easily verify if
-a username has been taken already, or to retrieve an account without knowing
-its ``ObjectId`` beforehand. Of course, both pieces of information can also be
-found by querying the resource endpoint (``/accounts?where={"username":
-"johndoe"}``), but then we would need to parse the response payload, whereas by
-hitting our new endpoint with a GET request we will obtain the bare account
-data, or a ``404 Not Found`` if the account does not exist.
+我们在 ``/accounts/<username>`` 定义一个额外的只读入口点。这不是真的必要，但是它
+可以为轻松验证一个用户名是否已经被拿走带来便利，或者在事先不知道 ``ObjectId`` 
+的情况下获取一个账户。当然，两片信息也都可以通过查询资源终结点 
+(``/accounts?where={"username":"johndoe"}``) 找到，但是接着我们需要解析响应
+载体，尽管通过一个对我们新终结点的 GET 请求，我们将获得裸账户数据，或者，
+如果账户不存在，将得到一个 ``404 Not Found``。
 
 一旦终结点已经配置好了，我们需要将它添加到 API 域:
 
@@ -113,7 +103,7 @@ data, or a ``404 Not Found`` if the account does not exist.
             if resource == 'accounts':
                 return username == 'superuser' and password == 'password'
             else:
-                # use Eve's own db driver; no additional connections/resources are used
+                # 使用 Eve 自己的数据库驱动; 没有使用额外的连接/资源
                 accounts = app.data.driver.db['accounts']
                 account = accounts.find_one({'username': username})
                 return account and \
@@ -124,24 +114,19 @@ data, or a ``404 Not Found`` if the account does not exist.
         app = Eve(auth=BCryptAuth)
         app.run()
 
-Thus, only the ``superuser`` account will be allowed to consume the
-``accounts`` endpoint, while standard authentication logic will apply to all
-other endpoints. Our mobile app (say) will add accounts by hitting the endpoint
-with simple POST requests, of course authenticating itself as a `superuser` by
-means of the `Authorization` header. The script assumes that stored passwords
-are encrypted with `bcrypt` (storing passwords as plain text is *never* a good
-idea). See :ref:`basic` for an alternative, faster but less secure SHA1/MAC
-example.
+因此，只有 ``superuser`` 账户被允许使用 ``accounts`` 终结点，而标准身份验证逻辑将应用
+于所有其他终结点。我们的移动应用 (好吧) 将通过简单的 POST 请求终结点添加账户，当然，
+通过 `Authorization` 头证实它自己为一个 `superuser`。这个脚本假定，保存的密码经过
+`bcrypt` (将密码保存为普通文本 *从来都不是* 一个好主意) 加密。查看 :ref:`basic` 获取
+一个可供替代的，更快但更不安全的 SHA1/MAC 示例。
 
 2b. 用户角色访问控制
 '''''''''''''''''''''''''''''
-Hard-coding usernames and passwords might very well do the job, but it is
-hardly the best approach that we can take here. What if another `superurser`
-account needs access to the endpoint? Updating the script each time
-a privileged user joins the ranks does not seem appropriate (it isn't).
-Fortunately, the :ref:`roleaccess` feature can help us here. You see where we
-are going with this: the idea is that only accounts with `superuser` and
-`admin` roles will be granted access to the endpoint.
+硬编码的用户名和密码可能会很好完成工作，但是它很难说是我们在这里可以使用的最好方式。如果
+另一个 `superurser` 账户需要访问终结点怎么办? 每次一个有特权的用户加入序列就更新脚本
+看起来并不合适 (确实不合适)。幸运的是，:ref:`roleaccess` 特性可以在这里帮助我们。通过
+这个: 想法是，只有带 `superuser` 和 `admin` 角色的账户才被准许访问终结点，你可以看到
+我们要去哪里。
 
 让我们从更新我们的资源模式开始。
 
@@ -174,23 +159,21 @@ are going with this: the idea is that only accounts with `superuser` and
    :emphasize-lines: 16
 
     accounts = {
-        # the standard account entry point is defined as
-        # '/accounts/<ObjectId>'. We define  an additional read-only entry
-        # point accessible at '/accounts/<username>'.
+        # 标准账户入口点定义为 '/accounts/<ObjectId>'。我们再定义一个额外的可以
+        # 在 '/accounts/<username>' 访问的只读入口点.
         'additional_lookup': {
             'url': 'regex("[\w]+")',
             'field': 'username',
         },
 
-        # We also disable endpoint caching as we don't want client apps to
-        # cache account data.
+        # 我们也禁用终结点缓存，因为我们不希望客户端应用程序缓存账户数据.
         'cache_control': '',
         'cache_expires': 0,
 
-        # Only allow superusers and admins.
+        # 只允许超级用户和管理员.
         'allowed_roles': ['superuser', 'admin'],
 
-        # Finally, let's add the schema definition for this endpoint.
+        # 最后，让我们为这个终结点添加模式定义.
         'schema': schema,
     }
 
@@ -205,11 +188,11 @@ are going with this: the idea is that only accounts with `superuser` and
 
     class RolesAuth(BasicAuth):
         def check_auth(self, username, password, allowed_roles, resource, method):
-            # use Eve's own db driver; no additional connections/resources are used
+            # 使用 Eve 自己的数据库驱动; 没有使用额外的连接/资源
             accounts = app.data.driver.db['accounts']
             lookup = {'username': username}
             if allowed_roles:
-                # only retrieve a user if his roles match ``allowed_roles``
+                # 只获取角色匹配 ``allowed_roles`` 的用户
                 lookup['roles'] = {'$in': allowed_roles}
             account = accounts.find_one(lookup)
             return account and check_password_hash(account['password'], password)
@@ -219,40 +202,30 @@ are going with this: the idea is that only accounts with `superuser` and
         app = Eve(auth=RolesAuth)
         app.run()
 
-What the above snippet does is secure all API endpoints with role-base access
-control. It is, in fact, the same snippet seen in :ref:`roleaccess`. This
-technique allows us to keep the code untouched as we add more `superuser` or
-`admin` accounts (and we'll probably be adding them by accessing our very own
-API). Also, should the need arise, we could easily restrict access to more
-endpoints just by updating the settings file, again without touching the
-authentication class.
+上面的片段做的是使用基于角色的访问控制保护所有 API 终结点。事实上，它是在 :ref:`roleaccess`
+中看到的同一个片段。这项技术使我们可以保持代码原封不动，因为我们添加了更多 `superuser` 或
+`admin` 账户 (并且我们很可能即将通过访问我们自己的 API 添加它们)。此外，如果需要的话，我们
+只要更新配置文件可以轻易限制对更多终结点的访问，又一次不涉及身份验证类。
 
 3. 保护其他 API 终结点
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-This will be quick, as both the `hard-coding` and the `role-based` access
-control approaches above effectively secure all API endpoints already.  Passing
-an authentication class to the ``Eve`` object enables authentication for the
-whole API: every time an endpoint is hit with a request, the class instance is
-invoked.
+这是很快的，因为上面的 `hard-coding` 和 `role-based` 访问控制方式事实上已经在
+保护所有 API 终结点了。向 ``Eve`` 对象传递一个身份验证类启用对整个 API 的身份验证: 
+每次当一个终结点遇到一个请求时，类实例就会被调用。
 
-Of course, you can still fine-tune security, for example by allowing public
-access to certain endpoints, or to certain HTTP methods. See :ref:`auth` for
-more details.
+当然，你仍然可以微调保护措施，例如，通过允许对特定终结点或者特定 HTTP 方法的公共访问。
+查看 :ref:`auth` 获取更多详情。
 
 4. 只允许访问账户资源
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Most of the time when you allow Authenticated users to store data, you only
-want them to access their own data. This can be convenientely achieved by
-using the :ref:`user-restricted` feature. When enabled, each stored document is
-associated with the account that created it. This allows the API to transparently
-serve only account-created documents on all kind of requests: read, edit, delete
-and of course create.
+大多数时间，当你允许认证的用户存储数据时，你只希望他们访问他们自己的数据。这可以通过使用
+:ref:`user-restricted` 特性顺利实现。启用时，每个保存的文档都关联到创建它的账户。这使
+API 可以只为所有类型的请求: 读取, 编辑, 删除，当然还有创建，透明提供账户创建的文档。
 
 要激活这个特性，我们只需要做两件事情:
 
-1. Configure the name of the field that will be used to store the owner of the
-   document;
-2. Set the document owner on each incoming POST request.
+1. 配置用于存储文档拥有者的字段名称;
+2. 为每一个收到的 POST 请求设置文档拥有者。
 
 
 由于我们希望对我们所有的 API 终结点启用这项特性，我们只要通过设置一个正确
@@ -260,7 +233,7 @@ and of course create.
 
 ::
 
-    # Name of the field used to store the owner of each document
+    # 用于保存每个文档所有者的字段名称
     AUTH_FIELD = 'user_id'
 
 
@@ -277,15 +250,14 @@ and of course create.
 
     class RolesAuth(BasicAuth):
         def check_auth(self, username, password, allowed_roles, resource, method):
-            # use Eve's own db driver; no additional connections/resources are used
+            # 使用 Eve 自己的数据库驱动; 没有使用额外的连接/资源
             accounts = app.data.driver.db['accounts']
             lookup = {'username': username}
             if allowed_roles:
-                # only retrieve a user if his roles match ``allowed_roles``
+                # 只获取角色匹配 ``allowed_roles`` 的用户
                 lookup['roles'] = {'$in': allowed_roles}
             account = accounts.find_one(lookup)
-            # set 'AUTH_FIELD' value to the account's ObjectId
-            # (instead of _Id, you might want to use ID_FIELD)
+            # 设置 'AUTH_FIELD' 值为账户的 ObjectId (你可能希望使用 ID_FIELD，而不是 _Id)
             self.set_request_auth_value(account['_id'])
             return account and check_password_hash(account['password'], password)
 
@@ -294,35 +266,27 @@ and of course create.
         app = Eve(auth=RolesAuth)
         app.run()
 
-This is all we need to do. Now when a client hits say the ``/invoices``
-endpoint with a GET request, it will only be served with invoices created by
-its own account. The same will happen with DELETE and PATCH, making it
-impossible for an authenticated user to accidentally retrieve, edit or delete
-other people's data.
+这就是所有我们需要做的。限制，当一个客户端通过 GET 请求访问 ``/invoices`` 终结点时，
+它只会被提供它自己的账户创建的 invoices。DELETE 和 PATCH 也会发生一样的事，使一个认证
+的用户不可能偶然获取，编辑或删除其他人的数据。
 
 使用令牌身份验证的账户
 ----------------------------------
-As seen in :ref:`token`, token authentication is just a specialized version of
-Basic Authentication. It is actually executed as a standard Basic
-Authentication request where the value of the *username* field is used for
-the token, and the password field is not provided (if included, it is ignored).
+就像 :ref:`token` 看到的，令牌身份验证只是一个专用版本的基本身份验证。事实上，它也被当作
+一个标准基本身份验证请求来执行，*username* 字段值用作令牌，而密码字段未提供 (就算包括了
+也会被忽略)。
 
-Consequently, handling accounts with Token Authentication is very similar to
-what we saw in :ref:`accounts_basic`, but there's one little caveat: tokens
-need to be generated and stored along with the account, and eventually returned
-to the client.
+因此，通过令牌身份验证处理账户与我们在 :ref:`accounts_basic` 中看到的非常类似，但是
+有一个小警告: 令牌需要伴随账户生成和保存，并最终被返回给客户端。
 
 根据这个，让我们回顾我们更新的任务列表:
 
-1. Make an endpoint available for all account management activities
-   (``/accounts``).
-2. Secure the endpoint so that it is only accessible to clients (tokens) that
-   we control.
-3. On account creation, generate and store its token.
-4. Optionally, return the new token with the response.
-5. Make sure that all other API endpoints are only accessible to authenticated
-   tokens.
-6. Allow authenticated users to only access resources created by themselves
+1. 制作一个所有账户管理活动都可用的终结点 (``/accounts``)。
+2. 保护终结点，这样它只能被我们控制的客户端 (令牌) 访问。
+3. 账户创建时，生成和存储它的令牌。
+4. 可选，通过响应返回新的令牌。
+5. 确保所有其他 API 终结点只能被证实的令牌访问。
+6. 使证实的用户只能访问他们自己创建的资源。
 
 1. ``/accounts/`` 终结点
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -362,23 +326,21 @@ to the client.
    :emphasize-lines: 16
 
     accounts = {
-        # the standard account entry point is defined as
-        # '/accounts/<ObjectId>'. We define  an additional read-only entry
-        # point accessible at '/accounts/<username>'.
+        # 标准账户入口点定义为 '/accounts/<ObjectId>'。我们再定义一个额外的
+        # 可以在 '/accounts/<username>' 访问的只读入口点.
         'additional_lookup': {
             'url': 'regex("[\w]+")',
             'field': 'username',
         },
 
-        # We also disable endpoint caching as we don't want client apps to
-        # cache account data.
+        # 我们也禁用终结点缓存，因为我们不希望客户端应用程序缓存账户数据.
         'cache_control': '',
         'cache_expires': 0,
 
-        # Only allow superusers and admins.
+        # 只允许超级用户和管理员.
         'allowed_roles': ['superuser', 'admin'],
 
-        # Finally, let's add the schema definition for this endpoint.
+        # 最后，让我们为这个终结点添加模式定义.
         'schema': schema,
     }
 
@@ -392,11 +354,11 @@ to the client.
 
     class RolesAuth(TokenAuth):
         def check_auth(self, token,  allowed_roles, resource, method):
-            # use Eve's own db driver; no additional connections/resources are used
+            # 使用 Eve 自己的数据库驱动; 没有使用额外的连接/资源
             accounts = app.data.driver.db['accounts']
             lookup = {'token': token}
             if allowed_roles:
-                # only retrieve a user if his roles match ``allowed_roles``
+                # 只获取角色匹配 ``allowed_roles`` 的用户
                 lookup['roles'] = {'$in': allowed_roles}
             account = accounts.find_one(lookup)
             return account
@@ -408,12 +370,10 @@ to the client.
 
 3. 在账户创建中构建自定义令牌
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-The code above has a problem: it won't authenticate anybody, as we aren't
-generating any token yet. Consequently, clients aren't getting their auth tokens
-back so they don't really know how to authenticate. Let's fix that by using the
-awesome :ref:`eventhooks` feature.  We'll update our launch script by
-registering a callback function that will be called when a new account is about
-to be stored to the database.
+上面的代码有一个问题: 它不会证明任何人，因为我们还没有生成任何令牌。因此，客户端取不回
+它们的认证令牌，因此，它们并不真正知道如何证明。让我们通过使用令人惊叹的 :ref:`eventhooks`
+特性来修复它。我们将通过注册一个回调函数来更新我们的启动脚本，这个函数在一个新账户即将
+被保存到数据库时调用。
 
 .. code-block:: python
    :emphasize-lines: 3-4,19-24,29
@@ -426,19 +386,19 @@ to be stored to the database.
 
     class RolesAuth(TokenAuth):
         def check_auth(self, token,  allowed_roles, resource, method):
-            # use Eve's own db driver; no additional connections/resources are used
+            # 使用 Eve 自己的数据库驱动; 没有使用额外的连接/资源
             accounts = app.data.driver.db['accounts']
             lookup = {'token': token}
             if allowed_roles:
-                # only retrieve a user if his roles match ``allowed_roles``
+                # 只获取角色匹配 ``allowed_roles`` 的用户
                 lookup['roles'] = {'$in': allowed_roles}
             account = accounts.find_one(lookup)
             return account
 
 
     def add_token(documents):
-        # Don't use this in production:
-        # You should at least make sure that the token is unique.
+        # 不要在生产环境使用:
+        # 你应该至少确保令牌使唯一的.
         for document in documents:
             document["token"] = (''.join(random.choice(string.ascii_uppercase)
                                          for x in range(10)))
@@ -449,81 +409,67 @@ to be stored to the database.
         app.on_insert_accounts += add_token
         app.run()
 
-As you can see, we are subscribing to the ``on_insert`` event of the `accounts`
-endpoint with our ``add_token`` function. This callback will receive
-`documents` as an argument, which is a list of validated documents accepted for
-database insertion. We simply add (or replace in the unlikely case that the
-request contained it already) a token to every document, and we're done! For
-more information on callbacks, see `Event Hooks`_.
+就像你可以看到的，我们在通过我们的 ``add_token`` 函数订阅 `accounts` 终结点的
+``on_insert`` 事件。这个回调将收到作为参数的 `documents`，它是一个被数据库插入过程
+接受的验证过的文档列表。我们只要为每个文档添加 (或者在不太可能，即请求已经包含的情况下，
+替换) 一个令牌，然后就完成了! 要获取更多关于回调函数的信息，参考 `Event Hooks`_。
 
 4. 通过响应返回令牌
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Optionally, you might want to return the tokens with the response. Truth be
-told, this isn't a very good idea. You generally want to send access
-information out-of-band, with an email for example. However we're assuming that
-we are on SSL, and there are cases where sending the auth token just makes
-sense, like when the client is a mobile application and we want the user to use
-the service right away.
+也许，你可能希望通过响应返回令牌。说实话，这不是一个很好的主意。你通常希望通过，例如
+一封电子邮件，发送权限信息 out-of-band。但是，假定我们在使用 SSL，有些场景发送认证
+令牌能说得通，像客户端是移动应用，而我们希望用户马上使用服务。
 
-Normally, only automatically handled fields (``ID_FIELD``, ``LAST_UPDATED``,
-``DATE_CREATED``, ``ETAG``) are included with POST response payloads.
-Fortunately, there's a setting which allows us to inject additional fields in
-responses, and that is ``EXTRA_RESPONSE_FIELDS``, with its endpoint-level
-equivalent, ``extra_response_fields``. All we need to do is update our endpoint
-definition accordingly:
+正常情况下，只包括自动处理的字段 (``ID_FIELD``, ``LAST_UPDATED``, ``DATE_CREATED``, 
+``ETAG``) 在 POST 响应载体中。幸运的是，有一个设置允许我们注入额外的字段到响应中，
+那就是 ``EXTRA_RESPONSE_FIELDS``，以及它的终结点级别的对应词，
+``extra_response_fields``。所有我们需要做的是对应更新我们的终结点定义:
 
 .. code-block:: python
    :emphasize-lines: 19
 
     accounts = {
-        # the standard account entry point is defined as
-        # '/accounts/<ObjectId>'. We define  an additional read-only entry
-        # point accessible at '/accounts/<username>'.
+        # 标准账户入口点定义为 '/accounts/<ObjectId>'。我们再定义一个额外的
+        # 可以在 '/accounts/<username>' 访问的只读入口点.
         'additional_lookup': {
             'url': 'regex("[\w]+")',
             'field': 'username',
         },
 
-        # We also disable endpoint caching as we don't want client apps to
-        # cache account data.
+        # 我们也禁用终结点缓存，因为我们不希望客户端应用程序缓存账户数据.
         'cache_control': '',
         'cache_expires': 0,
 
-        # Only allow superusers and admins.
+        # 只允许超级用户和管理员.
         'allowed_roles': ['superuser', 'admin'],
 
-        # Allow 'token' to be returned with POST responses
+        # 允许 'token' 通过 POST 响应返回
         'extra_response_fields': ['token'],
 
-        # Finally, let's add the schema definition for this endpoint.
+        # 最后，让我们为这个终结点添加模式定义.
         'schema': schema,
     }
 
-From now on responses to POST requests aimed at the ``/accounts`` endpoint
-will include the newly generated auth token, allowing the client to consume
-other API endpoints right away.
+从现在开始，针对 ``/accounts`` 终结点的 POST 请求的响应，将包括新生成的认证令牌，
+使客户端可以立即使用其他 API 终结点。
 
 5. 保护其他 API 终结点
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-As we've seen before, passing an authentication class to the ``Eve`` object
-enables authentication for all API endpoints. Again, you can still fine-tune
-security by allowing public access to certain endpoints or to certain HTTP
-methods. See :ref:`auth` for more details.
+像我们以前已经看到的，传递一个身份验证类到 ``Eve`` 对象启用对所有 API 终结点的
+身份验证。再说一次，你仍然可以通过允许对特定终结点或特定 HTTP 方法的公共访问来微调
+保护措施。查看 :ref:`auth` 获取更多详情。
 
 6. 只允许访问账户资源
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-This is achieved with the :ref:`user-restricted` feature, as seen in
-:ref:`accounts_basic`. You might want to store the user token as your
-``AUTH_FIELD`` value, but if you want user tokens to be easily revocable, then
-your best option is to use the account unique id for this.
+这个通过 :ref:`user-restricted` 特性实现，像 :ref:`accounts_basic` 看到的那样。
+你可能希望将用户令牌存储为你的 ``AUTH_FIELD`` 值，但是，如果你希望用户令牌可以被
+轻松废止，那么你的最佳选项是为此使用账户唯一 id。
 
 基本 vs 令牌: 最后的斟酌
 ------------------------------------
-Despite being a little more tricky to set up on the server side, Token
-Authentication offers significant advantages. First, you don't have passwords
-stored on the client and  being sent over the wire with every request. If
-you're sending your tokens out-of-band, and you're on SSL/TLS, that's quite
-a lot of additional security.
+尽管，要在服务端建立起来有点难搞，令牌身份验证提供显著的优势。首先，你不需要将密码
+保存在客户端，每次请求都通过线路发送它。如果你在发送你的令牌 out-of-band，而你使用
+SSL/TLS，, 那是相对大的额外保障。
 
 .. _SSL/TLS: http://en.wikipedia.org/wiki/Transport_Layer_Security
 .. _`Event Hooks`: http://python-eve.org/features.html#event-hooks
