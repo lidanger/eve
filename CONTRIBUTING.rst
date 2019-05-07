@@ -83,15 +83,15 @@
 ~~~~~~~~~~~~
 
 - 创建一个分支来标识你想解决的问题 (例如 ``fix_for_#1280``)
-- 使用你最喜欢的编辑器，做出修改，`committing as you go`_.
+- 使用你最喜欢的编辑器，做出修改，`committing as you go`_ 。
 - 遵行 `PEP8`_.
-- 包含覆盖你做出的任何代码变化的测试。确保如果没有你的补丁，测试会失败。`运行测试。<contributing-testsuite_>`_。
-- 推送你的提交到 GitHub 并 `生成一个 pull 请求`_.
+- 包含覆盖你做出的任何代码变化的测试。确保如果没有你的补丁，测试会失败。`运行测试 <contributing-testsuite_>`_。
+- 推送你的提交到 GitHub 并 `生成一个 pull 请求`_ 。
 - 庆祝 🎉
 
 .. _committing as you go: http://dont-be-afraid-to-commit.readthedocs.io/en/latest/git/commandlinegit.html#commit-your-changes
 .. _PEP8: https://pep8.org/
-.. _create a pull request: https://help.github.com/articles/creating-a-pull-request/
+.. _生成一个 pull 请求: https://help.github.com/articles/creating-a-pull-request/
 
 .. _contributing-testsuite:
 
