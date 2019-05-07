@@ -4,10 +4,9 @@
 
 Emphasis on REST
 ----------------
-The Eve project aims to provide the best possible REST-compliant API
-implementation. Fundamental REST_ principles like *separation of concerns*,
-*stateless and layered system*, *cacheability*, *uniform interface* have been
-kept into consideration while designing the core API.
+Eve 项目的目标使提供最大可能的兼容 REST 的 API 的实现。基本的 REST_ 原则，像
+*separation of concerns*, *stateless and layered system*, *cacheability*, 
+*uniform interface*，在涉及核心 API 时已经被列入考虑了。
 
 全部 CRUD 操作
 -----------------------------
