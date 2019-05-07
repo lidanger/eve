@@ -406,7 +406,7 @@
                                     可以在终结点 (Mongo 集合) 级别被重载。
                                     参考下面的 ``mongo_write_concern``。
 
-``DOMAIN``                          一个保存 API 域定义的字典。参考 `Domain Configuration`_。
+``DOMAIN``                          一个保存 API 域定义的字典。参考 `域配置`_。
 
 ``EXTENDED_MEDIA_INFO``             转自文件上传驱动的一组属性。
 
