@@ -4,26 +4,18 @@
 ================================
 安全保护介绍
 ------------------------
-Authentication is the mechanism whereby systems may securely identify their
-users. Eve supports several authentication schemes: Basic Authentication, Token
-Authentication, HMAC Authentication. `OAuth2 integration`_ is easily
-accomplished.
+身份验证是系统借以安全鉴别它们的用户的机制。Eve 支持几种身份验证模式: 基本身份验证，
+令牌身份验证，HMAC 身份验证。`OAuth2 集成`_ 很容易完成。
 
-Authorization is the mechanism by which a system determines what level of
-access a particular (authenticated) user should have access to resources
-controlled by the system. In Eve, you can restrict access to all API endpoints,
-or only some of them. You can protect some HTTP verbs while leaving others
-open. For example, you can allow public read-only access while leaving item
-creation and edition restricted to authorized users only. You can also allow
-``GET`` access for certain requests and ``POST`` access for others by checking
-the method parameter. There is also support for role-based access control.
+授权是系统用来确定一个特别（验证过的）的用户应该有什么级别的权限来访问系统控制的资源
+的机制。在 Eve 中，你可以现在对所有或者只是其中一些 API 终结点的访问。你可以保护一些
+HTTP 动词，而让其他的继续开放。例如，你可以允许公开的只读访问，而限制数据项创建和编辑
+只能由授权的用户进行。你也可以通过检查方法参数允许用于特定请求的 ``GET`` 访问和
+其他 ``POST`` 访问。同时也有对基于角色的权限控制的支持。
 
-Security is one of those areas where customization is very important. This is
-why you are provided with a handful of base authentication classes. They
-implement the basic authentication mechanism and must be subclassed in order
-to implement authorization logic. No matter which authentication scheme you
-pick the only thing that you need to do in your subclass is override the
-``check_auth()`` method.
+安全是定制化非常重要的其中一个区域。这就是为什么给你提供屈指可数的几个基本验证类的原因。
+它们实现基本的身份验证机制，必须被子类化以实现授权逻辑。不管你选择了哪一个身份验证模式，
+你需要在你的子类中做的仅有的事是重载 ``check_auth()`` 方法。
 
 全局身份验证
 ---------------------
@@ -56,46 +48,36 @@ pick the only thing that you need to do in your subclass is override the
 
 默认情况下，通过所有 HTTP 动词（方法）对所有终结点的访问都是受限的，事实上锁定了整个 API。
 
-But what if your authorization logic is more complex, and you only want to
-secure some endpoints or apply different logics depending on the
-endpoint being consumed? You could get away with just adding logic to your
-authentication class, maybe with something like this:
+但是如果你的授权逻辑更复杂，而你只希望保护一些终结点或根据使用的终结点的不同应用不同
+的逻辑，怎么办? 你只需要在你的身份验证类中添加逻辑就可以脱离困境，或许是像这样的东西:
 
 .. code-block:: python
 
     class MyBasicAuth(BasicAuth):
         def check_auth(self, username, password, allowed_roles, resource, method):
             if resource in ('zipcodes', 'countries'):
-                # 'zipcodes' and 'countries' are public
+                # 'zipcodes' 和 'countries' 是公共的
                 return True
             else:
-                # all the other resources are secured
+                # 所有其他资源都是受保护的
                 return username == 'admin' and password == 'secret'
 
-If needed, this approach also allows to take the request ``method`` into
-consideration, for example to allow ``GET`` requests for everyone while forcing
-validation on edits (``POST``, ``PUT``, ``PATCH``, ``DELETE``).
+如果需要，这个途径也允许将请求 ``方法`` 列入考虑范围，例如，允许每个人进行 ``GET`` 
+请求，而对编辑 (``POST``, ``PUT``, ``PATCH``, ``DELETE``) 进行强制验证。
 
 终结点级别身份验证
 -----------------------------
-The *one class to bind them all* approach seen above is probably good for most
-use cases but as soon as authorization logic gets more complicated it could
-easily lead to complex and unmanageable code, something you don't really want
-to have when dealing with security.
+上面看到的 *one class to bind them all* 途径很可能对大多数场景都不错，但一旦授权
+逻辑变得更复杂，就很容易变成复杂的难以管理的代码，在处理安全问题时你真的不希望的东西。
 
-Wouldn't it be nice if we could have specialized auth classes that we could
-freely apply to selected endpoints? This way the global level auth class, the
-one passed to the Eve constructor as seen above, would still be active on all
-endpoints except those where different authorization logic is needed.
-Alternatively, we could even choose to *not* provide a global auth class,
-effectively making all endpoints public, except the ones we want protected.
-With a system like this we could even choose to have some endpoints protected
-with, say, Basic Authentication while others are secured with Token, or HMAC
-Authentication!
+如果我们可以使用轻松应用于选定的终结点的专用认证类会不会不错? 这样，上面看到的，传递给
+Eve 构造器的全局级别的认证类，仍然对所有终结点起作用，除了那些需要不同授权逻辑的。
+或者，事实上，我们甚至可以选择 *不* 提供全局认证类，让所有终结点成为公共的，除了那些
+我们希望保护的。通过一个像这样的系统，我们甚至可以选择让一些终结点由，怎么说呢，基本身
+份验证保护，而其它的由令牌，或 HMAC 身份验证保护!
 
-Well, turns out this is actually possible by simply enabling the
-resource-level ``authentication`` setting when we are defining the API
-:ref:`domain <domain>`.
+好了，结果，事实上，通过在定义 API :ref:`domain <domain>` 时简单启用资源基本的
+``身份验证``配置，这是可能的。
 
 .. code-block:: python
 
@@ -107,39 +89,33 @@ resource-level ``authentication`` setting when we are defining the API
         'invoices': ...
         }
 
-And that's it. The `people` endpoint will now be using the ``MySuperCoolAuth``
-class for authentication, while the ``invoices`` endpoint  will be using the
-general-purpose auth class if provided or else it will just be open to the
-public.
+这就行了。`people` 终结点限制将使用 ``MySuperCoolAuth`` 类进行身份验证，而如果提供
+了的话，``invoices`` 终结点将使用一般用途的认证类，否则，它只会被开放给公众。
 
-There are other features and options that you can use to reduce complexity in
-your auth classes, especially (but not only) when using the global level
-authentication system. Lets review them.
+有其他的特性和选项可以用于在你的认证类中减少复杂性，特别是 (但不止是) 当使用全局级别
+认证系统时。让我们回顾一些它们。
 
 全局终结点安全
 ------------------------
-You might want a public read-only API where only authorized users can write,
-edit and delete. You can achieve that by using the ``PUBLIC_METHODS`` and
-``PUBLIC_ITEM_METHODS`` :ref:`global settings <global>`. Add the following to
-your `settings.py`:
+你可能想要一个公共只读的 API，只有授权的用户可以写入，编辑和删除。你可以通过使用
+``PUBLIC_METHODS`` 和 ``PUBLIC_ITEM_METHODS`` :ref:`global settings <global>`
+来实现。将下面的添加到你的 `settings.py`:
 
 ::
 
     PUBLIC_METHODS = ['GET']
     PUBLIC_ITEM_METHODS = ['GET']
 
-And run your API. POST, PATCH and DELETE are still restricted, while GET is
-publicly available at all API endpoints. ``PUBLIC_METHODS`` refers to resource
-endpoints, like ``/people``, while ``PUBLIC_ITEM_METHODS`` refers to individual
-items like ``/people/id``.
+运行你 API。POST, PATCH 和 DELETE 仍然受限，而在所有终结点 GET 都是公共可用的。
+``PUBLIC_METHODS`` 涉及像 ``/people`` 这样的资源终结点，而 ``PUBLIC_ITEM_METHODS``
+涉及像 ``/people/id`` 这样的单个数据项。
 
 .. _endpointsec:
 
 自定义终结点安全
 ------------------------
-Suppose that you want to allow public read access to only certain resources.
-You do that by declaring public methods at resource level, while declaring the
-API :ref:`domain <domain>`:
+假设，你希望只有特定的资源允许公共读权限。你通过在资源级别声明公共方法来实现，当声明
+API :ref:`domain <domain>` 时:
 
 .. code-block:: python
 
@@ -150,17 +126,16 @@ API :ref:`domain <domain>`:
             },
         }
 
-Be aware that, when present, :ref:`resource settings <local>` override global
-settings. You can use this to your advantage. Suppose that you want to grant
-read access to all endpoints with the only exception of ``/invoices``.  You
-first open read access for all endpoints:
+请意识到，存在时，:ref:`resource settings <local>` 重载全局配置。你可以使用这个
+作为你的优势。假设你希望对所有终结点授予读取权限，只有 ``/invoices`` 除外。你首先
+打开所有终结点的读取权限:
 
 ::
 
     PUBLIC_METHODS = ['GET']
     PUBLIC_ITEM_METHODS = ['GET']
 
-Then you protect the private endpoint:
+然后保护私有终结点:
 
 ::
 
@@ -171,31 +146,27 @@ Then you protect the private endpoint:
             }
         }
 
-Effectively making `invoices` a restricted resource.
+事实上让 `invoices` 成为一个受限的资源。
 
 .. _basic:
 
 基本身份验证
 --------------------
-The ``eve.auth.BasicAuth`` class allows the implementation of Basic
-Authentication (RFC2617). It should be subclassed in order to implement custom
-authentication.
+``eve.auth.BasicAuth`` 类允许实现级别身份验证 (RFC2617)。为了实现自定义的身份验证，它
+应该被子类化。
 
 使用 bcrypt 的基本身份验证
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Encoding passwords with bcrypt_ is a great idea. It comes at the cost of
-performance, but that's precisely the point, as slow encoding means very good
-resistance to brute-force attacks. For a faster (and less safe) alternative, see
-the SHA1/MAC snippet further below.
+通过 bcrypt_ 编码密码是好主意。它以牺牲性能为代价，但那正是核心问题，因为慢速编码意味着
+对穷举攻击的非常好的抵抗力。对于更快的 (也更不安全) 替代品，参考更下面的 SHA1/MAC 片段。
 
-This script assumes that user accounts are stored in an `accounts` MongoDB
-collection, and that passwords are stored as bcrypt hashes. All API
-resources/methods will be secured unless they are made explicitly public.
+这段脚本假定用户账户存储在一个 `accounts` MongoDB 集合中，而且密码作为 bcrypt hash 值
+存储的。所有 API 资源/方法都受到保护，除非它们明确定义为公共的。
 
 
-.. admonition:: Please note
+.. 提示:: 请注意
 
-    You will need to install `py-bcrypt` for this to work.
+    你需要安装 `py-bcrypt` 来让这个可以工作。
 
 .. code-block:: python
 
@@ -206,12 +177,11 @@ resources/methods will be secured unless they are made explicitly public.
         Auth-BCrypt
         ~~~~~~~~~~~
 
-        Securing an Eve-powered API with Basic Authentication (RFC2617).
+        通过基本身份验证 (RFC2617) 保护一个 Eve 支持的 API.
 
-        You will need to install py-bcrypt: ``pip install py-bcrypt``
+        你将需要安装 py-bcrypt: ``pip install py-bcrypt``
 
-        This snippet by Nicola Iarocci can be used freely for anything you like.
-        Consider it public domain.
+        这个由 Nicola Iarocci 提供的片段可以自由用于任何你喜欢的东西。将它视为公共领域.
     """
 
     import bcrypt
@@ -221,7 +191,7 @@ resources/methods will be secured unless they are made explicitly public.
 
     class BCryptAuth(BasicAuth):
         def check_auth(self, username, password, allowed_roles, resource, method):
-            # use Eve's own db driver; no additional connections/resources are used
+            # 使用 Eve 自己的数据库驱动; 未使用额外的连接/资源
             accounts = app.data.driver.db['accounts']
             account = accounts.find_one({'username': username})
             return account and \
@@ -234,9 +204,8 @@ resources/methods will be secured unless they are made explicitly public.
 
 使用 SHA1/HMAC 的基本身份验证
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-This script assumes that user accounts are stored in an `accounts` MongoDB
-collection, and that passwords are stored as SHA1/HMAC hashes. All API
-resources/methods will be secured unless they are made explicitly public.
+这段脚本假定，用户账户存储在一个 `accounts` MongoDB 集合，并且密码是作为 SHA1/HMAC hashe
+值存储的。所有 API 资源/方法都会受到保护，除非它们明确定义为公共的。
 
 .. code-block:: python
 
@@ -246,13 +215,12 @@ resources/methods will be secured unless they are made explicitly public.
         Auth-SHA1/HMAC
         ~~~~~~~~~~~~~~
 
-        Securing an Eve-powered API with Basic Authentication (RFC2617).
+        通过基本身份验证 (RFC2617) 保护一个 Eve 支持的 API.
 
-        Since we are using werkzeug we don't need any extra import (werkzeug being
-        one of Flask/Eve prerequisites).
+        由于我们正在使用 werkzeug，我们不需要任何额外的输入 (werkzeug 是 Flask/Eve 的
+        必备条件之一).
 
-        This snippet by Nicola Iarocci can be used freely for anything you like.
-        Consider it public domain.
+        这个由 Nicola Iarocci 提供的片段可以自由用于任何你喜欢的东西。将它视为公共领域.
     """
 
     from eve import Eve
@@ -262,7 +230,7 @@ resources/methods will be secured unless they are made explicitly public.
 
     class Sha1Auth(BasicAuth):
         def check_auth(self, username, password, allowed_roles, resource, method):
-            # use Eve's own db driver; no additional connections/resources are used
+            # 使用 Eve 自己的数据库驱动; 未使用额外的连接/资源
             accounts = app.data.driver.db['accounts']
             account = accounts.find_one({'username': username})
             return account and \
@@ -277,14 +245,12 @@ resources/methods will be secured unless they are made explicitly public.
 
 基于令牌的身份验证
 --------------------------
-Token-based authentication can be considered a specialized version of Basic
-Authentication. The Authorization header tag will contain the auth token as the
-username, and no password.
+基于令牌的身份验证可以被考虑为基本身份验证的一个专用版本。身份验证头标签将包含认证令牌作为
+用户名，而没有密码。
 
-This script assumes that user accounts are stored in an `accounts` MongoDB
-collection. All API resources/methods will be secured unless they are made
-explicitly public (by fiddling with some settings you can open one or more
-resources and/or methods to public access -see docs).
+这段脚本假定，用户账户存储在一个 `accounts` MongoDB 集合中。所有 API 资源/方法都会受到保护，
+除非它们明确定义为公共的 (通过对一些配置做手脚，你可以开放一个或多个资源以及方法为公共权限，
+参考文档)。
 
 .. code-block:: python
 
@@ -294,10 +260,9 @@ resources and/or methods to public access -see docs).
         Auth-Token
         ~~~~~~~~~~
 
-        Securing an Eve-powered API with Token based Authentication.
+        通过基于令牌的身份验证保护一个 Eve 支持的 API.
 
-        This snippet by Nicola Iarocci can be used freely for anything you like.
-        Consider it public domain.
+        这个由 Nicola Iarocci 提供的片段可以自由用于任何你喜欢的东西。将它视为公共领域.
     """
 
     from eve import Eve
@@ -306,12 +271,10 @@ resources and/or methods to public access -see docs).
 
     class TokenAuth(TokenAuth):
         def check_auth(self, token, allowed_roles, resource, method):
-            """For the purpose of this example the implementation is as simple as
-            possible. A 'real' token should probably contain a hash of the
-            username/password combo, which sould then validated against the account
-            data stored on the DB.
+            """由于这个示例的目的，实现尽可能简单。一个 '真正的' 令牌应该很可能包含一个
+            用户名/密码混合的 hash，然后应该通过存储在数据库中的账户数据验证.
             """
-            # use Eve's own db driver; no additional connections/resources are used
+            # 使用 Eve 自己的数据库驱动; 未使用额外的连接/资源
             accounts = app.data.driver.db['accounts']
             return accounts.find_one({'token': token})
 
@@ -322,48 +285,37 @@ resources and/or methods to public access -see docs).
 
 HMAC 身份验证
 -------------------
-The ``eve.auth.HMACAuth`` class allows for custom, Amazon S3-like, HMAC (Hash
-Message Authentication Code) authentication, which is basically a very secure
-custom authentication scheme built around the `Authorization` header.
+``eve.auth.HMACAuth`` 类允许自定义的，类似于 Amazon S3 的，HMAC (Hash Message 
+Authentication Code) 身份验证，基本上，这是一个在 `Authorization` 头附近构造的非常安全的
+自定义授权模式。
 
 HMAC 身份验证工作原理
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-The server provides the client with a user id and a secret key through some
-out-of-band technique (e.g., the service sends the client an e-mail
-containing the user id and secret key). The client will use the supplied
-secret key to sign all requests.
+服务器通过一些 out-of-band 技术(例如，服务向客户端发送一封包含用户 id 和私钥的电子邮件) 
+为客户端提供一个用户 id 和一个私钥。客户端将使用提供的私钥对所有请求进行签名。
 
-When the client wants to send a request, he builds the complete request and
-then, using the secret key, computes a hash over the complete message body (and
-optionally some of the message headers if required)
+当客户端希望发送一个请求时，它构建完整的请求，然后，使用私钥，计算出一个完整消息体 (有时候
+也一些消息头) 的 hash 值。
 
-Next, the client adds the computed hash and his userid to the message in the
-Authorization header:
+下一步，客户端将计算出的 hash 值和它的 userid 添加到身份验证头中的消息:
 
 ::
 
     Authorization: johndoe:uCMfSzkjue+HSDygYB5aEg==
 
-and sends it to the service. The service retrieves the userid from the
-message header and searches the private key for that user in its own
-database. Next it computes the hash over the message body (and selected
-headers) using the key to generate its hash. If the hash the client sends
-matches the hash the server computes, then the server knows the message was
-sent by the real client and was not altered in any way.
+并发送到服务。服务从消息头中获取 userid，并在它自己的数据库中搜索他个用户的私钥。接着，它
+使用私钥计算整个消息体 (以及选择的头) 的 hash 值来生成它的 hash 值。如果客户端发送的 hash 
+值与服务器计算的匹配，那么服务器就知道是被真正的客户端发送的，没有被任何方式篡改。
 
-Really the only tricky part is sharing a secret key with the user and keeping
-that secure. That is why some services allow for generation of shared keys
-with a limited life time so you can give the key to a third party to
-temporarily work on your behalf. This is also the reason why the secret key
-is generally provided through out-of-band channels (often a webpage or, as
-said above, an email or plain old paper).
+的确，唯一难办的部分是和用户分享一个密钥并保证安全。那就是为什么有些服务允许生成生存时间
+有限的共享密钥，这样你可以将密钥交给第三方来临时代表自己。这也是为什么私钥通常通过 
+out-of-band 通道 (常常是一个网页，或者像上面说的，一封邮件或传统的普通纸张) 提供的原因。
 
-The ``eve.auth.HMACAuth``  class also support access roles.
+``eve.auth.HMACAuth`` 类也支持访问角色。
 
 HMAC 示例
 ~~~~~~~~~~~~
-The snippet below can also be found in the `examples/security` folder of the
-Eve `repository`_.
+下面的片段也可以在 Eve `repository`_ 的 `examples/security` 文件夹中找到。
 
 .. code-block:: python
 
@@ -377,14 +329,12 @@ Eve `repository`_.
     class HMACAuth(HMACAuth):
         def check_auth(self, userid, hmac_hash, headers, data, allowed_roles,
                        resource, method):
-            # use Eve's own db driver; no additional connections/resources are
-            # used
+            # 使用 Eve 自己的数据库驱动; 未使用额外的连接/资源
             accounts = app.data.driver.db['accounts']
             user = accounts.find_one({'userid': userid})
             if user:
                 secret_key = user['secret_key']
-            # in this implementation we only hash request data, ignoring the
-            # headers.
+            # 在这个实现中，我们只对请求数据 hash，忽略头.
             return user and \
                 hmac.new(str(secret_key), str(data), sha1).hexdigest() == \
                     hmac_hash
@@ -398,25 +348,22 @@ Eve `repository`_.
 
 基于角色的访问控制
 -------------------------
-The code snippets above deliberately ignore the ``allowed_roles`` parameter.
-You can use this parameter to restrict access to authenticated users who also
-have been assigned specific roles.
+上面的代码片段故意忽略 ``allowed_roles`` 参数。你可以使用这个参数来限制已认证用户的权限，
+这些用户当然，也已经被分配了一个专门的角色。
 
-First, you would use the new ``ALLOWED_ROLES`` and ``ALLOWED_ITEM_ROLES`` :ref:`global
-settings <global>` (or the corresponding ``allowed_roles`` and ``allowed_item_roles``
-:ref:`resource settings <local>`).
+首先，你将使用新的 ``ALLOWED_ROLES`` 和 ``ALLOWED_ITEM_ROLES`` :ref:`global
+settings <global>` (或者对应的 ``allowed_roles`` 和 ``allowed_item_roles``
+:ref:`resource settings <local>`)。
 
 ::
 
     ALLOWED_ROLES = ['admin']
 
-Then your subclass would implement the authorization logic by making good use
-of the aforementioned ``allowed_roles`` parameter.
+然后，你的子类将通过好好使用上述 ``allowed_roles`` 参数来实现授权逻辑。
 
-The snippet below assumes that user accounts are stored in an `accounts`
-MongoDB collection, that passwords are stored as SHA1/HMAC hashes and that user
-roles are stored in a 'roles' array. All API resources/methods will be secured
-unless they are made explicitly public.
+下面的片段假定，用户账户存储在一个 `accounts` MongoDB 集合中，并且密码作为 SHA1/HMAC 
+hash 值存储，并且用户角色存储在一个 'roles' 数组中。所有 API 资源/方法都受到包含，除非
+它们明确声明为公共的。
 
 .. code-block:: python
 
@@ -426,14 +373,12 @@ unless they are made explicitly public.
         Auth-SHA1/HMAC-Roles
         ~~~~~~~~~~~~~~~~~~~~
 
-        Securing an Eve-powered API with Basic Authentication (RFC2617) and user
-        roles.
+        通过基本身份验证 (RFC2617) 和 用户角色保护一个 Eve 支持的 API.
 
-        Since we are using werkzeug we don't need any extra import (werkzeug being
-        one of Flask/Eve prerequisites).
+        由于我们正在使用 werkzeug，我们不需要任何额外的输入 (werkzeug 是 Flask/Eve 的
+        必备条件之一).
 
-        This snippet by Nicola Iarocci can be used freely for anything you like.
-        Consider it public domain.
+        这个由 Nicola Iarocci 提供的片段可以自由用于任何你喜欢的东西。将它视为公共领域.
     """
 
     from eve import Eve
@@ -443,11 +388,11 @@ unless they are made explicitly public.
 
     class RolesAuth(BasicAuth):
         def check_auth(self, username, password, allowed_roles, resource, method):
-            # use Eve's own db driver; no additional connections/resources are used
+            # 使用 Eve 自己的数据库驱动; 未使用额外的连接/资源
             accounts = app.data.driver.db['accounts']
             lookup = {'username': username}
             if allowed_roles:
-                # only retrieve a user if his roles match ``allowed_roles``
+                # 只获取角色匹配 ``allowed_roles`` 的用户
                 lookup['roles'] = {'$in': allowed_roles}
             account = accounts.find_one(lookup)
             return account and check_password_hash(account['password'], password)
@@ -461,23 +406,17 @@ unless they are made explicitly public.
 
 用户限制的资源访问
 -------------------------------
-When this feature is enabled, each stored document is associated with the
-account that created it. This allows the API to transparently serve only
-account-created documents on all kinds of requests: read, edit, delete and of
-course create.  User authentication needs to be enabled for this to work
-properly.
+当这项特性启用时，每一个存储的文档都被关联到创建它的账户。这使 API 处理各种请求时：
+读取，编辑，删除，当然还有创建，可以只透明提供账户创建的文档。要让这个正常工作，需要启用
+用户身份验证。
 
-At the global level this feature is enabled by setting ``AUTH_FIELD`` and locally
-(at the endpoint level) by setting ``auth_field``. These properties define the name
-of the field used to store the id of the user who created the document.  So for
-example by setting ``AUTH_FIELD`` to ``user_id``, you are effectively (and
-transparently to the user) adding a ``user_id`` field to every stored
-document. This will then be used to retrieve/edit/delete documents stored by
-the user.
+在全局级别，这项特性通过设置 ``AUTH_FIELD`` 启用，而在本地 (在终结点级别) 则通过设置
+``auth_field``。这些属性定义了用于存储创建文档的用户 id 的字段名称。因此，例如，通过
+设置 ``AUTH_FIELD`` 为 ``user_id``，你事实上 (并且对用户来说很明显) 为每个保存的文档添加
+了一个 ``user_id`` 字段。然后，这将被用于获取/编辑/删除用户保存的文档。
 
-But how do you set the ``auth_field`` value? By invoking the
-``set_request_auth_value()`` class method. Let us revise our
-BCrypt-authentication example from above:
+但是，你如何设置 ``auth_field`` 的值? 通过调用 ``set_request_auth_value()`` 类方法。
+让我们修改我们上面的 BCrypt-authentication 例子:
 
 .. code-block:: python
    :emphasize-lines: 25-28
@@ -488,12 +427,11 @@ BCrypt-authentication example from above:
         Auth-BCrypt
         ~~~~~~~~~~~
 
-        Securing an Eve-powered API with Basic Authentication (RFC2617).
+        通过基本身份验证 (RFC2617) 保护一个 Eve 支持的 API.
 
-        You will need to install py-bcrypt: ``pip install py-bcrypt``
+        你将需要安装 py-bcrypt: ``pip install py-bcrypt``
 
-        This snippet by Nicola Iarocci can be used freely for anything you like.
-        Consider it public domain.
+        这个由 Nicola Iarocci 提供的片段可以自由用于任何你喜欢的东西。将它视为公共领域.
     """
 
     import bcrypt
@@ -503,11 +441,10 @@ BCrypt-authentication example from above:
 
     class BCryptAuth(BasicAuth):
         def check_auth(self, username, password, allowed_roles, resource, method):
-            # use Eve's own db driver; no additional connections/resources are used
+            # 使用 Eve 自己的数据库驱动; 未使用额外的连接/资源
             accounts = app.data.driver.db['accounts']
             account = accounts.find_one({'username': username})
-            # set 'auth_field' value to the account's ObjectId
-            # (instead of _id, you might want to use ID_FIELD)
+            # 设置 'auth_field' 值为账户的 ObjectId (你可能希望使用 ID_FIELD 而不是 _id)
             if account and '_id' in account:
                 self.set_request_auth_value(account['_id'])
             return account and \
@@ -522,19 +459,15 @@ BCrypt-authentication example from above:
 
 身份验证驱动的数据库访问
 ---------------------------
-Custom authentication classes can also set the database that should be used
-when serving the active request.
+自定义的身份验证类也可以设置处理活动请求时应该使用的数据库。
 
-Normally you either use a single database for the whole API or you configure
-which database each endpoint consumes by setting ``mongo_prefix`` to the
-desired value (see :ref:`local`).
+正常情况下，你或者为整个 API 使用单个数据库，或者通过设置 ``mongo_prefix`` 为需要的值 
+(参考 :ref:`local`) 来配置每个终结点使用哪个数据库。
 
-However, you might opt to select the target database based on the active token,
-user or client. This is handy if your use-case includes user-dedicated database
-instances. All you have to do is set invoke the ``set_mongo_prefix()`` method
-when authenticating the request.
+但是，你可以基于活动令牌，用户或客户端来选择目标数据库。如果你的使用场景包括用户专用的
+数据库实例，这样很方便。所有你需要做的是在对请求认证时，调用 ``set_mongo_prefix()`` 方法。
 
-A trivial example would be:
+一个微不足道的的实例就是:
 
 .. code-block:: python
 
@@ -547,35 +480,29 @@ A trivial example would be:
             elif username == 'user2':
                 self.set_mongo_prefix('MONGO2')
             else:
-                # serve all other users from the default db.
+                # 为所有其他用户提供来自默认数据库的数据.
                 self.set_mongo_prefix(None)
             return username is not None and password == 'secret'
 
     app = Eve(auth=MyBasicAuth)
     app.run()
 
-The above class will serve ``user1`` with data coming from the database which
-configuration settings are prefixed by ``MONGO1`` in ``settings.py``. Same
-happens with ``user2`` and ``MONGO2`` while all other users are served with
-the default database.
+上面的类将为 ``user1`` 提供来自配置项前缀为 ``settings.py`` 中的 ``MONGO1`` 的数据库
+的数据。``user2`` 和 ``MONGO2`` 也会发送同样的事，而所有其他用户由默认数据库提供服务。
 
-Since values set by ``set_mongo_prefix()`` have precedence over both default
-and endpoint-level ``mongo_prefix`` settings, what happens here is that the two
-users will always be served from their reserved databases, no matter the
-eventual database configuration for the endpoint.
+由于通过 ``set_mongo_prefix()`` 设置的值对默认和终结点级别的 ``mongo_prefix`` 设置
+有优先权，这里发生的是，两个用户将总是由它们预定的数据库来提供服务，不管终结点的最终配置
+是什么。
 
 OAuth2 集成
 ------------------
-Since you have total control over the Authorization process, integrating
-OAuth2 with Eve is easy. Make yourself comfortable with the topics illustrated
-in this page, then head over to `Eve-OAuth2`_, an example project which
-leverages `Flask-Sentinel`_ to demonstrate how you can protect your API with
-OAuth2.
+由于你全程控制授权过程，让 Eve 集成 OAuth2 很简单。阅读这个页面中描述的主题时请放轻松，
+然后调头回到 `Eve-OAuth2`_ ，一个利用 `Flask-Sentinel`_ 演示如何使用 OAuth2 来保护
+你的 API 的示例项目。
 
-.. admonition:: Please note
+.. 提示:: 请主意
 
-    The snippets in this page can also be found in the `examples/security`
-    folder of the Eve `repository`_.
+    这个页面中的片段也可以在 Eve `repository`_ 的 `examples/security` 文件夹中找到。
 
 .. _`repository`: https://github.com/pyeve/eve
 .. _bcrypt: http://en.wikipedia.org/wiki/Bcrypt
