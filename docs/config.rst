@@ -749,7 +749,7 @@
                                 ``['field1', 'field2', 'field3.nested_field', ...]``。
 
 ``schema``                      一个定义资源处理的实际数据结构的字典。启用数据验证。
-                                参考 `Schema Definition`_。
+                                参考 `模式定义`_ 。
 
 ``bulk_enabled``                为 ``True`` 时，这个选项启用这个资源的 :ref:`bulk_insert` 特性。
                                 本地重载 ``BULK_ENABLED``。
