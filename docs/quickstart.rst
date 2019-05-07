@@ -8,8 +8,8 @@
 先决条件
 -------------
 - 你已经安装了 Eve。如果没有，掉头转到 :ref:`install` 节。
-- 安装了 MongoDB_。
-- MongoDB 的一个实例正在运行_。
+- 安装_ 了 MongoDB。
+- MongoDB 的一个实例正在 运行_ 。
 
 一个最小的应用程序
 ---------------------
@@ -255,5 +255,5 @@ API 入口点符合 :ref:`hateoas_feature` 规范并提供关于 API 资源可�
 .. 注意::
     所有的示例和代码片段都来源于 :ref:`demo`，它是一个完整的实用性 API，可以用于在现场实例或本地实例进行独立的试验(你可以实用样例客户端应用来输入数据或者重置数据库)。
 
-.. _`installed`: http://docs.mongodb.org/manual/installation/
-.. _running: http://docs.mongodb.org/manual/tutorial/manage-mongodb-processes/
+.. _`安装`: http://docs.mongodb.org/manual/installation/
+.. _运行: http://docs.mongodb.org/manual/tutorial/manage-mongodb-processes/
