@@ -18,14 +18,12 @@ Extensions
 
 Eve-Auth-JWT
 ------------
-
 | *by Olivier Poitrey*
 
 Eve-Auth-JWT_ 是一个用于 Eve 的 OAuth 2 JWT 令牌验证模块。
 
 Eve-Elastic
 -----------
-
 | *by Petr Jašek*
 
 Eve-Elastic_ 是一个针对 Eve REST 框架的 elasticsearch 数据层。
@@ -33,7 +31,6 @@ Features facets support and the generation of mapping for schema.
 
 Eve-Healthcheck
 ---------------
-
 | *by LuisComS*
 
 Eve-Healthcheck_ 是提供用于监控你的 Eve 应用程序的健康检查 urls 服务的项目。
@@ -46,7 +43,6 @@ Eve-Mocker
 
 Eve-Mongoengine
 ---------------
-
 | *by Stanislav Heller*
 
 Eve-Mongoengine_ 是一个 Eve 扩展，它使 Mongoengine ORM 模型可以被用作 eve 模式。如果你在应用程序中使用 mongoengine，又十分急切地想使用 Eve，不需要用 Cerberus 格式 (DRY!) 再写一遍模式，你可以使用这个扩展，它获取你的 mongoengine 模型并在后台自动转换为 Cerberus 模式。
@@ -71,7 +67,6 @@ Eve-SQLAlchemy
 
 Eve-Swagger
 -----------
-
 | *by Nicola Iarocci*
 
 Eve-Swagger_ 是一个用于 Eve 的 swagger.io 扩展。使用一个 Swagger-enabled API，你得到了可交互的文档，客户端 SDK 生成和可发现性。来自
