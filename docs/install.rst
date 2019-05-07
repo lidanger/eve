@@ -12,7 +12,7 @@
 
 开发版本
 --------------------
-Eve 在 GitHub 的开发很活跃，代码 `在 <https://github.com/pyeve/eve> 总是可用的`_。如果你想使用开发版本的 Eve，有两种方式：你可以让 `pip` 下载开发版本，或者你可以让它执行一个 git checkout。
+Eve 在 GitHub 的开发很活跃，代码 `在 <https://github.com/pyeve/eve> 总是可用的`_ 。如果你想使用开发版本的 Eve，有两种方式：你可以让 `pip` 下载开发版本，或者你可以让它执行一个 git checkout。
 不论哪种方式，都推荐使用 virtualenv。
 
 在一个新的 virtualenv 中获取 git checkout 并在开发模式下运行。
