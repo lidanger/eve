@@ -10,14 +10,14 @@
 
 Twitter
 -------
-I 常常为 Eve 的新特性和发布发 tweet。关注 `@nicolaiarocci <https://twitter.com/nicolaiarocci>`_。
+I 常常为 Eve 的新特性和发布发 tweet。关注 `@nicolaiarocci <https://twitter.com/nicolaiarocci>`_ 。
 
 邮件列表
 ------------
-`mailing list`_ 是为了成为一项同时为开发者/贡献者和 API 维护者提供寻求帮助或请求反馈的低流量资源。
+`邮件列表`_ 是为了成为一项同时为开发者/贡献者和 API 维护者提供寻求帮助或请求反馈的低流量资源。
 
 GitHub
 ------
-当然，跟踪 Eve 开发最好的方式是通过 ` GitHub 代码库 <https://github.com/pyeve/eve>`_。
+当然，跟踪 Eve 开发最好的方式是通过 ` GitHub 代码库 <https://github.com/pyeve/eve>`_ 。
 
-.. _`mailing list`: https://groups.google.com/forum/#!forum/python-eve
+.. _`邮件列表`: https://groups.google.com/forum/#!forum/python-eve
