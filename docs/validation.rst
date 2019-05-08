@@ -57,7 +57,7 @@
     if __name__ == '__main__':
         app.run()
 
-通过继承 Mongo 验证器基类然后添加一个自定义的 ``_validate_<rulename>`` 方法，你扩展了可用的 :ref:`schema` 语法，而现在，新的自定义规则 ``isodd`` 在你的模式种就可用了。你现在可以做某些事情，像:
+通过继承 Mongo 验证器基类然后添加一个自定义的 ``_validate_<rulename>`` 方法，你扩展了可用的 :ref:`schema` 语法，而现在，新的自定义规则 ``isodd`` 在你的模式中就可用了。你现在可以做某些事情，像:
 
 .. code-block:: python
 
