@@ -10,46 +10,42 @@ Eve 项目的目标使提供最大可能的兼容 REST 的 API 的实现。基�
 
 全部 CRUD 操作
 -----------------------------
-APIs can support the full range of CRUD_ operations. Within the same API, you
-can have a read-only resource accessible at one endpoint, along with a fully
-editable resource at another endpoint. The following table shows Eve's
-implementation of CRUD via REST:
+API 可以支持所有 CRUD_ 操作。在相同的 API 中，你可以在一个端点上访问只读资源，在另
+一个端点上访问完整的的可编辑资源。下表是 Eve 对基于 REST 的 CRUD 的实现:
 
 ======= ========= ===================
-Action  HTTP Verb Context
+动作     HTTP 动词 使用环境
 ======= ========= ===================
-Create  POST      Collection
-Create  PUT       Document
-Replace PUT       Document
-Read    GET, HEAD Collection/Document
-Update  PATCH     Document
-Delete  DELETE    Collection/Document
+创建     POST      Collection
+创建     PUT       Document
+覆盖     PUT       Document
+读取     GET, HEAD Collection/Document
+更新     PATCH     Document
+删除     DELETE    Collection/Document
 ======= ========= ===================
 
 重写 HTTP 方法
 ~~~~~~~~~~~~~~~~~~~~~~~
-As a fallback for the odd client not supporting any of these methods, the API
-will gladly honor ``X-HTTP-Method-Override`` requests. For example a client not
-supporting the ``PATCH`` method could send a ``POST`` request with
-a ``X-HTTP-Method-Override: PATCH`` header.  The API would then perform
-a ``PATCH``, overriding the original request method.
+对于不支持任何这些方法的奇怪客户机，API 是一种备用方法将欣然接受
+``X-HTTP-Method-Override`` 请求。例如，不支持 ``PATCH`` 方法的客户端方法可以
+使用 ``X-HTTP-Method-Override: PATCH`` 头发送 ``POST`` 请求。然后 API 将执行
+一个覆盖原来的请求方法的 ``PATCH``。
 
 .. _resource_endpoints:
 
 自定义资源终结点
 -------------------------------
-By default, Eve will make known database collections available as resource
-endpoints (persistent identifiers in REST idiom). So a database ``people``
-collection will be available at the ``example.com/people`` API endpoint.  You
-can customize the URIs though, so the API endpoint could become, say,
-``example.com/customers/overseas``. Consider the following request:
+默认情况下，Eve 将使已知的数据库集合作为可用资源端点 (REST 习惯用法中的持久化标识)。
+因此，数据库集合 ``people`` 在 ``example.com/people`` API 终结点是可用的。但是你
+也可以自定义 URI，这样 API 终结点可以变成，``example.com/customers/overseas``。 
+考虑以下请求:
 
 .. code-block:: console
 
     $ curl -i http://eve-demo.herokuapp.com/people
     HTTP/1.1 200 OK
 
-The response payload will look something like this:
+响应负载看起来应该是这样的:
 
 .. code-block:: javascript
 
@@ -83,32 +79,28 @@ The response payload will look something like this:
     }
 
 
-The ``_items`` list contains the requested data. Along with its own fields,
-each item provides some important, additional fields:
+``_items`` 列表包含请求数据，以及它自己的字段，每一项都提供一些重要的附加字段:
 
 ============ =================================================================
-Field        Description
+字段          说明
 ============ =================================================================
-``_created`` item creation date.
-``_updated`` item last updated on.
-``_etag``    ETag, to be used for concurrency control and conditional requests.
-``_id``      unique item key, also needed to access the individual item endpoint.
+``_created`` 数据项创建日期。
+``_updated`` 数据项上一次更新日期。
+``_etag``    ETag，用于并发控制和有条件的请求。
+``_id``      唯一数据项键，也是在访问单个项目端点时需要。
 ============ =================================================================
 
-These additional fields are automatically handled by the API (clients don't
-need to provide them when adding/editing resources).
+这些额外的字段由 API 自动处理(客户端不需要在添加/编辑资源时提供它们)。
 
-The ``_meta`` field provides pagination data and will only be there if
-:ref:`Pagination` has been enabled (it is by default) and there is at least one
-document being returned. The ``_links`` list provides HATEOAS_ directives.
+``_meta`` 字段提供分页数据，只有当 :ref:`Pagination` 已启用 (默认设置)，并至少有
+一个文档返回时才会有。``_links`` 列表提供 HATEOAS_ 指令。
 
 .. _subresources:
 
 子资源
 ~~~~~~~~~~~~~
-Endpoints support sub-resources so you could have something like:
-``people/<contact_id>/invoices``. When setting the ``url`` rule for such an
-endpoint you would use a regex and assign a field name to it:
+终结点支持子资源，所以你可以有这样的东西: ``people/<contact_id>/invoices``。当为
+这样的终结点设置 ``url`` 规则时，您将使用 regex 并为其分配字段名:
 
 .. code-block:: python
 
@@ -116,107 +108,97 @@ endpoint you would use a regex and assign a field name to it:
         'url': 'people/<regex("[a-f0-9]{24}"):contact_id>/invoices'
         ...
 
-Then, a GET to the following endpoint:
+然后，对以下终结点执行 GET 请求:
 
 ::
 
     people/51f63e0838345b6dcd7eabff/invoices
 
-would cause the underlying database to be queried like this:
+会导致底层数据库查询像这样:
 
 ::
 
     {'contact_id': '51f63e0838345b6dcd7eabff'}
 
-And this one:
+还有这一个:
 
 ::
 
     people/51f63e0838345b6dcd7eabff/invoices?where={"number": 10}
 
-would be queried like:
+将会使查询像这样:
 
 ::
 
     {'contact_id': '51f63e0838345b6dcd7eabff', "number": 10}
 
-Please note that when designing your API, most of the time you can get away
-without resorting to sub-resources. In the example above the same result would
-be achieved by simply exposing an ``invoices`` endpoint that clients could query
-this way:
+请注意，在设计 API 时，大多数时候你都可以不用求助于子资源。在上面的例子中，只要简单地
+公开一个客户端可以这样查询的 ``invoices`` 终结点，就可以得到相同的结果: 
 
 ::
 
     invoices?where={"contact_id": 51f63e0838345b6dcd7eabff}
 
-or
+或者
 
 ::
 
     invoices?where={"contact_id": 51f63e0838345b6dcd7eabff, "number": 10}
 
-It's mostly a design choice, but keep in mind that when it comes to enabling
-individual document endpoints you might incur performance hits. This
-otherwise legit GET request:
+这主要是一种设计选择，但请记住，启用单个文档终结点，可能会导致性能下降。否则，这个合法
+的 GET 请求:
 
 ::
 
     people/<contact_id>/invoices/<invoice_id>
 
-would cause a two fields lookup on the database. This is not ideal and also not
-really needed, as ``<invoice_id>`` is a unique field. By contrast, if you had
-a simple resource endpoint the document lookup would happen on a single field:
+将导致在数据库上的双字段查找。这不是理想的，也不是真正需要的，因为 ``<invoice_id>`` 
+是一个惟一字段。相反，如果您有一个简单的资源端点，那么文档查找将发生在单个字段上: 
 
 ::
 
     invoices/<invoice_id>
 
 
-Endpoints that supports sub-resources will have a specific behavior on
-``DELETE`` operations. A ``DELETE`` to the following endpoint:
+支持子资源的终结点在 `DELETE`` 操作方面有一个特定的行为。对如下终结点的 ``DELETE``:
 
 ::
 
     people/51f63e0838345b6dcd7eabff/invoices
 
-would cause the deletion of all the documents that match follow query:
+将导致删除所有匹配以下查询的文档:
 
 ::
 
     {'contact_id': '51f63e0838345b6dcd7eabff'}
 
 
-Therefore, for sub-resource endpoints, only the documents satisfying the
-endpoint semantic will be deleted. This differs from the standard behavior,
-whereas a delete operation on a collection enpoint will cause the deletion of
-all the documents in the collection.
+因此，对于子资源终结点，只有满足端点语义的文档才会被删除。这与标准行为不同，而集合
+终结点上的 delete 操作将导致删除集合中的所有文档。
 
-Another example. A ``DELETE`` to the following item endpoint:
+另一个例子。对如下数据项终结点的 ``DELETE``:
 
 ::
 
     people/51f63e0838345b6dcd7eabff/invoices/1
 
-would cause the deletion all the documents matched by the follow query:
+会导致删除所有匹配如下查询的文档:
 
 ::
 
     {'contact_id': '51f63e0838345b6dcd7eabff', "<invoice_id>": 1}
 
-This behaviour enables support for typical tree structures, where the id of the
-resource alone is not necessarily a primary key by itself.
+这种行为支持典型的树结构，其中资源的 id 本身不一定是主键。
 
 
 .. _custom_item_endpoints:
 
 自定义的多数据项终结点
 -------------------------------------
-Resources can or cannot expose individual item endpoints. API consumers could
-get access to ``people``, ``people/<ObjectId>`` and ``people/Doe``,
-but only to ``/works``.  When you do grant access to item endpoints, you can
-define up to two lookups, both defined with regexes. The first will be the
-primary endpoint and will match your database primary key structure (i.e., an
-``ObjectId`` in a MongoDB database).
+资源可以或不公开单个项端点。API 消费者可以获得访问 ``people``、``people/<ObjectId>`` 
+和 ``people/Doe`` 的权限，但只是对 ``/works`` 的权限。当你授予对数据项终结点的访问权
+时，您最多可以定义两个查找，它们都是通过 regex 定义的。第一个将是主终结点，并将匹配数
+据库主键结构 (即，MongoDB 数据库中的 ``ObjectId``)。
 
 .. code-block:: console
 
@@ -226,8 +208,7 @@ primary endpoint and will match your database primary key structure (i.e., an
     Last-Modified: Wed, 21 Nov 2012 16:04:56 GMT
     ...
 
-The second, which is optional and read-only, will match a field with unique values since Eve
-will retrieve only the first match anyway.
+第二个是可选和只读的，它将匹配具有惟一值的字段，因为 Eve 无论如何只取第一个匹配。
 
 .. code-block:: console
 
@@ -237,8 +218,7 @@ will retrieve only the first match anyway.
     Last-Modified: Wed, 21 Nov 2012 16:04:56 GMT
     ...
 
-Since we are accessing the same item, in both cases the response payload will
-look something like this:
+由于我们访问的是相同的数据项，在这两种情况下，响应负载看起来都是这样的:
 
 .. code-block:: javascript
 
@@ -259,82 +239,73 @@ look something like this:
         }
     }
 
-As you can see, item endpoints provide their own HATEOAS_ directives.
+可以看到，数据项终结点提供了它们自己的 HATEOAS_ 指令。
 
-.. admonition:: Please Note
+.. 警告:: 请注意
 
-    According to REST principles resource items should only have one unique
-    identifier. Eve abides by providing one default endpoint per item. Adding
-    a secondary endpoint is a decision that should be pondered carefully.
+    根据 REST 规范，资源项应该只有一个惟一标识符。Eve 坚持为每个项目提供一个默认端点。
+    添加辅助端点是一个需要仔细考虑的决定。
 
-    Consider our example above. Even without the ``people/<lastname>``
-    endpoint, a client could always retrieve a person by querying the resource
-    endpoint by last name: ``people/?where={"lastname": "Doe"}``. Actually the
-    whole example is fubar, as there could be multiple people sharing the same
-    last name, but you get the idea.
+    考虑我们上面的例子。即使没有 ``people/<lastname>`` 终结点，客户端也总是可以通过
+    按姓氏查询资源端点来检索人员:``people/?where={"lastname": "Doe"}``。实际上，
+    整个例子是无法处置的，因为可能有很多人共享相同的姓氏，但是你应该明白了。
 
 .. _filters:
 
 筛选
 ---------
-Resource endpoints allow consumers to retrieve multiple documents. Query
-strings are supported, allowing for filtering and sorting. Both native Mongo
-queries and Python conditional expressions are supported.
+资源终结点允许使用者检索多个文档。支持查询字符串，允许过滤和排序。同时支持原生 Mongo 
+查询和 Python 条件表达式。
 
-Here we are asking for all documents where ``lastname`` value is ``Doe``:
+这里我们请求所有 ``lastname`` 值是 ``Doe``的文档:
 
 ::
 
     http://eve-demo.herokuapp.com/people?where={"lastname": "Doe"}
 
-With ``curl`` you would go like this:
+使用 ``curl``，你可以这样做:
 
 .. code-block:: console
 
     $ curl -i -g http://eve-demo.herokuapp.com/people?where={%22lastname%22:%20%22Doe%22}
     HTTP/1.1 200 OK
 
-Filtering on embedded document fields is possible:
+过滤嵌入的文档字段是可行的:
 
 ::
 
     http://eve-demo.herokuapp.com/people?where={"location.city": "San Francisco"}
 
-Date fields are also easy to query on:
+日期字段也很容易查询:
 
 ::
 
     http://eve-demo.herokuapp.com/people?where={"born": {"$gte":"Wed, 25 Feb 1987 17:00:00 GMT"}}
 
-Date values should conform to RFC1123. Should you need a different format, you can change the ``DATE_FORMAT`` setting.
+日期值应该符合 RFC1123。如果需要不同的格式，可以更改 ``DATE_FORMAT`` 设置。
 
-In general you will find that most `MongoDB queries`_ "just work". Should you
-need it, ``MONGO_QUERY_BLACKLIST`` allows you to blacklist unwanted operators.
+一般来说，你会发现大多数 `MongoDB 查询`_ “只是工作”。如果你需要，
+``MONGO_QUERY_BLACKLIST`` 允许你将不需要的操作符列入黑名单。
 
-Native Python syntax works like this:
+原生 Python 语法是这样工作的:
 
 .. code-block:: console
 
     $ curl -i http://eve-demo.herokuapp.com/people?where=lastname=="Doe"
     HTTP/1.1 200 OK
 
-Both syntaxes allow for conditional and logical And/Or operators, however
-nested and combined.
+这两种语法都允许条件运算符和逻辑运算符 And/Or 运算符，无论它们是嵌套的还是组合的。
 
-Filters are enabled by default on all document fields. However, the API
-maintainer can choose to disable them all and/or whitelist allowed ones (see
-``ALLOWED_FILTERS`` in :ref:`global`). If scraping, or fear of DB DoS attacks
-by querying on non-indexed fields is a concern, then whitelisting allowed
-filters is the way to go.
+默认情况下，对所有文档字段都启用过滤器。但是，API 维护者可以选择禁用它们所有，并/或在
+白名单中列出允许的 (参见 :ref:`global` 中的 ``ALLOWED_FILTERS``)。如果抓取或者担心
+通过查询非索引字段而受到 DB DoS 攻击，那么允许过滤器的白名单就是解决方法。
 
-You also have the option to validate the incoming filters against the resource's
-schema and refuse to apply the filtering if any filters are invalid, by using the
-``VALIDATE_FILTERING`` system setting (see :ref:`global`)
+您还可以使用 ``VALIDATE_FILTERING`` 系统设置(参见 :ref:`global`)，根据资源的模式
+验证传入的过滤器，如果有任何过滤器无效，则拒绝应用过滤。
 
 整齐打印
 ---------------
-You can pretty print the response by specifying a query parameter named
-``pretty``:
+您可以通过指定一个名为 ``pretty`` 的查询参数来美化对响应的打印:
 
 .. code-block:: console
 
@@ -372,77 +343,70 @@ You can pretty print the response by specifying a query parameter named
 
 排序
 -------
-Sorting is supported as well:
+也支持排序:
 
 .. code-block:: console
 
     $ curl -i http://eve-demo.herokuapp.com/people?sort=city,-lastname
     HTTP/1.1 200 OK
 
-Would return documents sorted by city and then by lastname (descending). As you
-can see you simply prepend a minus to the field name if you need the sort order
-to be reversed for a field.
+将返回按 city 和 lastname (降序) 排序的文档。如你所见，如果需要反转字段的排序顺序，
+只需在字段名称前加上一个减号。
 
-The MongoDB data layer also supports native MongoDB syntax:
+MongoDB 数据层也支持原生 MongoDB 语法:
 
 ::
 
     http://eve-demo.herokuapp.com/people?sort=[("lastname", -1)]
 
-which translates to the following ``curl`` request:
+翻译过来就是下面的 ``curl`` 请求:
 
 .. code-block:: console
 
     $ curl -i http://eve-demo.herokuapp.com/people?sort=[(%22lastname%22,%20-1)]
     HTTP/1.1 200 OK
 
-Would return documents sorted by lastname in descending order.
+将返回按 lastname 降序排序的文档。
 
-Sorting is enabled by default and can be disabled both globally and/or at
-resource level (see ``SORTING`` in :ref:`global` and ``sorting`` in
-:ref:`domain`). It is also possible to set the default sort at every API
-endpoints (see ``default_sort`` in :ref:`domain`).
+默认情况下，排序是启用的，可以同时在全局和/或资源级别禁用(参见 :ref:`global` 中的
+``SORTING`` 和 :ref:`domain` 中的 ``sorting``)。还可以在每个 API 终结点上设置默认
+排序 (参见 :ref:`domain` 中的 ``default_sort``)。
 
-.. admonition:: Please note
+.. 警告:: 请注意
 
-    Always use double quotes to wrap field names and values. Using single
-    quotes will result in ``400 Bad Request`` responses.
+    始终使用双引号来包装字段名和值。使用单引号将导致 ``400 Bad Request`` 响应。
 
 .. _pagination:
 
 分页
 ----------
-Resource pagination is enabled by default in order to improve performance and
-preserve bandwidth. When a consumer requests a resource, the first N items
-matching the query are served, and links to subsequent/previous pages are
-provided with the response. Default and maximum page size is customizable, and
-consumers can request specific pages via the query string:
+默认情况下，为了改善性能和保留带宽，资源分页是启用的。当使用者请求资源时，将提供与查询
+匹配的前 N 个项，并通过响应提供到后续/以前页面的链接。默认和最大页面大小是可定制的，
+消费者可以通过查询字符串请求特定的页面:
 
 .. code-block:: console
 
     $ curl -i http://eve-demo.herokuapp.com/people?max_results=20&page=2
     HTTP/1.1 200 OK
 
-Of course you can mix all the available query parameters:
+当然，您可以混合所有可用的查询参数:
 
 .. code-block:: console
 
     $ curl -i http://eve-demo.herokuapp.com/people?where={"lastname": "Doe"}&sort=[("firstname", 1)]&page=5
     HTTP/1.1 200 OK
 
-Pagination can be disabled. Please note that, for clarity, the above example is
-not properly escaped. If using ``curl``, refer to the examples provided in
-:ref:`filters`.
+可以禁用分页。请注意，为了清楚起见，上面的示例没有正确转义。如果使用 ``curl``，
+请参考 :ref:`filters` 中提供的示例。
 
 .. _hateoas_feature:
 
 HATEOAS
 -------
-*Hypermedia as the Engine of Application State* (HATEOAS_) is enabled by
-default. Each GET response includes a ``_links`` section. Links provide details
-on their ``relation`` relative to the resource being accessed, and a ``title``.
-Relations and titles can then be used by clients to dynamically updated their
-UI, or to navigate the API without knowing its structure beforehand. An example:
+默认启用 *Hypermedia as the Engine of Application State* (HATEOAS_)。每个 GET 响应
+都包含一个 ``_links`` 节。链接提供了关于它们相对于被访问资源的``关系``的详细信息和一
+个``标题``。然后，客户端可以使用关系和标题动态更新 UI，或者在不知道 API 结构的情况下
+导航 API。一个例子:
 
 ::
 
@@ -467,31 +431,25 @@ UI, or to navigate the API without knowing its structure beforehand. An example:
         }
     }
 
-A GET request to the API home page (the API entry point) will be served with
-a list of links to accessible resources. From there, any client could navigate
-the API just by following the links provided with every response.
+对 API 主页 (API 入口点) 的 GET 请求将提供到可访问资源的链接列表。从那里，任何客户端
+都可以只通过跟随每个响应提供的链接来导航 API。
 
-HATEOAS links are always relative to the API entry point, so if your API home
-is at ``examples.com/api/v1``, the ``self`` link in the above example would
-mean that the *people* endpoint is located at ``examples.com/api/v1/people``.
+HATEOAS 链接总是相对于 API 入口点，所以如果你的 API 主页面在 ``examples.com/api/v1``，
+在上面例子中的 ``self`` 链接就意味着 *people* 端点位于 ``examples.com/api/v1/people``。
 
-Please note that ``next``, ``previous``, ``last`` and ``related`` items will only be
-included when appropriate.
+请注意，``next``, ``previous``, ``last`` 和 ``related`` 只有在适当的情况下才会包括在内。
 
 禁用 HATEOAS
 ~~~~~~~~~~~~~~~~~
-HATEOAS can be disabled both at the API and/or resource level. Why would you
-want to turn HATEOAS off? Well, if you know that your client application is not
-going to use the feature, then you might want to save on both bandwidth and
-performance.
+可以在 API 和/或资源级别禁用 HATEOAS。为什么要把 HATEOAS 关掉? 好吧，如果你知道你的客
+户端应用程序不会使用该特性，那么你可能希望同时节省带宽和性能。
 
 .. _rendering:
 
 渲染
 ---------
-Eve responses are automatically rendered as JSON (the default) or XML,
-depending on the request ``Accept`` header. Inbound documents (for inserts and
-edits) are in JSON format.
+Eve 响应自动呈现为 JSON (默认值) 或 XML，这取决于请求 ``Accept`` 报头。入站文档 (用于
+插入和编辑) 采用 JSON 格式。
 
 .. code-block:: console
 
@@ -507,7 +465,7 @@ edits) are in JSON format.
         <link rel="child" href="works" title="works" />
     </resource>
 
-Default renderers might be changed by editing ``RENDERERS`` value in the settings file.
+默认渲染器可以通过编辑设置文件中的 ``RENDERERS`` 值来更改。
 
 .. code-block:: python
 
@@ -516,25 +474,22 @@ Default renderers might be changed by editing ``RENDERERS`` value in the setting
         'eve.render.XMLRenderer'
     ]
 
-You can create your own renderer by subclassing ``eve.render.Renderer``. Each
-renderer should set valid ``mime`` attr and have ``.render()`` method implemented.
-Please note that at least one renderer must always be enabled.
+你可以通过子类化 ``eve.render.Renderer`` 来创建自己的渲染器。每个渲染器应该设置有效的
+``mime`` 特性并实现 ``.render()`` 方法。请注意，必须始终启用至少一个渲染器。
 
 .. _conditional_requests:
 
 带条件的请求
 --------------------
-Each resource representation provides information on the last time it was
-updated (``Last-Modified``), along with an hash value computed on the
-representation itself (``ETag``). These headers allow clients to perform
-conditional requests by using the ``If-Modified-Since`` header:
+每个资源陈述都提供关于它最后一次更新的信息 (``Last-Modified``)，以及对陈述本身计算的
+散列值 (``ETag``)。这些头使客户端可以使用 ``If-Modified-Since`` 头执行条件请求:
 
 .. code-block:: console
 
     $ curl -H "If-Modified-Since: Wed, 05 Dec 2012 09:53:07 GMT" -i http://eve-demo.herokuapp.com/people/521d6840c437dc0002d1203c
     HTTP/1.1 200 OK
 
-or the ``If-None-Match`` header:
+或者 ``If-None-Match`` 头:
 
 .. code-block:: console
 
@@ -546,38 +501,35 @@ or the ``If-None-Match`` header:
 
 数据完整性和并发控制
 --------------------------------------
-API responses include a ``ETag`` header which also allows for proper
-concurrency control. An ``ETag`` is a hash value representing the current state
-of the resource on the server. Consumers are not allowed to edit (``PATCH`` or
-``PUT``) or delete (``DELETE``) a resource unless they provide an up-to-date
-``ETag`` for the resource they are attempting to edit. This prevents
-overwriting items with obsolete versions.
+API 响应包括一个 ``ETag`` 头，它也允许适当的并发控制。``ETag`` 是一个哈希值，表示服
+务器上资源的当前状态。使用者不得编辑 (``PATCH`` 或 ``PUT``) 或删除 (``DELETE``) 资
+源，除非他们为试图编辑的资源提供最新的 ``ETag``。这可以防止用过时的版本覆盖项。
 
-Consider the following workflow:
+考虑以下工作流程:
 
 .. code-block:: console
 
     $ curl -H "Content-Type: application/json" -X PATCH -i http://eve-demo.herokuapp.com/people/521d6840c437dc0002d1203c -d '{"firstname": "ronald"}'
     HTTP/1.1 428 PRECONDITION REQUIRED
 
-We attempted an edit (``PATCH``), but we did not provide an ``ETag`` for the
-item so we got a ``428 PRECONDITION REQUIRED`` back. Let's try again:
+我们尝试编辑 (``PATCH``)，但我们没有为项目提供 ``ETag``，所以我们得到
+``428 PRECONDITION REQUIRED`` 返回。让我们再试一次:
 
 .. code-block:: console
 
     $ curl -H "If-Match: 1234567890123456789012345678901234567890" -H "Content-Type: application/json" -X PATCH -i http://eve-demo.herokuapp.com/people/521d6840c437dc0002d1203c -d '{"firstname": "ronald"}'
     HTTP/1.1 412 PRECONDITION FAILED
 
-What went wrong this time? We provided the mandatory ``If-Match`` header, but
-it's value did not match the ``ETag`` computed on the representation of the item
-currently stored on the server, so we got a ``412 PRECONDITION FAILED``. Again!
+这次出了什么问题? 我们提供了强制的 ``If-Match`` 标头，但是它的值与当前存储在服务器上
+的项的陈述计算出的 ``ETag`` 不匹配，因此我们得到了 ``412 PRECONDITION FAILED``。
+又一次!
 
 .. code-block:: console
 
     $ curl -H "If-Match: 80b81f314712932a4d4ea75ab0b76a4eea613012" -H "Content-Type: application/json" -X PATCH -i http://eve-demo.herokuapp.com/people/50adfa4038345b1049c88a37 -d '{"firstname": "ronald"}'
     HTTP/1.1 200 OK
 
-Finally! And the response payload looks something like this:
+终于! 响应负载看起来是这样的:
 
 .. code-block:: javascript
 
@@ -589,39 +541,32 @@ Finally! And the response payload looks something like this:
         "_links": {"self": "..."}
     }
 
-This time we got our patch in, and the server returned the new ``ETag``.  We
-also get the new ``_updated`` value, which eventually will allow us to perform
-subsequent `conditional requests`_.
+这一次我们的补丁打对了，服务器返回了新的 ``ETag``。我们还得到了新的 ``_updated``
+值，它最终将允许我们执行后续的 `conditional requests`_ 。
 
-Concurrency control applies to all edition methods: ``PATCH`` (edit), ``PUT``
-(replace), ``DELETE`` (delete).
+并发控制适用于所有版本方法: ``PATCH`` (edit), ``PUT`` (覆盖), ``DELETE`` (删除)。
 
 禁用并发控制
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-If your use case requires, you can opt to completely disable concurrency
-control. ETag match checks can be disabled by setting the ``IF_MATCH``
-configuration variable to ``False`` (see :ref:`global`). When concurrency
-control is disabled no ETag is provided with responses. You should be careful
-about disabling this feature, as you would effectively open your API to the
-risk of older versions replacing your documents. Alternatively, ETag match
-checks can be made optional by the client if ``ENFORCE_IF_MATCH`` is disabled.
-When concurrency check enforcement is disabled, requests with the ``If-Match``
-header will be processed as conditional requests, and requests made without
-the ``If-Match`` header will not be processed as conditional.
+如果你的使用场景需要，您可以选择完全禁用并发控制。可以通过设置 ``IF_MATCH`` 配置变量
+为 ``False`` 来禁用 ETag 匹配检查 (参见 :ref:`global`)。当并发控制被禁用时，响应中
+不会提供 ETag。您应该谨慎禁用此功能，因为你将开放你的 API，使其实际上面临文档被旧版本
+替换的风险。另外，如果禁用了 ``ENFORCE_IF_MATCH``，ETag 匹配检查可以被客户端当成可
+选的。当禁用强制性并发检查后，带有 ``If-Match`` 标头的请求将作为条件请求处理，而没有
+``If-Match`` 标头的请求将不作为条件请求处理。
 
 .. _bulk_insert:
 
 批量插入
 ------------
-A client may submit a single document for insertion:
+客户可提交单个文档插入:
 
 .. code-block:: console
 
     $ curl -d '{"firstname": "barack", "lastname": "obama"}' -H 'Content-Type: application/json' http://eve-demo.herokuapp.com/people
     HTTP/1.1 201 OK
 
-In this case the response payload will just contain the relevant document
-metadata:
+在这种情况下，响应有效负载将只包含相关的文档元数据:
 
 .. code-block:: javascript
 
@@ -633,20 +578,18 @@ metadata:
         "_links": {"self": {"href": "people/50ae43339fa12500024def5b", "title": "person"}}
     }
 
-When a ``201 Created`` is returned following a POST request, the ``Location``
-header is also included with the response. Its value is the URI to the new
-document.
+当 POST 请求返回 ``201 Created`` 时，响应中还包含了 ``Location`` 报头。它的值
+是新文档的 URI。
 
-In order to reduce the number of loopbacks, a client might also submit
-multiple documents with a single request. All it needs to do is enclose the
-documents in a JSON list:
+为了减少回送的数量，客户端还可以通过一个请求提交多个文档。它所需要做的就是将文档
+封装在 JSON 列表中:
 
 .. code-block:: console
 
     $ curl -d '[{"firstname": "barack", "lastname": "obama"}, {"firstname": "mitt", "lastname": "romney"}]' -H 'Content-Type: application/json' http://eve-demo.herokuapp.com/people
     HTTP/1.1 201 OK
 
-The response will be a list itself, with the state of each document:
+响应本身将是一个列表，带有每个文档的状态:
 
 .. code-block:: javascript
 
@@ -670,29 +613,23 @@ The response will be a list itself, with the state of each document:
         ]
     }
 
-When multiple documents are submitted the API takes advantage of MongoDB *bulk
-insert* capabilities which means that not only there's just one request
-traveling from the client to the remote API, but also that a single loopback is
-performed between the API server and the database.
+当多个文档被提交时，API 利用了 MongoDB *bulk insert* 功能，这意味着不仅是只有一个
+请求从客户端传输到远程 API，还在 API 服务器和数据库之间执行了一个回送。
 
-In case of successful multiple inserts, keep in mind that the ``Location``
-header only returns the URI of the first created document.
+如果多文档插入成功，请记住 ``Location`` 头只返回创建的第一个文档的 URI。
 
 
 数据验证
 ---------------
-Data validation is provided out-of-the-box. Your configuration includes
-a schema definition for every resource managed by the API. Data sent to the API
-to be inserted/updated will be validated against the schema, and a resource
-will only be updated if validation passes.
+数据验证是开箱即用的。您的配置包括对 API 管理的每个资源的模式定义。发送到 API 
+要被插入/更新的数据将根据模式进行验证，只有验证通过时才会更新资源。
 
 .. code-block:: console
 
     $ curl -d '[{"firstname": "bill", "lastname": "clinton"}, {"firstname": "mitt", "lastname": "romney"}]' -H 'Content-Type: application/json' http://eve-demo.herokuapp.com/people
     HTTP/1.1 201 OK
 
-The response will contain a success/error state for each item provided in the
-request:
+响应中将包含请求中提供的每个项目的成功/错误状态:
 
 .. code-block:: javascript
 
@@ -710,33 +647,28 @@ request:
         ]
     ]
 
-In the example above, the first document did not validate so the whole request
-has been rejected.
+在上面的示例中，第一个文档没有通过验证，因此整个请求被拒绝。
 
-When all documents pass validation and are inserted correctly the response
-status is ``201 Created``. If any document fails validation the response status
-is ``422 Unprocessable Entity``, or any other error code defined by
-``VALIDATION_ERROR_STATUS`` configuration.
+当所有文档通过验证并正确插入时，响应状态为 ``201 Created``。如果任何文档验证失败，那么
+响应状态为 ``422 Unprocessable Entity``，或由 ``VALIDATION_ERROR_STATUS`` 配置定义
+的任何其他错误代码。
 
-For more information see :ref:`validation`.
+有关更多信息，请参见 :ref:`validation`。
 
 扩展性的数据验证
 --------------------------
-Data validation is based on the Cerberus_ validation system and therefore it is
-extensible, so you can adapt it to your specific use case. Say that your API can
-only accept odd numbers for a certain field value; you can extend the
-validation class to validate that. Or say you want to make sure that a VAT
-field actually matches your own country VAT algorithm; you can do that too. As
-a matter of fact, Eve's MongoDB data-layer itself extends Cerberus
-validation by implementing the ``unique`` schema field constraint. For more
-information see :ref:`validation`.
+数据验证基于 Cerberus_ 验证系统，因此它是可扩展的，所以你可以根据你的特定使用场景
+调整它。假设你的 API 在某个字段值上只能接受奇数，你可以扩展 validation 类来验证
+它。或者你希望确保 VAT 字段实际上匹配你自己国家的增值税算法，你也可以这么做。事
+实上，Eve 的 MongoDB 数据层本身通过实现 ``unique`` 模式字段约束扩展了 Cerberus 
+验证。有关更多信息，请参见 :ref:`validation`。
 
 编辑一个文档 (PATCH)
 --------------------------
-Clients can edit a document with the ``PATCH`` method, while ``PUT`` will
-replace it. ``PATCH`` cannot remove a field, but only update its value.
+客户端可以通过 ``PATCH`` 方法编辑文档，而 ``PUT`` 将替换它。``PATCH`` 不能删除
+字段，而只能更新其值。
 
-Consider the following schema:
+考虑以下模式:
 
 .. code-block:: javascript
 
@@ -764,15 +696,15 @@ Consider the following schema:
     }
 
 
-Two notations: ``{contact: {email: 'an email'}}`` and ``{contact.email: 'an
-email'}`` can be used to update the ``email`` field in the ``contact`` subdocument.
+两种写法: ``{contact: {email: 'an email'}}`` 和 ``{contact.email: 'an
+email'}`` 都可以用于更新 ``contact`` 子文档种 ``email`` 字段。
 
 
 .. _cache_control:
 
 资源级缓存控制
 ----------------------------
-You can set global and individual cache-control directives for each resource.
+您可以为每个资源设置全局和单独的缓存控制指令。
 
 .. code-block:: console
 
@@ -785,107 +717,81 @@ You can set global and individual cache-control directives for each resource.
     Server: Eve/0.0.3 Werkzeug/0.8.3 Python/2.7.3
     Date: Tue, 22 Jan 2013 09:34:14 GMT
 
-The response above includes both ``Cache-Control`` and ``Expires`` headers.
-These will minimize load on the server since cache-enabled consumers will
-perform resource-intensive request only when really needed.
+上面的响应包括 ``Cache-Control`` 和 ``Expires`` 头信息。这将最小化服务器上的负载，
+因为启用缓存的使用者仅在真正需要时才执行资源密集型请求。
 
 API 版本控制
 --------------
-I'm not too fond of API versioning. I believe that clients should be
-intelligent enough to deal with API updates transparently, especially since
-Eve-powered API support HATEOAS_. When versioning is a necessity, different API
-versions should be isolated instances since so many things could be different
-between versions: caching, URIs, schemas, validation, and so on. URI versioning
-(http://api.example.com/v1/...) is supported.
+我不太喜欢 API 版本控制。我相信客户端应该足够聪明，能够透明地处理 API 更新，特别是
+是在 Eve 支持的 API 支持 HATEOAS_ 以后。当需要进行版本控制时，不同的 API 版本应该
+是独立的实例，因为不同版本之间有许多不同之处: 缓存、URI、模式、验证等等。支持 URI 
+版本控制 (http://api.example.com/v1/..)。
 
 .. _document_versioning:
 
 文档版本控制
 -------------------
-Eve supports automatic version control of documents. By default, this setting
-is turned off, but it can be turned globally or configured individually for
-each resource. When enabled, Eve begins automatically tracking changes to
-documents and adds the fields ``_version`` and ``_latest_version`` when
-retrieving documents.
+Eve 支持文档的自动版本控制。默认情况下，该设置是关闭的，但是可以全局打开，也可以为
+每个资源单独配置。启用后，Eve 开始自动跟踪对文档的更改，并在检索文档时添加
+``_version`` 和 ``_latest_version`` 字段。
 
-Behind the scenes, Eve stores document versions in shadow collections that
-parallels the collection of each primary resource that Eve defines. New
-document versions are automatically added to this collection during normal
-POST, PUT, and PATCH operations. A special new query parameter is available
-when GETing an item that provides access to the document versions. Access a
-specific version with ``?version=VERSION``, access all versions with
-``?version=all``, and access diffs of all versions with ``?version=diffs``.
-Collection query features like projections, pagination, and sorting work with
-``all`` and ``diff`` except for sorting which does not work on ``diff``.
+在幕后，Eve 将文档版本存储在影子集合中，影子集合与 Eve 定义的每个主要资源的集合平行。
+在正常的 POST、PUT 和 PATCH 操作期间，新文档版本会自动添加到这个集合中。当获取提供
+对文档版本访问的数据项时，可以使用一个特殊的新查询参数。使用 ``?version=VERSION``
+访问特定版本，使用 ``?version=all`` 访问所有版本，并使用 ``?version=diffs`` 访问
+所有版本的差异。集合查询特性，如投影、分页和排序，可以与 ``all`` 和 ``diff`` 一起
+工作，但排序与 ``diff`` 不行。
 
-It is important to note that there are a few non-standard scenarios which could
-produce unexpected results when versioning is turned on. In particular, document
-history will not be saved when modifying collections outside of the Eve
-generated API. Also, if at anytime the ``VERSION`` field gets removed from the
-primary document (which cannot happen through the API when versioning is turned
-on), a subsequent write will re-initialize the ``VERSION`` number with
-``VERSION`` = 1. At this time there will be multiple versions of the document
-with the same version number. In normal practice, ``VERSIONING`` can be enable
-without worry for any new collection or even an existing collection which has
-not previously had versioning enabled.
+需要注意的是，在开启版本控制时，有一些非标准场景可能会产生意想不到的结果。特别是，
+在 Eve 生成的 API 之外修改集合时，不会保存文档历史记录。此外，如果在任何时候从主文
+档中删除了 ``VERSION`` 字段 (启用版本控制时不能通过 API 执行)，后续的写操作通过
+``VERSION`` = 1 重新初始化 ``VERSION`` 号。此时将有多个版本的文档使用相同的版本号。
+在正常实践中，可以启用 ``VERSIONING``，而不必担心任何新集合，甚至不必担心以前没有
+启用版本控制的现有集合。
 
-Additionally, there are caching corner cases unique to document versions. A
-specific document version includes the ``_latest_version`` field, the value of
-which will change when a new document version is created. To account for this,
-Eve determines the time ``_latest_version`` changed (the timestamp of the last
-update to the primary document) and uses that value to populate the
-``Last-Modified`` header and check the ``If-Modified-Since`` conditional cache
-validator of specific document version queries. Note that this will be
-different from the timestamp in the version's last updated field. The etag for
-a document version does not change when ``_latest_version`` changes, however.
-This results in two corner cases. First, because Eve cannot determine if the
-client's ``_latest_version`` is up to date from an ETag alone, a query using
-only ``If-None-Match`` for cache validation of old document versions will always
-have its cache invalidated. Second, a version fetched and cached in the same
-second that multiple new versions are created can receive incorrect
-``Not Modified`` responses on ensuing ``GET`` queries due to ``Last-Modified``
-values having a resolution of one second and the static etag values not
-providing indication of the changes. These are both highly unlikely scenarios,
-but an application expecting multiple edits per second should account for the
-possibility of holing stale ``_latest_version`` data.
+此外，还有文档版本特有的缓存边缘场景。特定的文档版本包含 ``_latest_version`` 字段，
+当创建新文档版本时，该字段的值将发生更改。为了解释这一点，Eve 确定时间 
+``_latest_version`` 是否已更改 (最后一个的时间戳) 并使用该值填充 ``Last-Modified``
+标头，并检查特定文档版本查询的 ``If-Modified-Since`` 条件缓存验证器'。注意，这与
+版本最后更新字段中的时间戳不同。但是，当 ``_latest_version`` 更改时，文档版本的
+etag 不会更改。这导致了两种极端情况。首先，由于 Eve 无法仅从 ETag 确定客户端的
+``_latest_version`` 是否为最新的，因此仅使用 ``If-None-Match`` 进行旧文档版本
+缓存验证的查询将始终使其缓存失效。其次，在创建多个新版本的同一秒内获取和缓存的版本
+可能会在随后的 ``GET`` 查询中收到不正确的 ``Not Modified`` 响应，原因是
+``Last-Modified`` 值的分辨率为 1 秒，而静态 etag 值没有提供更改指示。这些都是非常
+不可能的场景，但是希望每秒进行多次编辑的应用程序应该考虑到打破旧 ``_latest_version`` 
+数据的可能性。
 
-For more information see and :ref:`global` and :ref:`domain`.
+有关更多信息，请参见: :ref:`global` 和 :ref:`domain`。
 
 
 身份验证
 --------------
-Customizable Basic Authentication (RFC-2617), Token-based authentication and
-HMAC-based Authentication are supported. OAuth2 can be easily integrated. You
-can lockdown the whole API, or just some endpoints. You can also restrict CRUD
-commands, like allowing open read-only access while restricting edits, inserts
-and deletes to authorized users. Role-based access control is supported as
-well. For more information see :ref:`auth`.
+支持可定制的基本身份验证 (RFC-2617)、基于令牌的身份验证和基于 HMAC 的身份验证。
+OAuth2 可以很容易地集成。您可以锁定整个 API，或者只是一些终结点。你还可以限制 CRUD 
+命令，比如，允许打开只读访问，同时限制对授权用户的编辑、插入和删除。还支持基于角色
+的访问控制。有关更多信息，请参见 :ref:`auth`。
 
 CORS 跨域资源共享
 ----------------------------------
-Eve-powered APIs can be accessed by the JavaScript contained in web pages.
-Disabled by default, CORS_ allows web pages to work with REST APIs, something
-that is usually restricted by most browsers 'same domain' security policy. The
-``X_DOMAINS`` setting allows to specify which domains are allowed to perform
-CORS requests. A list of regular expressions may be defined in ``X_DOMAINS_RE``, which is useful for websites with dynamic ranges of subdomains. Make sure to
-anchor and escape the regexes properly, for example
-``X_DOMAINS_RE = ['^http://sub-\d{3}\.example\.com$']``.
+web 页面中包含的 JavaScript 可以访问 Eve 支持的 API。默认情况下是禁用的，CORS_ 使
+web 页面可以使用 REST API，这通常受到大多数浏览器 “同域” 安全策略的限制。
+``X_DOMAINS`` 设置允许指定允许哪些域可以执行 CORS 请求。正则表达式列表可以在
+``X_DOMAINS_RE`` 中定义，这对于具有子域动态范围的网站非常有用。确保锚定并正确转义 
+regex，例如 ``X_DOMAINS_RE = ['^http://sub-\d{3}\.example\.com$']`。
 
 JSONP 支持
 -------------
-In general you don't really want to add JSONP when you can enable CORS instead:
+一般来说，当你可以启用 CORS 时，你并不想添加 JSONP:
 
-    There have been some criticisms raised about JSONP. Cross-origin resource
-    sharing (CORS) is a more recent method of getting data from a server in
-    a different domain, which addresses some of those criticisms. All modern
-    browsers now support CORS making it a viable cross-browser alternative (source_.)
+    有人对 JSONP 提出了一些批评。跨源资源共享 (CORS) 是一种较新的从不同域中的服务器
+    获取数据的方法，它解决了其中一些批评。现在所有的现代浏览器都支持 CORS，这使得它
+    成为跨浏览器的可行选择 (source_)。
 
-There are circumstances however when you do need JSONP, like when you have to
-support legacy software (IE6 anyone?)
+然而，在某些情况下，你确实需要 JSONP，比如必须支持老软件时(有人支持 IE6 吗?)
 
-To enable JSONP in Eve you just set
-``JSONP_ARGUMENT``. Then, any valid request with ``JSONP_ARGUMENT`` will get
-back a response wrapped with said argument value. For example if you set
+要在 Eve 中启用 JSONP，只需设置 ``JSONP_ARGUMENT``。然后，任何带有 
+``JSONP_ARGUMENT`` 的有效请求都会返回一个包含该参数值的响应。例如，如果您设置 
 ``JSON_ARGUMENT = 'callback'``:
 
 .. code-block:: console
@@ -893,29 +799,25 @@ back a response wrapped with said argument value. For example if you set
     $ curl -i http://localhost:5000/?callback=hello
     hello(<JSON here>)
 
-Requests with no ``callback`` argument will be served with no JSONP.
+不含 ``callback`` 参数的请求将被当作没有 JSONP 的情况来处理。
 
 
 默认只读
 --------------------
-If all you need is a read-only API, then you can have it up and running in
-a matter of minutes.
+如果你只需要一个只读 API，那么你可以在几分钟内启动并运行它。
 
 默认的和可为空的值
 ---------------------------
-Fields can have default values and nullable types. When serving POST (create)
-requests, missing fields will be assigned the configured default values. See
-``default`` and ``nullable`` keywords in :ref:`schema` for more information.
+字段可以有默认值和可空类型。当服务 POST (创建) 请求时，将为缺失的字段分配配置的默认值。
+有关更多信息，请参见 :ref:`schema` 中的 ``default`` and ``nullable``关键字。
 
 预定义的数据库过滤器
 ---------------------------
-Resource endpoints will only expose (and update) documents that match
-a predefined filter. This allows for multiple resource endpoints to seamlessly
-target the same database collection. A typical use-case would be a
-hypothetical ``people`` collection on the database being used by both the
-``/admins`` and ``/users`` API endpoints.
+资源端点将只公开 (和更新) 匹配预定义筛选器的文档。这使多个资源端点可以无缝地针对同一个
+数据库集合。典型的使用场景是假想中的，由 ``/admins`` 和 ``/users`` API 终结点使用的
+数据库上的 ``people`` 集合。
 
-.. admonition:: See also
+.. 警告:: 另请参阅
 
     - :ref:`datasource`
     - :ref:`filter`
@@ -924,30 +826,26 @@ hypothetical ``people`` collection on the database being used by both the
 
 投影
 -----------
-This feature allows you to create dynamic views of collections and documents,
-or more precisely, to decide what fields should or should not be returned,
-using a 'projection'. Put another way, Projections are conditional queries
-where the client dictates which fields should be returned by the API.
+这项特性允许你创建集合和文档的动态视图，或者更精确地说，使用 'projection' 来决定应该
+或不应该返回哪些字段。换句话说，投影是条件查询，客户端指定 API 应该返回哪些字段。
 
 .. code-block:: console
 
     $ curl -i http://eve-demo.herokuapp.com/people?projection={"lastname": 1, "born": 1}
     HTTP/1.1 200 OK
 
-The query above will only return *lastname* and *born* out of all the fields
-available in the 'people' resource. You can also exclude fields:
+上面的查询将只返回 'people' 资源中所有可用字段中的 *lastname* 和 *born*。你还可以排除字段:
 
 .. code-block:: console
 
     $ curl -i http://eve-demo.herokuapp.com/people?projection={"born": 0}
     HTTP/1.1 200 OK
 
-The above will return all fields but *born*. Please note that key fields such
-as ID_FIELD, DATE_CREATED, DATE_UPDATED etc.  will still be included with the
-payload. Also keep in mind that some database engines, Mongo included, do not
-allow for mixing of inclusive and exclusive selections.
+上面将返回除 *born* 以外的所有字段。请注意，负载中仍然包含 ID_FIELD、DATE_CREATED、
+DATE_UPDATED 等关键字段。还要记住，有些数据库引擎 (包括 Mongo) 不允许混合包含和排除
+选项。
 
-.. admonition:: See also
+.. 警告:: 另请参阅
 
     - :ref:`projection`
     - :ref:`projection_filestorage`
@@ -956,12 +854,10 @@ allow for mixing of inclusive and exclusive selections.
 
 内嵌资源序列化
 -------------------------------
-If a document field is referencing a document in another resource, clients can
-request the referenced document to be embedded within the requested document.
+如果文档字段正在引用另一个资源中的文档，客户端可以请求将引用的文档嵌入到请求的文档中。
 
-Clients have the power to activate document embedding on per-request basis by
-means of a query parameter. Suppose you have a ``emails`` resource configured
-like this:
+客户端可以通过查询参数激活基于每个请求的文档嵌入。假设你有一个这样配置的 ``emails`` 
+资源:
 
 .. code-block:: python
    :emphasize-lines: 9
@@ -982,23 +878,18 @@ like this:
             }
         }
 
-A GET like this: ``/emails?embedded={"author":1}`` would return a fully
-embedded users document, whereas the same request without the ``embedded``
-argument would just return the user ``ObjectId``. Embedded resource
-serialization is available at both resource and item
-(``/emails/<id>/?embedded={"author":1}``) endpoints.
+A GET 像这样: ``/emails?embedded={"author":1}``，将返回一个完全嵌入的用户文档，
+而没有 ``embedded`` 参数的相同请求将只返回用户 ``ObjectId``。嵌入式资源序列化在
+资源和数据项 (``/emails/<id>/?embedded={"author":1}``) 终结点都可用。
 
-Embedding can be enabled or disabled both at global level (by setting
-``EMBEDDING`` to either ``True`` or ``False``) and at resource level (by
-toggling the ``embedding`` value). Furthermore, only fields with the
-``embeddable`` value explicitly set to ``True`` will allow the embedding of
-referenced documents.
+可以在全局级别 (通过将 ``EMBEDDING`` 设置为 ``True`` 或 ``False``) 和资源级别 
+(通过切换 ``embedding`` 值) 启用或禁用嵌入。此外，只有 ``embeddable`` 值显式设
+置为 ``True`` 的字段才允许嵌入引用的文档。
 
-Embedding also works with a data_relation to a specific version of a document,
-but the schema looks a little bit different. To enable the data_relation to a
-specific version, add ``'version': True`` to the data_relation block. You'll
-also want to change the ``type`` to ``dict`` and add the ``schema`` definition
-shown below.
+嵌入还可以处理到文档特定版本的 data_relationship，但是模式看起来有点不同。要将 
+data_relationship 启用到特定版本，请将 ``'version': True`` 添加到 
+data_relationship 块。你还需要将 ``type`` 更改为 ``dict``，并添加如下所示的 
+``schema`` 定义。
 
 .. code-block:: python
    :emphasize-lines: 5, 6, 11
@@ -1024,19 +915,16 @@ shown below.
             }
         }
 
-As you can see, ``'version': True`` changes the expected value of a
-data_relation field to a dictionary with fields names ``data_relation['field']``
-and ``VERSION``. With ``'field': '_id'`` in the data_relation definition above
-and ``VERSION = '_version'`` in the Eve config, the value of the data_relation
-in this scenario would be a dictionary with fields ``_id`` and ``_version``.
+如你所见，``'version': True`` 将 data_relationship 字段的期望值更改为具有字段名称
+``data_relation['field']`` 和 ``VERSION`` 的字典。在上面的 data_relationship 定
+义中使用 ``'field': '_id'``，在 Eve 配置中使用 ``VERSION = '_version'``，在这种
+情况下，data_relationship 的值将是一个字典，其中的字段为 ``_id`` 和 ``_version``。
 
 预定义的资源序列化
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-It is also possible to elect some fields for predefined resource
-serialization. If the listed fields are embeddable and they are actually referencing
-documents in other resources (and embedding is enabled for the resource), then the
-referenced documents will be embedded by default. Clients can still opt out from field
-that are embedded by default:
+还可以为预定义的资源序列化选择一些字段。如果列出的字段是可嵌入的，并且它们实际上正在
+引用其他资源中的文档 (并且对资源启用了嵌入)，那么默认情况下将嵌入所引用的文档。客户端
+仍然可以选择退出默认嵌入的字段:
 
 .. code-block:: console
 
@@ -1045,46 +933,37 @@ that are embedded by default:
 
 Limitations
 ~~~~~~~~~~~
-Currently we support embedding of documents by references located in any
-subdocuments (nested dicts and lists). For example, a query
-``/invoices/?embedded={"user.friends":1}`` will return a document with ``user``
-and all his ``friends`` embedded, but only if ``user`` is a subdocument and
-``friends`` is a list of reference (it could be a list of dicts, nested
-dict, etc.). This feature is about serialization on GET requests. There's no
-support for POST, PUT or PATCH of embedded documents.
+目前，我们通过对位于任何子文档 (嵌套的字典和列表) 的引用支持文档嵌入。例如，查询 
+``/invoices/?embedded={"user.friends":1}`` 将返回一个带有 ``user`` 的文档
+和它所有的 ``friends`` 嵌入，但只有当 ``user`` 是一个子文档，而 ``friends`` 是
+一个引用列表 (它可以是一个字典列表，嵌套字典，等等) 时。这个特性是关于 GET 请求的
+序列化。不支持对嵌入文档的 POST、PUT 或 PATCH。
 
-Document embedding is enabled by default.
+默认情况下文档嵌入是启用的。
 
-.. admonition:: Please note
+.. 警告:: 请注意
 
-    When it comes to MongoDB, what embedded resource serialization deals with
-    is *document references* (linked documents), something different from
-    *embedded documents*, also supported by Eve (see `MongoDB Data Model
-    Design`_). Embedded resource serialization is a nice feature that can
-    really help with normalizing your data model for the client.  However, when
-    deciding whether to enable it or not, especially by default, keep in mind
-    that each embedded resource being looked up will require a database lookup,
-    which can easily lead to performance issues.
+    当涉及到 MongoDB 时，嵌入式资源序列化处理的是*文档引用* (链接文档)，这与
+    *嵌入式文档*不同，也受到 Eve 的支持 (参见 `MongoDB Data Model
+    Design`_)。嵌入式资源序列化是一个很好的特性，它可以帮助你为客户端规范化数据
+    模型。但是，在决定是否启用它时 (尤其是默认情况下)，请记住，正在查找的每个嵌入
+    式资源都需要进行数据库查找，这很容易导致性能问题。
 
 .. _soft_delete:
 
 Soft Delete
 -----------
-Eve provides an optional "soft delete" mode in which deleted documents continue
-to be stored in the database and are able to be restored, but still act as
-removed items in response to API requests. Soft delete is disabled by default,
-but can be enabled globally using the ``SOFT_DELETE`` configuration setting, or
-individually configured at the resource level using the domain configuration
-``soft_delete`` setting. See :ref:`global` and :ref:`domain` for more
-information on enabling and configuring soft delete.
+Eve 提供了一个可选的 “软删除” 模式，在该模式中，已删除的文档继续存储在数据库中，并且
+能够恢复，但在响应 API 请求时仍然作为已删除的项。默认情况下软删除是禁用的，但是可以
+使用 ``SOFT_DELETE`` 配置项设置全局启用软删除，或者使用域配置 ``soft_delete`` 设置
+在资源级别单独配置软删除。有关启用和配置软删除的更多信息，请参见 :ref:`global` 和 
+:ref:`domain`。
 
-When soft deletion is enabled, callbacks attached to
-``on_delete_resource_originals`` and
-``on_delete_resource_originals_<resource_name>`` events will receive both
-deleted and not deleted documents via the ``originals`` argument (see
-:ref:`eventhooks`).
+当启用软删除时，附加到 ``on_delete_resource_originals`` 和 
+``on_delete_resource_originals_<resource_name>`` 事件的回调将通过 ``originals`` 
+参数接收已删除和未删除的文档(参见 :ref:`eventhooks`)。
 
-Behavior
+行为
 ~~~~~~~~
 With soft delete enabled, DELETE requests to individual items and resources
 respond just as they do for a traditional "hard" delete. Behind the scenes,
@@ -1128,7 +1007,7 @@ automatically filter out soft deleted items. Passing a request object with
 ``req.show_deleted == True`` or a lookup dictionary that explicitly filters on
 the ``_deleted`` field will override the default filtering.
 
-Restoring Soft Deleted Items
+恢复软删除项
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 PUT or PATCH requests made to a soft deleted document will restore it,
 automatically setting ``_deleted`` to ``false`` in the database. Modifying the
@@ -1146,7 +1025,7 @@ state. This is because soft deleted documents are ignored when validating the
 `unique` rule for new or updated documents.
 
 
-Versioning
+版本控制
 ~~~~~~~~~~
 Soft deleting a versioned document creates a new version of that document with
 ``_deleted`` set to ``true``. A GET request to the deleted version will receive
@@ -1154,7 +1033,7 @@ a ``404 Not Found`` response as described above, while previous versions will
 continue to respond with ``200 OK``. Responses to ``?version=diff`` or
 ``?version=all`` will include the deleted version as if it were any other.
 
-Data Relations
+数据关系
 ~~~~~~~~~~~~~~
 The Eve ``data_relation`` validator will not allow references to documents that
 have been soft deleted. Attempting to create or update a document with a
@@ -1168,7 +1047,7 @@ Versioned data relations to a deleted document version will also fail to
 validate, but relations to versions prior to deletion or after restoration of
 the document are allowed and will continue to resolve successfully.
 
-Considerations
+注意事项
 ~~~~~~~~~~~~~~
 Disabling soft delete after use in an application requires database maintenance
 to ensure your API remains consistent. With soft delete disabled, requests will
@@ -1181,9 +1060,9 @@ application is safe, and will maintain documents deleted from that point on.
 
 .. _eventhooks:
 
-Event Hooks
+事件钩子
 -----------
-Pre-Request Event Hooks
+Pre-Request 事件钩子
 ~~~~~~~~~~~~~~~~~~~~~~~
 When a GET/HEAD, POST, PATCH, PUT, DELETE request is received, both
 a ``on_pre_<method>`` and a ``on_pre_<method>_<resource>`` event is raised.
@@ -1209,7 +1088,7 @@ Callbacks will receive the resource being requested, the original
 exception being the ``on_pre_POST`` hook which does not provide a ``lookup``
 argument).
 
-Dynamic Lookup Filters
+动态查询过滤器
 ^^^^^^^^^^^^^^^^^^^^^^
 Since the ``lookup`` dictionary will be used by the data layer to retrieve
 resource documents, developers may choose to alter it in order to add custom
@@ -1232,7 +1111,7 @@ filters via configuration whereas by hooking to the ``on_pre_<METHOD>`` events
 you are allowed to set dynamic filters instead, which allows for additional
 flexibility.
 
-Post-Request Event Hooks
+Post-Request 事件钩子
 ~~~~~~~~~~~~~~~~~~~~~~~~
 When a GET, POST, PATCH, PUT, DELETE method has been executed, both
 a ``on_post_<method>`` and ``on_post_<method>_<resource>`` event is raised. You
@@ -1255,7 +1134,7 @@ payload.
 
     >>> app.run()
 
-Database event hooks
+数据库事件钩子
 ~~~~~~~~~~~~~~~~~~~~
 
 Database event hooks work like request event hooks. These events are fired
@@ -1380,7 +1259,7 @@ Let's see an overview of what events are available:
 
 
 
-Fetch Events
+Fetch 事件
 ^^^^^^^^^^^^
 
 These are the fetch events with their method signature:
@@ -1424,7 +1303,7 @@ that diffs returns partial documents which should be handled in the
 callback.
 
 
-Insert Events
+Insert 事件
 ^^^^^^^^^^^^^
 
 These are the insert events with their method signature:
@@ -1455,7 +1334,7 @@ After the items have been inserted, these two events are fired:
     Items passed to these events as arguments come in a list. And only those items
     that passed validation are sent.
 
-Example:
+示例:
 
 .. code-block:: pycon
 
@@ -1470,7 +1349,7 @@ Example:
     >>> app.on_inserted_contacts += after_insert_contacts
 
 
-Replace Events
+Replace 事件
 ^^^^^^^^^^^^^^
 
 These are the replace events with their method signature:
@@ -1496,7 +1375,7 @@ After the item has been replaced, these other two events are fired:
 - ``on_replaced`` for any resource item endpoint.
 - ``on_replaced_<resource_name>`` for the specific resource endpoint.
 
-Update Events
+Update 事件
 ^^^^^^^^^^^^^
 
 These are the update events with their method signature:
@@ -1530,7 +1409,7 @@ could hook into these events to arbitrarily add or update fields in
     consistent with the state of the items on the database (they  won't be
     updated to reflect changes eventually applied by the callback functions).
 
-Delete Events
+Delete 事件
 ^^^^^^^^^^^^^
 
 These are the delete events with their method signature:
@@ -1546,7 +1425,7 @@ These are the delete events with their method signature:
 - ``on_deleted_resource(resource_name)``
 - ``on_deleted_resource_<resource_name>()``
 
-Items
+数据项
 .....
 
 When a DELETE request hits an item endpoint and `before` the item is deleted,
@@ -1564,7 +1443,7 @@ these events to perform accessory actions. And no you can't arbitrarily abort
 the delete operation at this point (you should probably look at
 :ref:`validation`, or eventually disable the delete command altogether).
 
-Resources
+资源
 .........
 
 If you were brave enough to enable the DELETE command on resource endpoints
@@ -1583,7 +1462,7 @@ list of originals
 
 .. _aggregation_hooks:
 
-Aggregation event hooks
+聚合事件钩子
 ~~~~~~~~~~~~~~~~~~~~~~~
 You can also attach one or more callbacks to your aggregation endpoints. The
 ``before_aggregation`` event is fired when an aggregation is about to be
@@ -1621,7 +1500,7 @@ For more information on aggregation support, see :ref:`aggregation`
 
 .. _ratelimiting:
 
-Rate Limiting
+速度限制
 -------------
 API rate limiting is supported on a per-user/method basis. You can set the
 number of requests and the time window for each HTTP method. If the requests
@@ -1647,13 +1526,12 @@ PATCH, DELETE).
    Rate Limiting is disabled by default, and needs a Redis server running when
    enabled. A tutorial on Rate Limiting is forthcoming.
 
-Custom ID Fields
+自定义 ID 字段
 ----------------
-Eve allows to extend its standard data type support. In the :ref:`custom_ids`
-tutorial we see how it is possible to use UUID values instead of MongoDB
-default ObjectIds as unique document identifiers.
+Eve 允许扩展其标准数据类型支持。在 :ref:`custom_ids` 教程中，我们看到了如何使用 UUID 
+值代替 MongoDB 默认对象作为惟一的文档标识。
 
-File Storage
+文件存储
 ------------
 Media files (images, pdf, etc.) can be uploaded as ``media`` document
 fields. Upload is done via ``POST``, ``PUT`` and
@@ -1685,7 +1563,7 @@ As a proper developer guide is not available yet, you can peek at the
 MediaStorage_ source if you are interested in developing custom storage
 classes.
 
-Serving media files as Base64 strings
+以 Base64 字符串的形式提供媒体文件
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 When a document is requested media files will be returned as Base64 strings,
 
@@ -1741,7 +1619,7 @@ example) then the media files can be excluded from the payload by setting to
 ``False`` the ``RETURN_MEDIA_AS_BASE64_STRING`` flag. This takes into account
 if ``EXTENDED_MEDIA_INFO`` is used.
 
-Serving media files at a dedicated endpoint
+在专用终结点上提供媒体文件
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 While returning files embedded as Base64 fields is the default behaviour, you
 can opt for serving them at a dedicated media endpoint. You achieve that by
@@ -1771,7 +1649,7 @@ the API base address will be used when building the URL for ``MEDIA_ENDPOINT``.
 
 .. _partial_request:
 
-Partial media downloads
+部分媒体下载
 ~~~~~~~~~~~~~~~~~~~~~~~
 When files are served at a dedicated endpoint, clients can request partial
 downloads. This allows them to provide features such as optimized
@@ -1796,7 +1674,7 @@ In the snippet above, we see curl requesting the first chunk of a file.
 
 .. _projection_filestorage:
 
-Leveraging Projections to optimize the handling of media files
+利用投影优化媒体文件的处理
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Clients and API maintainers can exploit the :ref:`projections` feature to
 include/exclude media fields from response payloads.
@@ -1845,7 +1723,7 @@ response payloads by sending requests like this one:
 
 .. _multipart:
 
-Note on media files as ``multipart/form-data``
+关于媒体文件作为 ``multipart/form-data`` 的注意事项
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 If you are uploading media files as ``multipart/form-data`` all the
 additional fields except the file fields will be treated as ``strings``
@@ -1873,7 +1751,7 @@ be sure that it is correct.
 
 .. _media_lists:
 
-Using lists of media
+使用媒体列表
 ~~~~~~~~~~~~~~~~~~~~
 When using lists of media, there is no way to submit these in the default
 configuration. Enable ``AUTO_COLLAPSE_MULTI_KEYS`` and ``AUTO_CREATE_LISTS``
@@ -1925,7 +1803,7 @@ validation was implemented to be more strict, allowing only two members. This
 restriction can be disabled by setting ``ALLOW_CUSTOM_FIELDS_IN_GEOJSON`` to
 ``True``.
 
-Querying GeoJSON Data
+查询 GeoJSON 数据
 ~~~~~~~~~~~~~~~~~~~~~
 As a general rule all MongoDB `geospatial query operators`_ and their associated
 geometry specifiers are supported. In this example we are using the `$near`_
@@ -1940,7 +1818,7 @@ Please refer to MongoDB documentation for details on geo queries.
 
 .. _internal_resources:
 
-Internal Resources
+内部资源
 ------------------
 By default responses to GET requests to the home endpoint will include all the
 resources. The ``internal_resource`` setting keyword, however, allows you to
@@ -2000,7 +1878,7 @@ will get the point across.
 
 .. _logging:
 
-Enhanced Logging
+增强的日志记录
 ----------------
 A number of events are available for logging via the default application
 logger. The standard `LogRecord attributes`_ are extended with a few request
@@ -2069,7 +1947,7 @@ possibly ``DEBUG`` level events in the future.
 
 .. _oplog:
 
-Operations Log
+操作日志
 --------------
 The OpLog is an API-wide log of all edit operations. Every ``POST``, ``PATCH``
 ``PUT`` and ``DELETE`` operation can be recorded to the oplog. At its core the
@@ -2136,7 +2014,7 @@ Please note that by default the ``c`` (changes) field is not included for
 setting (see :ref:`global`) if you wish the whole document to be included on
 every insertion.
 
-How is the oplog operated?
+oplog 是如何操作的?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 Seven settings are dedicated to the OpLog:
 
@@ -2154,7 +2032,7 @@ As you can see the oplog feature is turned off by default. Also, since
 public oplog endpoint will be available. You will have to explicitly set the
 endpoint name in order to expose your oplog to the public.
 
-The Oplog endpoint
+Oplog 终结点
 ~~~~~~~~~~~~~~~~~~
 Since the oplog endpoint is nothing but a standard API endpoint, you can
 customize it. This allows for setting up custom authentication (you might want
@@ -2210,20 +2088,17 @@ Please note that unless you explicitly set ``OPLOG_RETURN_EXTRA_FIELD`` to
 
 .. _schema_endpoint:
 
-The Schema Endpoint
+模式终结点
 -------------------
-Resource schema can be exposed to API clients by enabling Eve's schema
-endpoint. To do so, set the ``SCHEMA_ENDPOINT`` configuration option to the API
-endpoint name from which you want to serve schema data. Once enabled, Eve will
-treat the endpoint as a read only resource containing JSON encoded Cerberus
-schema definitions, indexed by resource name. Resource visibility and
-authorization settings are honored, so internal resources or resources for
-which a request does not have read authentication will not be accessible at the
-schema endpoint. By default, ``SCHEMA_ENDPOINT`` is set to ``None``.
+通过启用 Eve 的模式终结点，可以将资源模式公开给 API 客户端。为此，将 
+``SCHEMA_ENDPOINT`` 配置选项设置为要从中提供模式数据的 API 端点名称。启用后，Eve 将
+把终结点当作一个只读资源，其中包含 JSON 编码的 Cerberus 模式定义，并按资源名称索引。
+将启用资源可见性和授权设置，因此无法在模式终结点访问内部资源或请求没有读取身份验证的资
+源。默认情况下，``SCHEMA_ENDPOINT`` 被设置为 ``None``。
 
 .. _aggregation:
 
-MongoDB Aggregation Framework
+MongoDB 聚合框架
 -----------------------------
 Support for the `MongoDB Aggregation Framework`_ is built-in. In the example
 below (taken from PyMongo) we’ll perform a simple aggregation to count the
@@ -2349,17 +2224,15 @@ datasource (see :ref:`source`), similar functionality can be easily achieved.
 
 MongoDB 和 SQL 支持
 ------------------------
-Support for single or multiple MongoDB database/servers comes out of the box.
-An SQLAlchemy extension provides support for SQL backends. Additional data
-layers can can be developed with relative ease. Visit the `extensions page`_
-for a list of community developed data layers and extensions.
+原生支持对单台或多台 MongoDB 数据库/服务器的。
+SQLAlchemy 扩展提供了对 SQL 后端的支持。其他的数据层也相对容易地开发。访问
+`extensions page`_ 来获取社区开发的数据层和扩展的列表。
 
 Flask 技术支持
 ----------------
-Eve is based on the Flask_ micro web framework. Actually, Eve itself is
-a Flask subclass, which means that Eve exposes all of Flask functionalities and
-niceties, like a built-in development server and debugger_, integrated support
-for unittesting_ and an `extensive documentation`_.
+Eve 基于 Flask_ 微 web 框架。事实上，Eve 本身就是一个 Flask 子类，这意味着 Eve 公开
+了 Flask 的所有功能和良好的细节，比如内置的开发服务器和 debugger_ ，对于 unittesting_ 
+和一个 `extensive documentation`_ 的集成支持。
 
 .. _HATEOAS: http://en.wikipedia.org/wiki/HATEOAS
 .. _Cerberus: https://github.com/pyeve/cerberus
