@@ -37,7 +37,7 @@ API 可以支持所有 CRUD_ 操作。在相同的 API 中，你可以在一个�
 -------------------------------
 默认情况下，Eve 将使已知的数据库集合作为可用资源端点 (REST 习惯用法中的持久化标识)。
 因此，数据库集合 ``people`` 在 ``example.com/people`` API 终结点是可用的。但是你
-也可以自定义 URI，这样 API 终结点可以变成，``example.com/customers/overseas``。 
+也可以自定义 URI，这样 API 终结点可以变成，``example.com/customers/overseas`` 。 
 考虑以下请求:
 
 .. code-block:: console
@@ -404,8 +404,8 @@ MongoDB 数据层也支持原生 MongoDB 语法:
 HATEOAS
 -------
 默认启用 *Hypermedia as the Engine of Application State* (HATEOAS_)。每个 GET 响应
-都包含一个 ``_links`` 节。链接提供了关于它们相对于被访问资源的``关系``的详细信息和一
-个``标题``。然后，客户端可以使用关系和标题动态更新 UI，或者在不知道 API 结构的情况下
+都包含一个 ``_links`` 节。链接提供了关于它们相对于被访问资源的 ``关系`` 的详细信息和一
+个 ``标题`` 。然后，客户端可以使用关系和标题动态更新 UI，或者在不知道 API 结构的情况下
 导航 API。一个例子:
 
 ::
@@ -503,7 +503,7 @@ Eve 响应自动呈现为 JSON (默认值) 或 XML，这取决于请求 ``Accept
 --------------------------------------
 API 响应包括一个 ``ETag`` 头，它也允许适当的并发控制。``ETag`` 是一个哈希值，表示服
 务器上资源的当前状态。使用者不得编辑 (``PATCH`` 或 ``PUT``) 或删除 (``DELETE``) 资
-源，除非他们为试图编辑的资源提供最新的 ``ETag``。这可以防止用过时的版本覆盖项。
+源，除非他们为试图编辑的资源提供最新的 ``ETag`` 。这可以防止用过时的版本覆盖项。
 
 考虑以下工作流程:
 
@@ -541,7 +541,7 @@ API 响应包括一个 ``ETag`` 头，它也允许适当的并发控制。``ETag
         "_links": {"self": "..."}
     }
 
-这一次我们的补丁打对了，服务器返回了新的 ``ETag``。我们还得到了新的 ``_updated``
+这一次我们的补丁打对了，服务器返回了新的 ``ETag``。我们还得到了新的 ``_updated`` 
 值，它最终将允许我们执行后续的 `conditional requests`_ 。
 
 并发控制适用于所有版本方法: ``PATCH`` (edit), ``PUT`` (覆盖), ``DELETE`` (删除)。
@@ -613,7 +613,7 @@ API 响应包括一个 ``ETag`` 头，它也允许适当的并发控制。``ETag
         ]
     }
 
-当多个文档被提交时，API 利用了 MongoDB *bulk insert* 功能，这意味着不仅是只有一个
+当多个文档被提交时，API 利用了 MongoDB *批量插入* 功能，这意味着不仅是只有一个
 请求从客户端传输到远程 API，还在 API 服务器和数据库之间执行了一个回送。
 
 如果多文档插入成功，请记住 ``Location`` 头只返回创建的第一个文档的 URI。
@@ -2121,4 +2121,4 @@ Eve 基于 Flask_ 微 web 框架。事实上，Eve 本身就是一个 Flask 子�
 .. _`LogRecord attributes`: https://docs.python.org/2/library/logging.html#logrecord-attributes
 .. _`MongoDB Aggregation Framework`: https://docs.mongodb.org/v3.0/applications/aggregation/
 .. _link: https://docs.mongodb.org/manual/reference/operator/aggregation/limit/
-.. _`MongoDB queries`: https://docs.mongodb.com/v3.2/reference/operator/query/
+.. _`MongoDB 查询`: https://docs.mongodb.com/v3.2/reference/operator/query/
