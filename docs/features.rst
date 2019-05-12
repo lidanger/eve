@@ -5,8 +5,8 @@
 Emphasis on REST
 ----------------
 Eve 项目的目标使提供最大可能的兼容 REST 的 API 的实现。基本的 REST_ 原则，像
-*separation of concerns*, *stateless and layered system*, *cacheability*, 
-*uniform interface*，在涉及核心 API 时已经被列入考虑了。
+*关注分离*，*无状态和分层的系统*，*可缓存*，*统一接口*，在涉及核心 API 时已经被列入
+考虑了。
 
 全部 CRUD 操作
 -----------------------------
@@ -965,98 +965,71 @@ Eve 提供了一个可选的 “软删除” 模式，在该模式中，已删�
 
 行为
 ~~~~~~~~
-With soft delete enabled, DELETE requests to individual items and resources
-respond just as they do for a traditional "hard" delete. Behind the scenes,
-however, Eve does not remove deleted items from the database, but instead
-patches the document with a ``_deleted`` meta field set to ``true``. (The name
-of the ``_deleted`` field is configurable. See :ref:`global`.) All requests
+启用软删除后，对单个项和资源的 DELETE 请求的响应与对传统 “硬” 删除的响应一样。然而，
+在后台，Eve 并没有从数据库中去除已删除的条目，而是将文档的 ``_deleted`` 元字段设置
+为 ``true``。(``_deleted`` 字段的名称是可配置的。参见 :ref:`global`。) 当软删除
+是启用的，所有请求都过滤或以其他方式帐户的 ``_deleted`` 字段。（All requests
 made when soft delete is enabled filter against or otherwise account for the
-``_deleted`` field.
+``_deleted`` field.）
 
-The ``_deleted`` field is automatically added and initialized to ``false`` for
-all documents created while soft delete is enabled. Documents created prior to
-soft delete being enabled and which therefore do not define the ``_deleted``
-field in the database will still include ``_deleted: false`` in API response
-data, added by Eve during response construction. PUTs or PATCHes to these
-documents will add the ``_deleted`` field to the stored documents, set to
-``false``.
+启用软删除时创建的所有文档都自动添加 ``_deleted`` 字段并初始化为 ``false``。在启用
+软删除之前创建因此没有在数据库中定义 ``_deleted`` 字段的文档，在 API 响应数据中仍然
+包含 ``_deleted: false``，这是 Eve 在响应构建期间添加的。对这些文档的 PUT 或 
+PATCH 将把 ``_deleted`` 字段添加到存储的文档中，设置为 ``false``。
 
-Responses to GET requests for soft deleted documents vary slightly from
-responses to missing or "hard" deleted documents. GET requests for soft deleted
-documents will still respond with ``404 Not Found`` status codes, but the
-response body will contain the soft deleted document with ``_deleted: true``.
-Documents embedded in the deleted document will not be expanded in the
-response, regardless of any default settings or the contents of the request's
-``embedded`` query param. This is to ensure that soft deleted documents
-included in ``404`` responses reflect the state of a document when it was
-deleted, and do not to change if embedded documents are updated.
+对软删除文档的 GET 请求的响应与丢失或 “硬” 删除文档的响应略有不同。对软删除文档的 
+GET 请求仍然会以 ``404 Not Found`` 状态码作为响应，但是响应主体将包含带有 
+``_deleted: true`` 的软删除文档。无论默认设置或请求的 ``embedded`` 查询参数的内容
+是什么，嵌入到已删除文档中的文档都不会在响应中展开。这是为了确保 ``404`` 响应中包含
+的软删除文档反映文档被删除时的状态，并且在更新嵌入文档时不会更改。
 
-By default, resource level GET requests will not include soft deleted items in
-their response. This behavior matches that of requests after a "hard" delete.
-If including deleted items in the response is desired, the ``show_deleted``
-query param can be added to the request. (the ``show_deleted`` param name is
-configurable. See :ref:`global`) Eve will respond with all documents, deleted
-or not, and it is up to the client to parse returned documents' ``_deleted``
-field. The ``_deleted`` field can also be explicitly filtered against in a
-request, allowing only deleted documents to be returned using a
-``?where={"_deleted": true}`` query.
+默认情况下，资源级别 GET 请求的响应中不会包含软删除项。此行为与 “硬” 删除后的请求匹配。
+如果需要在响应中包含已删除的项，可以将 ``show_deleted`` 查询参数添加到请求中。
+(``show_delete`` 参数名称是可配置的。参见 :ref:`global`) Eve 将响应所有文档，无论
+是否已删除，由客户端解析返回的文档 ``_deleted`` 字段。``_deleted`` 字段也可以在请求
+中使用 ``?where={"_deleted": true}`` 查询显式过滤，只允许返回已删除的文档。
 
-Soft delete is enforced in the data layer, meaning queries made by application
-code using the ``app.data.find_one`` and ``app.data.find`` methods will
-automatically filter out soft deleted items. Passing a request object with
-``req.show_deleted == True`` or a lookup dictionary that explicitly filters on
-the ``_deleted`` field will override the default filtering.
+软删除是在数据层强制执行的，这意味着应用程序代码使用 ``app.data find_one`` 和 
+``app.data.find`` 方法进行的查询都将自动过滤掉软删除项。传递一个带有 
+``req.show_deleted == True`` 的请求对象或在 ``_deleted`` 字段上显式筛选的查找字典
+将覆盖默认筛选。
 
 恢复软删除项
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-PUT or PATCH requests made to a soft deleted document will restore it,
-automatically setting ``_deleted`` to ``false`` in the database. Modifying the
-``_deleted`` field directly is not necessary (or allowed). For example, using
-PATCH requests, only the fields to be changed in the restored version would be
-specified, or an empty request would be made to restore the document as is. The
-request must be made with proper authorization for write permission to the soft
-deleted document or it will be refused.
+对软删除文档的 PUT 或 PATCH 请求将恢复它，自动将数据库中的 ``_deleted`` 设置为 
+``false``。不需要 (或不允许) 直接修改 ``_deleted`` 字段。例如，使用 PATCH 请求，只
+有要在恢复版本中更改的字段才会被更改指定，否则将发出空请求以恢复文档的原样。对软删除
+文档的写权限请求必须经过适当的授权，否则将被拒绝。
 
-Be aware that, should a previously soft deleted document be restored, there is
-a chance that an eventual unique field might end up being now duplicated in two
-different documents: the restored one, and another which might have been stored
-with the same field value while the original (now restored) was in 'deleted'
-state. This is because soft deleted documents are ignored when validating the
-`unique` rule for new or updated documents.
+要知道，如果以前软删除文档应该恢复，最终唯一字段有机会被复制在两个不同的文件: 一个是恢
+复的，另一个是可能使用相同的字段值存储而在原来 (现在已恢复) 是 “删除” 状态的。这是因为
+在为新文档或更新的文档执行 `惟一` 规则时将忽略软删除的文档。
 
 
 版本控制
 ~~~~~~~~~~
-Soft deleting a versioned document creates a new version of that document with
-``_deleted`` set to ``true``. A GET request to the deleted version will receive
-a ``404 Not Found`` response as described above, while previous versions will
-continue to respond with ``200 OK``. Responses to ``?version=diff`` or
-``?version=all`` will include the deleted version as if it were any other.
+软删除一个版本化的文档将创建该文档的一个新版本，并将 ``deleted`` 设置为 ``true``。如上
+所述，对已删除版本的 GET 请求将收到 ``404 Not Found`` 响应，而以前的版本将继续响应 
+``200 OK``。对 ``?version=diff`` 或 ``?version=all`` 的响应将包含删除的版本，就像它
+包含任何其他版本一样。
 
 数据关系
 ~~~~~~~~~~~~~~
-The Eve ``data_relation`` validator will not allow references to documents that
-have been soft deleted. Attempting to create or update a document with a
-reference to a soft deleted document will fail just as if that document had
-been hard deleted. Existing data relations to documents that are soft deleted
-remain in the database, but requests requiring embedded document serialization
-of those relations will resolve to a null value. Again, this matches the
-behavior of relations to hard deleted documents.
+Eve ``data_relationship`` 验证器不允许引用已被软删除的文档。试图创建或更新引用软删除
+文档的文档将失败，就像该文档已被硬删除一样。与软删除文档的现有数据关系仍然存在于数据库中，
+但是需要对这些关系进行嵌入式文档序列化的请求将解析为空值。同样，这与硬删除文档的关系行为
+相匹配。
 
-Versioned data relations to a deleted document version will also fail to
-validate, but relations to versions prior to deletion or after restoration of
-the document are allowed and will continue to resolve successfully.
+与已删除文档版本的版本化数据关系也将无法验证，但允许与删除之前或恢复文档之后的版本的关系，
+并将继续成功解析。
 
 注意事项
 ~~~~~~~~~~~~~~
-Disabling soft delete after use in an application requires database maintenance
-to ensure your API remains consistent. With soft delete disabled, requests will
-no longer filter against or handle the ``_deleted`` field, and documents that
-were soft deleted will now be live again on your API. It is therefore necessary
-when disabling soft delete to perform a data migration to remove all documents
-with ``_deleted == True``, and recommended to remove the ``_deleted`` field
-from documents where ``_deleted == False``. Enabling soft delete in an existing
-application is safe, and will maintain documents deleted from that point on.
+在应用程序中使用后禁用软删除需要数据库维护，以确保 API 保持一致。禁用软删除后，请求将不
+再过滤或处理 ``_deleted`` 字段，被软删除的文档将再次在 API 上活动。因此，在禁用软删除时，
+有必要执行数据迁移，删除所有带有 ``_deleted == True`` 的文档，并建议从 
+``_deleted == False`` 的文档中删除 ``_deleted`` 字段。在现有应用程序中启用软删除是安
+全的，并将维护从那时起删除的文档。
 
 .. _eventhooks:
 
@@ -1064,9 +1037,8 @@ application is safe, and will maintain documents deleted from that point on.
 -----------
 Pre-Request 事件钩子
 ~~~~~~~~~~~~~~~~~~~~~~~
-When a GET/HEAD, POST, PATCH, PUT, DELETE request is received, both
-a ``on_pre_<method>`` and a ``on_pre_<method>_<resource>`` event is raised.
-You can subscribe to these events with multiple callback functions.
+当接收到 GET/HEAD、POST、PATCH、PUT、DELETE 请求时，会引发 ``on_pre_<method>`` 和
+ ``on_pre_<method>_<resource>`` 事件。你可以使用多个回调函数来订阅这些事件。
 
 .. code-block:: pycon
 
@@ -1083,21 +1055,18 @@ You can subscribe to these events with multiple callback functions.
 
     >>> app.run()
 
-Callbacks will receive the resource being requested, the original
-``flask.request`` object and the current lookup dictionary as arguments (only
-exception being the ``on_pre_POST`` hook which does not provide a ``lookup``
-argument).
+回调函数将接收被请求的资源，即原始的 ``flask.request`` 对象和当前查找字典作为参数 
+(唯一的例外是 ``on_pre_POST`` 钩子不提供 ``lookup`` 参数)。
 
 动态查询过滤器
 ^^^^^^^^^^^^^^^^^^^^^^
-Since the ``lookup`` dictionary will be used by the data layer to retrieve
-resource documents, developers may choose to alter it in order to add custom
-logic to the lookup query.
+由于数据层将使用 ``lookup`` 字典来检索资源文档，因此开发人员可以选择修改它，以便向
+查找性查询添加自定义逻辑。
 
 .. code-block:: python
 
     def pre_GET(resource, request, lookup):
-        # only return documents that have a 'username' field.
+        # 只返回带有 'username' 字段的文档.
         lookup["username"] = {'$exists': True}
 
     app = Eve()
@@ -1105,19 +1074,15 @@ logic to the lookup query.
     app.on_pre_GET += pre_GET
     app.run()
 
-Altering the lookup dictionary at runtime would have similar effects to
-applying :ref:`filter` via configuration. However, you can only set static
-filters via configuration whereas by hooking to the ``on_pre_<METHOD>`` events
-you are allowed to set dynamic filters instead, which allows for additional
-flexibility.
+在运行时更改查找字典将产生与通过配置应用 :ref:`filter` 的类似效果。但是，你只能通过
+配置设置静态过滤器，而通过连接到 ``on_pre_<METHOD>`` 事件，你可以设置动态过滤器，这
+允许额外的灵活性。
 
 Post-Request 事件钩子
 ~~~~~~~~~~~~~~~~~~~~~~~~
-When a GET, POST, PATCH, PUT, DELETE method has been executed, both
-a ``on_post_<method>`` and ``on_post_<method>_<resource>`` event is raised. You
-can subscribe to these events with multiple callback functions. Callbacks will
-receive the resource accessed, original `flask.request` object and the response
-payload.
+当执行 GET、POST、PATCH、PUT、DELETE 方法时，``on_post_<method>`` 和 
+``on_post_<method>_<resource>`` 事件同时被触发。你可以使用多个回调函数来订阅这些事件。
+回调函数将接收被访问的资源，即原始的 `flask.request` 对象和响应负载。
 
 .. code-block:: pycon
 
@@ -1137,9 +1102,8 @@ payload.
 数据库事件钩子
 ~~~~~~~~~~~~~~~~~~~~
 
-Database event hooks work like request event hooks. These events are fired
-before and after a database action. Here is an example of how events are
-configured:
+数据库事件钩子的工作原理类似于请求事件钩子。这些事件在数据库操作之前和之后触发。下面
+是一个如何配置事件的例子:
 
 .. code-block:: pycon
 
@@ -1149,7 +1113,7 @@ configured:
    >>> app = Eve()
    >>> app.on_fetched_item += add_signature
 
-You may use flask's ``abort()`` to interrupt the database operation:
+你可以使用 flask 的 ``abort()`` 方法来中断数据库操作:
 
 .. code-block:: pycon
 
@@ -1161,84 +1125,83 @@ You may use flask's ``abort()`` to interrupt the database operation:
    >>> app = Eve()
    >>> app.on_insert_item += check_update_access
 
-The events are fired for resources and items if the action is available for
-both. And for each action two events will be fired:
+如果操作对资源和数据项都可用，就会触发响应的事件。每个动作都会触发两个事件:
 
-- Generic: ``on_<action_name>``
-- With the name of the resource: ``on_<action_name>_<resource_name>``
+- 通用的: ``on_<action_name>``
+- 带有资源名称的: ``on_<action_name>_<resource_name>``
 
-Let's see an overview of what events are available:
+让我们来看看可用事件的概述:
 
 +-------+--------+------+--------------------------------------------------+
-|Action |What    |When  |Event name / method signature                     |
+|行为   | 对象    | 时机 | 事件名称 / 方法签名                                |
 +=======+========+======+==================================================+
-|Fetch  |Resource|After || ``on_fetched_resource``                         |
+|Fetch  |Resource|之后  || ``on_fetched_resource``                         |
 |       |        |      || ``def event(resource_name, response)``          |
 |       |        |      +--------------------------------------------------+
 |       |        |      || ``on_fetched_resource_<resource_name>``         |
 |       |        |      || ``def event(response)``                         |
 |       +--------+------+--------------------------------------------------+
-|       |Item    |After || ``on_fetched_item``                             |
+|       |Item    |之后  || ``on_fetched_item``                             |
 |       |        |      || ``def event(resource_name, response)``          |
 |       |        |      +--------------------------------------------------+
 |       |        |      || ``on_fetched_item_<resource_name>``             |
 |       |        |      || ``def event(response)``                         |
 |       +--------+------+--------------------------------------------------+
-|       |Diffs   |After || ``on_fetched_diffs``                            |
+|       |Diffs   |之后  || ``on_fetched_diffs``                            |
 |       |        |      || ``def event(resource_name, response)``          |
 |       |        |      +--------------------------------------------------+
 |       |        |      || ``on_fetched_diffs_<resource_name>``            |
 |       |        |      || ``def event(response)``                         |
 +-------+--------+------+--------------------------------------------------+
-|Insert |Items   |Before|| ``on_insert``                                   |
+|Insert |Items   |之前  || ``on_insert``                                   |
 |       |        |      || ``def event(resource_name, items)``             |
 |       |        |      +--------------------------------------------------+
 |       |        |      || ``on_insert_<resource_name>``                   |
 |       |        |      || ``def event(items)``                            |
 |       |        +------+--------------------------------------------------+
-|       |        |After || ``on_inserted``                                 |
+|       |        |之后  || ``on_inserted``                                 |
 |       |        |      || ``def event(resource_name, items)``             |
 |       |        |      +--------------------------------------------------+
 |       |        |      || ``on_inserted_<resource_name>``                 |
 |       |        |      || ``def event(items)``                            |
 +-------+--------+------+--------------------------------------------------+
-|Replace|Item    |Before|| ``on_replace``                                  |
+|Replace|Item    |之前  || ``on_replace``                                  |
 |       |        |      || ``def event(resource_name, item, original)``    |
 |       |        |      +--------------------------------------------------+
 |       |        |      || ``on_replace_<resource_name>``                  |
 |       |        |      || ``def event(item, original)``                   |
 |       |        +------+--------------------------------------------------+
-|       |        |After || ``on_replaced``                                 |
+|       |        |之后  || ``on_replaced``                                 |
 |       |        |      || ``def event(resource_name, item, original)``    |
 |       |        |      +--------------------------------------------------+
 |       |        |      || ``on_replaced_<resource_name>``                 |
 |       |        |      || ``def event(item, original)``                   |
 +-------+--------+------+--------------------------------------------------+
-|Update |Item    |Before|| ``on_update``                                   |
+|Update |Item    |之前  || ``on_update``                                   |
 |       |        |      || ``def event(resource_name, updates, original)`` |
 |       |        |      +--------------------------------------------------+
 |       |        |      || ``on_update_<resource_name>``                   |
 |       |        |      || ``def event(updates, original)``                |
 |       |        +------+--------------------------------------------------+
-|       |        |After || ``on_updated``                                  |
+|       |        |之后  || ``on_updated``                                  |
 |       |        |      || ``def event(resource_name, updates, original)`` |
 |       |        |      +--------------------------------------------------+
 |       |        |      || ``on_updated_<resource_name>``                  |
 |       |        |      || ``def event(updates, original)``                |
 +-------+--------+------+--------------------------------------------------+
-|Delete |Item    |Before|| ``on_delete_item``                              |
+|Delete |Item    |之前  || ``on_delete_item``                              |
 |       |        |      || ``def event(resource_name, item)``              |
 |       |        |      +--------------------------------------------------+
 |       |        |      || ``on_delete_item_<resource_name>``              |
 |       |        |      || ``def event(item)``                             |
 |       |        +------+--------------------------------------------------+
-|       |        |After || ``on_deleted_item``                             |
+|       |        |之后  || ``on_deleted_item``                             |
 |       |        |      || ``def event(resource_name, item)``              |
 |       |        |      +--------------------------------------------------+
 |       |        |      || ``on_deleted_item_<resource_name>``             |
 |       |        |      || ``def event(item)``                             |
 |       +--------+------+--------------------------------------------------+
-|       |Resource|Before|| ``on_delete_resource``                          |
+|       |Resource|之前  || ``on_delete_resource``                          |
 |       |        |      || ``def event(resource_name)``                    |
 |       |        |      +--------------------------------------------------+
 |       |        |      || ``on_delete_resource_<resource_name>``          |
@@ -1250,7 +1213,7 @@ Let's see an overview of what events are available:
 |       |        |      || ``on_delete_resource_originals_<resource_name>``|
 |       |        |      || ``def event(originals, lookup)``                |
 |       |        +------+--------------------------------------------------+
-|       |        |After || ``on_deleted_resource``                         |
+|       |        |之后  || ``on_deleted_resource``                         |
 |       |        |      || ``def event(resource_name, item)``              |
 |       |        |      +--------------------------------------------------+
 |       |        |      || ``on_deleted_resource_<resource_name>``         |
@@ -1262,7 +1225,7 @@ Let's see an overview of what events are available:
 Fetch 事件
 ^^^^^^^^^^^^
 
-These are the fetch events with their method signature:
+这些是带有方法签名的 fetch 事件:
 
 - ``on_fetched_resource(resource_name, response)``
 - ``on_fetched_resource_<resource_name>(response)``
@@ -1271,9 +1234,8 @@ These are the fetch events with their method signature:
 - ``on_fetched_diffs(resource_name, response)``
 - ``on_fetched_diffs_<resource_name>(response)``
 
-They are raised when items have just been read from the database and are
-about to be sent to the client. Registered callback functions can manipulate
-the items as needed before they are returned to the client.
+当项目刚从数据库中读取并即将发送到客户端时，将引发这些事件。注册的回调函数可以在项目
+返回给客户端之前根据需要操作它们。
 
 .. code-block:: pycon
 
@@ -1295,44 +1257,37 @@ the items as needed before they are returned to the client.
     >>> app.on_fetched_item += before_returning_item
     >>> app.on_fetched_item_contacts += before_returning_contact
 
-It is important to note that item fetch events will work with `Document
-Versioning`_ for specific document versions like ``?version=5`` and all
-document versions with ``?version=all``. Accessing diffs of all versions
-with ``?version=diffs`` will only work with the diffs fetch events. Note
-that diffs returns partial documents which should be handled in the
-callback.
+需要注意的是，对于特定的文档版本，如 ``?version=5`` 和所有带有 ``?version=all`` 
+的文档版本来说，数据项 fetch 事件将与 `Document Versioning`_ 一起工作。使用
+ ``?version=diffs`` 访问所有版本的 diffs 只适用于 diffs 获取事件。注意，diffs 
+返回应该在回调中处理的部分文档。
 
 
 Insert 事件
 ^^^^^^^^^^^^^
 
-These are the insert events with their method signature:
+这些是带有方法签名的 insert 事件:
 
 - ``on_insert(resource_name, items)``
 - ``on_insert_<resource_name>(items)``
 - ``on_inserted(resource_name, items)``
 - ``on_inserted_<resource_name>(items)``
 
-When a POST requests hits the API and new items are about to be stored in
-the database, these events are fired:
+当一个 POST 请求到达 API，并且新的条目即将被存储到数据库中时，这些事件将被触发:
 
-- ``on_insert`` for every resource endpoint.
-- ``on_insert_<resource_name>`` for the specific `<resource_name>` resource
-  endpoint.
+- ``on_insert`` 用于每一个资源终结点。
+- ``on_insert_<resource_name>`` 用于指定的 `<resource_name>` 资源终结点。
 
-Callback functions could hook into these events to arbitrarily add new fields
-or edit existing ones.
+回调函数可以挂接到这些事件中，以任意添加新字段或编辑现有字段。
 
-After the items have been inserted, these two events are fired:
+插入项目后，触发以下两个事件:
 
-- ``on_inserted`` for every resource endpoint.
-- ``on_inserted_<resource_name>`` for the specific `<resource_name>` resource
-  endpoint.
+- ``on_inserted`` 用于每一个资源终结点。
+- ``on_inserted_<resource_name>`` 用于指定的 `<resource_name>` 资源终结点。
 
-.. admonition:: Validation errors
+.. 警告:: 验证错误
 
-    Items passed to these events as arguments come in a list. And only those items
-    that passed validation are sent.
+    作为参数传递给这些事件的数据项出现在列表中。并且只发送那些通过验证的项。
 
 示例:
 
@@ -1352,67 +1307,58 @@ After the items have been inserted, these two events are fired:
 Replace 事件
 ^^^^^^^^^^^^^^
 
-These are the replace events with their method signature:
+这些事带有方法签名的 replace 事件:
 
 - ``on_replace(resource_name, item, original)``
 - ``on_replace_<resource_name>(item, original)``
 - ``on_replaced(resource_name, item, original)``
 - ``on_replaced_<resource_name>(item, original)``
 
-When a PUT request hits the API and an item is about to be replaced after
-passing validation, these events are fired:
+当 PUT 请求到达 API，并且在通过验证之后将要替换某个项时，将触发以下事件:
 
-- ``on_replace`` for any resource item endpoint.
-- ``on_replace_<resource_name>`` for the specific resource endpoint.
+- ``on_replace`` 用于任何资源数据项终结点。
+- ``on_replace_<resource_name>`` 用于指定的资源终结点。
 
-`item` is the new item which is about to be stored. `original` is the item in
-the database that is being replaced. Callback functions could hook into these
-events to arbitrarily add or update `item` fields, or to perform other
-accessory action.
+`item` 是即将存储的新项目。`original` 是数据库中要被替换的项。回调函数可以挂接到
+这些事件中，以任意添加或更新 `item` 字段，或执行其他辅助操作。
 
-After the item has been replaced, these other two events are fired:
+在数据项被替换之后，将触发以下两个事件:
 
-- ``on_replaced`` for any resource item endpoint.
-- ``on_replaced_<resource_name>`` for the specific resource endpoint.
+- ``on_replaced`` 用于任何数据项终结点。
+- ``on_replaced_<resource_name>`` 用于指定的资源终结点。
 
 Update 事件
 ^^^^^^^^^^^^^
 
-These are the update events with their method signature:
+这些是带有方法签名的 update 事件:
 
 - ``on_update(resource_name, updates, original)``
 - ``on_update_<resource_name>(updates, original)``
 - ``on_updated(resource_name, updates, original)``
 - ``on_updated_<resource_name>(updates, original)``
 
-When a PATCH request hits the API and an item is about to be updated after
-passing validation, these events are fired `before` the item is updated:
+当 PATCH 请求到达 API，并且数据项通过验证后即将更新时，这些事件会在项目更新之前触发:
 
-- ``on_update`` for any resource endpoint.
-- ``on_update_<resource_name>`` is fired only when the `<resource_name>`
-  endpoint is hit.
+- ``on_update`` 用于任何资源终结点。
+- ``on_update_<resource_name>`` 只有在 `<resource_name>` 终结点被命中时触发。
 
-Here `updates` stands for updates being applied to the item and `original` is
-the item in the database that is about to be updated. Callback functions
-could hook into these events to arbitrarily add or update fields in
-`updates`, or to perform other accessory action.
+这里的 `updates` 表示应用于该项的更新，而 `original` 则表示即将更新的数据库项。回调
+函数可以挂接到这些事件中，以在 `updates` 中任意添加或更新字段，或执行其他辅助操作。
 
-`After` the item has been updated:
+数据项更新`后`:
 
-- ``on_updated`` is fired for any resource endpoint.
-- ``on_updated_<resource_name>`` is fired only when the `<resource_name>`
-  endpoint is hit.
+- ``on_updated`` 由任何资源终结点触发。.
+- ``on_updated_<resource_name>`` 只有在 `<resource_name>` 终结点被命中时触发。
 
-.. admonition:: Please note
+.. 警告:: 请注意
 
-    Please be aware that ``last_modified`` and ``etag`` headers will always be
-    consistent with the state of the items on the database (they  won't be
-    updated to reflect changes eventually applied by the callback functions).
+    请注意，``last_modified`` 和 ``etag`` 头将始终与数据库中项的状态一致 (它们不会
+    更新以反映回调函数最终应用的更改)。
 
 Delete 事件
 ^^^^^^^^^^^^^
 
-These are the delete events with their method signature:
+这些是带有方法签名的 delete 事件:
 
 - ``on_delete_item(resource_name, item)``
 - ``on_delete_item_<resource_name>(item)``
@@ -1428,47 +1374,35 @@ These are the delete events with their method signature:
 数据项
 .....
 
-When a DELETE request hits an item endpoint and `before` the item is deleted,
-these events are fired:
+当 DELETE 请求到达一个数据项终结点，以及该项目被删除 “之前”，将触发以下事件:
 
-- ``on_delete_item`` for any resource hit by the request.
-- ``on_delete_item_<resource_name>`` for the specific `<resource_name>` item endpoint
-  hit by the DELETE.
+- ``on_delete_item`` 用于请求命中的任何资源。
+- ``on_delete_item_<resource_name>`` 用于 DELETE 命中的指定 `<resource_name>` 数据项的终结点。
 
-`After` the item has been deleted the ``on_deleted_item(resource_name,
-item)`` and ``on_deleted_item_<resource_name>(item)`` are raised.
+数据项删除`之后`，``on_deleted_item(resource_name, item)`` 和 
+``on_deleted_item_<resource_name>(item)`` 将被触发。
 
-`item` is the item being deleted. Callback functions could hook into
-these events to perform accessory actions. And no you can't arbitrarily abort
-the delete operation at this point (you should probably look at
-:ref:`validation`, or eventually disable the delete command altogether).
+`item` 是被删除的项。回调函数可以挂接到这些事件中来执行辅助操作。不，此时你不能任意
+中止删除操作 (你可能应该看看 :ref:`validation`，或者最终完全禁用删除命令)。
 
 资源
 .........
 
-If you were brave enough to enable the DELETE command on resource endpoints
-(allowing for wipeout of the entire collection in one go), then you can be
-notified of such a disastrous occurrence by hooking a callback function to the
-``on_delete_resource(resource_name)`` or
-``on_delete_resource_<resource_name>()`` hooks.
+如果你足够的勇气在资源端点 (允许失败的整个集合在一个去) 启用 DELETE 命令，那么你可以
+通过连接回调函数到 ``on_delete_resource (resource_name)`` 或 
+``on_delete_resource_ < resource_name >()`` 钩子来获得对这样的灾难性事件的通知。
 
-- ``on_delete_resource_originals`` for any resource hit by the request after having retrieved the originals documents.
-- ``on_delete_resource_originals_<resource_name>`` for the specific `<resource_name>` resource endpoint
-  hit by the DELETE after having retrieved the original document.
+- ``on_delete_resource_originals`` 用于请求命中的任何资源，在检索到原始文档后触发。
+- ``on_delete_resource_originals_<resource_name>`` 用于 DELETE 命中的指定 `<resource_name>` 资源终结点，在检索到原始文档后触发。
 
-NOTE: those two event are useful in order to perform some business
-logic before the actual remove operation given the look up and the
-list of originals
+注意: 考虑到查找和原始列表，为了在实际删除操作之前执行一些业务逻辑，这两个事件非常有用
 
 .. _aggregation_hooks:
 
 聚合事件钩子
 ~~~~~~~~~~~~~~~~~~~~~~~
-You can also attach one or more callbacks to your aggregation endpoints. The
-``before_aggregation`` event is fired when an aggregation is about to be
-performed. Any attached callback function will receive both the endpoint name
-and the aggregation pipeline as arguments. The pipeline can then be altered if
-needed.
+还可以将一个或多个回调附加到聚合终结点。当要执行聚合时，将触发 ``before_aggregation`` 
+事件。任何附加的回调函数都将同时接收端点名称和聚合管道作为参数。如果需要，可以更改管道。
 
 .. code-block:: pycon
 
@@ -1478,9 +1412,8 @@ needed.
     >>> app = Eve()
     >>> app.before_aggregation += on_aggregate
 
-The ``after_aggregation`` event is fired when the aggregation has been
-performed. An attached callback function could leverage this event to modify
-the documents before they are returned to the client.
+``after_aggregation`` 事件在执行聚合时触发。附加的回调函数可以利用此事件在文档返回
+给客户端之前修改文档。
 
 .. code-block:: pycon
 
@@ -1491,26 +1424,22 @@ the documents before they are returned to the client.
    >>> app = Eve()
    >>> app.after_aggregation += alter_documents
 
-For more information on aggregation support, see :ref:`aggregation`
+有关聚合支持的更多信息，请参见 :ref:`aggregation`
 
 
-.. admonition:: Please note
+.. 警告:: 请注意
 
-    To provide seamless event handling features Eve relies on the Events_ package.
+    为了提供无缝的事件处理特性，Eve 依赖于 Events_ 包。
 
 .. _ratelimiting:
 
 速度限制
 -------------
-API rate limiting is supported on a per-user/method basis. You can set the
-number of requests and the time window for each HTTP method. If the requests
-limit is hit within the time window, the API will respond with ``429 Request
-limit exceeded`` until the timer resets. Users are identified by the
-Authentication header or (when missing) by the client IP. When rate limiting
-is enabled, appropriate ``X-RateLimit-`` headers are provided with every API
-response.  Suppose that the rate limit has been set to 300 requests every 15
-minutes, this is what a user would get after hitting a endpoint with a single
-request:
+每个用户/方法都支持 API 速率限制。您可以为每个 HTTP 方法设置请求数量和时间窗口。
+如果请求限制在时间窗口内被命中，API 将以 ``429 Request limit exceeded`` 响应，
+直到计时器重置。用户是由身份验证头标识的，或者 (在缺少身份验证头时) 由客户机IP标识。
+当启用速率限制时，每个 API 响应都会提供适当的 ``X-RateLimit-`` 头文件。假设速率限制
+设置为每 15 分钟 300 个请求，这是用户在使用单个请求到达终结点后得到的结果:
 
 ::
 
@@ -1518,13 +1447,12 @@ request:
     X-RateLimit-Limit: 300
     X-RateLimit-Reset: 1370940300
 
-You can set different limits for each one of the supported methods (GET, POST,
-PATCH, DELETE).
+您可以为每个受支持的方法 (GET、POST、PATCH、DELETE) 设置不同的限制。
 
-.. admonition:: Please Note
+.. 警告:: 请注意
 
-   Rate Limiting is disabled by default, and needs a Redis server running when
-   enabled. A tutorial on Rate Limiting is forthcoming.
+   速率限制在默认情况下是禁用的，而启用时需要运行一个Redis服务器。一个关于速率限制
+   的教程即将发布。
 
 自定义 ID 字段
 ----------------
@@ -1533,11 +1461,11 @@ Eve 允许扩展其标准数据类型支持。在 :ref:`custom_ids` 教程中，
 
 文件存储
 ------------
-Media files (images, pdf, etc.) can be uploaded as ``media`` document
-fields. Upload is done via ``POST``, ``PUT`` and
-``PATCH`` as usual, but using the ``multipart/form-data`` content-type.
+媒体文件 (图片、pdf 等) 可以作为 ``media`` 文档字段上传。和往常一样，上传通过
+``POST``, ``PUT`` 和 ``PATCH`` 来完成，不过使用的是 ``multipart/form-data`` 上下
+文类型。
 
-Let us assume that the ``accounts`` endpoint has a schema like this:
+让我们假设 ``accounts`` 终结点有这样一个模式:
 
 .. code-block:: python
 
@@ -1547,25 +1475,23 @@ Let us assume that the ``accounts`` endpoint has a schema like this:
         ...
     }
 
-With curl we would ``POST`` like this:
+使用 curl，我们会这样 ``POST``:
 
 .. code-block:: console
 
     $ curl -F "name=john" -F "pic=@profile.jpg" http://example.com/accounts
 
 
-For optimized performance files are stored in GridFS_ by default. Custom
-``MediaStorage`` classes can be implemented and passed to the application to
-support alternative storage systems. A ``FileSystemMediaStorage`` class is in
-the works, and will soon be included with the Eve package.
+对于优化的性能文件，默认情况下存储在 GridFS_ 中。可以实现自定义的 ``MediaStorage`` 
+类并将其传递给应用程序，以支持其他存储系统。一个名为 ``FileSystemMediaStorage`` 
+的类正在开发中，并将很快包含在 Eve 包中。
 
-As a proper developer guide is not available yet, you can peek at the
-MediaStorage_ source if you are interested in developing custom storage
-classes.
+由于还没有合适的开发人员指南，如果你对开发自定义存储类感兴趣，可以查看 
+MediaStorage_ 源文件。
 
 以 Base64 字符串的形式提供媒体文件
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-When a document is requested media files will be returned as Base64 strings,
+当一个文档被请求时，媒体文件将以 Base64 字符串的形式返回，
 
 .. code-block:: python
 
@@ -1579,21 +1505,19 @@ When a document is requested media files will be returned as Base64 strings,
         ...
    }
 
-However, if the ``EXTENDED_MEDIA_INFO`` list is populated (it isn't by
-default) the payload format will be different. This flag allows passthrough
-from the driver of additional meta fields. For example, using the MongoDB
-driver, fields like ``content_type``, ``name`` and ``length`` can be added to
-this list and will be passed-through from the underlying driver.
+但是，如果填充了 ``EXTENDED_MEDIA_INFO`` 列表 (默认情况下没有)，那么负载格式
+将会不同。此标志允许从附加元字段的驱动程序传递。例如，使用 MongoDB 驱动程序，
+像 ``content_type``, ``name`` 和 ``length`` 这样的字段可以添加到这个列表中，
+并从底层驱动程序传递。
 
-When ``EXTENDED_MEDIA_INFO`` is used the field will be a dictionary
-whereas the file itself is stored under the ``file`` key and other keys
-are the meta fields. Suppose that the flag is set like this:
+当使用 ``EXTENDED_MEDIA_INFO`` 时，字段将是一个字典，而文件本身存储在 ``file``
+键下，其他键是元字段。假设标志是这样设置的:
 
 .. code-block:: python
 
     EXTENDED_MEDIA_INFO = ['content_type', 'name', 'length']
 
-Then the output will be something like
+那么，输出将会是像这样的东西
 
 .. code-block:: python
 
@@ -1612,49 +1536,44 @@ Then the output will be something like
         ...
     }
 
-For MongoDB, further fields can be found in the `driver documentation`_.
+对于 MongoDB，可以在 `driver documentation`_ 中找到更多字段。
 
-If you have other means to retrieve the media files (custom Flask endpoint for
-example) then the media files can be excluded from the payload by setting to
-``False`` the ``RETURN_MEDIA_AS_BASE64_STRING`` flag. This takes into account
-if ``EXTENDED_MEDIA_INFO`` is used.
+如果你有其他检索媒体文件的方法 (例如自定义 Flask 端点)，那么通过设置 
+``RETURN_MEDIA_AS_BASE64_STRING`` 标志为 ``False``，可以在负载中将媒体文件排除在外。
+这将考虑是否使用了 ``EXTENDED_MEDIA_INFO``。
 
 在专用终结点上提供媒体文件
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-While returning files embedded as Base64 fields is the default behaviour, you
-can opt for serving them at a dedicated media endpoint. You achieve that by
-setting ``RETURN_MEDIA_AS_URL`` to ``True``. When this feature is enabled
-document fields contain urls to the correspondent files, which are served at the
-media endpoint.
+虽然返回嵌入为 Base64 字段的文件是默认行为，但是你可以选择在专用的媒体端点上提供这些文件。
+你可以通过将 ``RETURN_MEDIA_AS_URL`` 设置为 ``True`` 来实现这一点。启用此功能时，文档
+字段包含对应文件的 url，这些对应文件在媒体端点上提供服务。
 
-You can change the default media endpoint (``media``) by updating the
-``MEDIA_BASE_URL`` and ``MEDIA_ENDPOINT`` setting. Suppose you are storing your
-images on Amazon S3 via a custom ``MediaStorage`` subclass. You would probably
-set your media endpoint like so:
+你可以通过更新 ``MEDIA_BASE_URL`` 和 ``MEDIA_ENDPOINT`` 设置来更改默认媒体端点 
+(``media``)。假设你通过自定义的 ``MediaStorage`` 子类将图像存储在 Amazon S3 上。你可
+能会这样设置你的媒体端点:
 
 .. code-block:: python
 
-    # disable default behaviour
+    # 禁用默认行为
     RETURN_MEDIA_AS_BASE64_STRING = False
 
-    # return media as URL instead
+    # 相反，返回媒体作为 URL
     RETURN_MEDIA_AS_URL = True
 
-    # set up the desired media endpoint
+    # 创建需要的媒体终结点
     MEDIA_BASE_URL = 'https://s3-us-west-2.amazonaws.com'
     MEDIA_ENDPOINT = 'media'
 
-Setting ``MEDIA_BASE_URL`` is optional. If no value is set, then
-the API base address will be used when building the URL for ``MEDIA_ENDPOINT``.
+``MEDIA_BASE_URL`` 设置是可选的。如果没有设置值，那么在为 ``MEDIA_ENDPOINT`` 构建 
+URL 时将使用 API 基本地址。
 
 .. _partial_request:
 
 部分媒体下载
 ~~~~~~~~~~~~~~~~~~~~~~~
-When files are served at a dedicated endpoint, clients can request partial
-downloads. This allows them to provide features such as optimized
-pause/resume (with no need to restart the download). To perform a partial
-download, make sure the ``Range`` header is added the the client request.
+当文件在专用端点上提供时，客户端可以请求部分下载。这使它们可以提供一些特性，比如优化的
+暂停/恢复 (不需要重新启动下载)。要执行部分下载，请确保在客户端请求中添加了 ``Range`` 
+标头。
 
     .. code-block:: console
 
@@ -1670,32 +1589,27 @@ download, make sure the ``Range`` header is added the the client request.
 
         abcdefghilm
 
-In the snippet above, we see curl requesting the first chunk of a file.
+在上面的代码片段中，我们看到 curl 请求了文件的第一个块。
 
 .. _projection_filestorage:
 
 利用投影优化媒体文件的处理
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Clients and API maintainers can exploit the :ref:`projections` feature to
-include/exclude media fields from response payloads.
+客户端和 API 维护人员可以利用 :ref:`projections` 特性将媒体字段包含/排除在响应负载之外。
 
-Suppose that a client stored a document with an image. The image field is
-called *image* and it is of ``media`` type. At a later time, the client wants
-to retrieve the same document but, in order to optimize for speed and since the
-image is cached already, it does not want to download the image along with the
-document. It can do so by requesting the field to be trimmed out of the
-response payload:
+假设客户端存储了一个带有图像的文档。image 字段被称为 *image*，它的类型是 ``media``。
+稍后，客户端希望检索相同的文档，但是为了优化速度，而且由于已经缓存了图像，所以它不希望
+下载图像和文档。它可以通过请求将字段从响应负载中删除来做到这一点:
 
 .. code-block:: console
 
     $ curl -i http://example.com/people/<id>?projection={"image": 0}
     HTTP/1.1 200 OK
 
-The document will be returned with all its fields except the *image* field.
+文档将返回除 *image* 字段外的所有字段。
 
-Moreover, when setting the ``datasource`` property for any given resource
-endpoint it is possible to explicitly exclude fields (of ``media`` type, but
-also of any other type) from default responses:
+此外，当为任何给定资源终结点设置 ``datasource`` 属性时，可以显式地从默认响应中排除字段 
+(``media`` 类型的字段，也可以是任何其他类型的字段):
 
 .. code-block:: python
 
@@ -1706,64 +1620,56 @@ also of any other type) from default responses:
         ...
     }
 
-Now clients will have to explicitly request the image field to be included with
-response payloads by sending requests like this one:
+现在，客户端必须通过发送如下请求，显式地请求包含在响应载荷中的图像字段:
 
 .. code-block:: console
 
     $ curl -i http://example.com/people/<id>?projection={"image": 1}
     HTTP/1.1 200 OK
 
-.. admonition:: See also
+.. 警告:: 另请参阅
 
     - :ref:`config`
     - :ref:`datasource`
 
-    for details on the ``datasource`` setting.
+    获取有关 ``datasource`` 设置的详细信息。
 
 .. _multipart:
 
 关于媒体文件作为 ``multipart/form-data`` 的注意事项
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-If you are uploading media files as ``multipart/form-data`` all the
-additional fields except the file fields will be treated as ``strings``
-for all field validation purposes.  If you have already defined some of
-the resource fields to be of different type (boolean, number, list etc)
-the validation rules for these fields would fail, preventing you to
-successffully submit your resource.
+如果你正在把媒体文件当作 ``multipart/form-data`` 上传，除了文件字段外，为了验证所有
+字段的目的，所有其他字段都将被视为 ``string``。如果你已经定义了一些不同类型的资源字
+段 (boolean、number、list 等)，那么这些字段的验证规则将会失败，从而阻止你成功提交资
+源。
 
-If you still want to be able to perform field validation in this case, you
-will have to turn on ``MULTIPART_FORM_FIELDS_AS_JSON`` in your settings
-file in order to treat the incoming fields as JSON encoded strings and still
-be able to validate your fields.
+如果你仍然希望在这种情况下能够执行字段验证，你必须在设置文件中打开 
+``MULTIPART_FORM_FIELDS_AS_JSON``，以便将传入的字段视为 JSON 编码的字符串，这样
+仍然能够验证字段。
 
-Please note, that in case you indeed turn on ``MULTIPART_FORM_FIELDS_AS_JSON``
-you will have to submit all resource fields as properly encoded JSON strings.
+请注意，如果你确实打开了 ``MULTIPART_FORM_FIELDS_AS_JSON``，则必须将所有资源字段作为
+正确编码的 JSON 字符串提交。
 
-For example a ``number`` should be submited as ``1234`` (as you would normally
-expect). A ``boolean`` will have to be send as ``true`` (note the lowercase
-``t``). A ``list`` of strings as ``["abc", "xyz"]``. And finally
-a ``string``, which is the thing that will most likely trip, you will have
-to be submitted as ``"'abc'"`` (note that it is surrounded with double
-quotes). If ever in doubt if what you are submitting is a valid JSON string
-you can try passing it from the JSON Validator at http://jsonlint.com/ to
-be sure that it is correct.
+例如，``number`` 应该被提交为 ``1234`` (正如你通常所期望的那样)。``boolean`` 必须发
+送为 ``true`` (注意小写字母 ``t``)。字符串 ``list`` 为 ``["abc"， "xyz"]``。最后是
+一个 ``string``，这是最有可能出错的东西，你必须提交为 ``"'abc'"`` (注意，它被双引号
+包围)。如果你对提交的是否是一个有效的 JSON 字符串有任何疑问，你可以尝试在 
+http://jsonlint.com/ 的 JSON Validator 传递它，以确保它是正确的。
 
 .. _media_lists:
 
 使用媒体列表
 ~~~~~~~~~~~~~~~~~~~~
-When using lists of media, there is no way to submit these in the default
-configuration. Enable ``AUTO_COLLAPSE_MULTI_KEYS`` and ``AUTO_CREATE_LISTS``
-to make this possible. This allows to send multiple values for one key in
-``multipart/form-data`` requests and in this way upload a list of files.
+当使用媒体列表时，无法在默认配置中提交这些列表。启用 ``AUTO_COLLAPSE_MULTI_KEYS`` 和
+``AUTO_CREATE_LISTS`` 使这成为可能。这允许在 ``multipart/form-data`` 请求中为一个键
+发送多个值，并以这种方式上传文件列表。
 
 .. _geojson_feature:
 
 GeoJSON
 -------
-The MongoDB data layer supports geographic data structures
-encoded in GeoJSON_ format. All GeoJSON objects supported by MongoDB_ are available:
+MongoDB 数据层支持 GeoJSON_ 格式编码的地理数据结构。所有 MongoDB_ 支持的 GeoJSON 对象
+都是可用的:
 
     - ``Point``
     - ``Multipoint``
@@ -1773,11 +1679,9 @@ encoded in GeoJSON_ format. All GeoJSON objects supported by MongoDB_ are availa
     - ``MultiPolygon``
     - ``GeometryCollection``
 
-All these objects are implemented as native Eve data types (see :ref:`schema`)
-so they are are subject to the proper validation.
+所有这些对象都实现为原生 Eve 数据类型 (参见 :ref:`schema`)，因此它们都要经过适当的验证。
 
-In the example below we are extending the `people` endpoint by adding
-a ``location`` field of type Point_.
+在下面的示例中，我们通过添加 Point_ 类型的 ``location`` 字段来扩展 `people` 终结点。
 
 .. code-block:: javascript
 
@@ -1789,47 +1693,40 @@ a ``location`` field of type Point_.
         ...
     }
 
-Storing a contact along with its location is pretty straightforward:
+存储联系人及其位置非常简单:
 
 .. code-block:: console
 
     $ curl -d '[{"firstname": "barack", "lastname": "obama", "location": {"type":"Point","coordinates":[100.0,10.0]}}]' -H 'Content-Type: application/json'  http://127.0.0.1:5000/people
     HTTP/1.1 201 OK
 
-Eve also supports GeoJSON ``Feature`` and ``FeatureCollection`` objects, which
-are not explicitely mentioned in MongoDB_ documentation. GeoJSON specification
-allows object to contain any number of members (name/value pairs). Eve
-validation was implemented to be more strict, allowing only two members. This
-restriction can be disabled by setting ``ALLOW_CUSTOM_FIELDS_IN_GEOJSON`` to
-``True``.
+Eve 还支持 GeoJSON 的 ``Feature`` 和 ``FeatureCollection`` 对象，这些对象在 
+MongoDB_ 文档中没有明确提到。GeoJSON 规范允许对象包含任意数量的成员 (名称/值对)。
+Eve 验证的实现更加严格，只允许两个成员。通过将 ``ALLOW_CUSTOM_FIELDS_IN_GEOJSON`` 
+设置为 ``True``，可以禁用此限制。
 
 查询 GeoJSON 数据
 ~~~~~~~~~~~~~~~~~~~~~
-As a general rule all MongoDB `geospatial query operators`_ and their associated
-geometry specifiers are supported. In this example we are using the `$near`_
-operator to query for all contacts living in a location within 1000 meters from
-a certain point:
+一般来说，所有 MongoDB 的 `geospatial query operators`_  及其相关的几何说明符都是支
+持的。在这个例子中，我们使用 `$near`_ 操作符来查询所有居住在距离某个点 1000 米以内的
+联系人:
 
 ::
 
     ?where={"location": {"$near": {"$geometry": {"type":"Point", "coordinates": [10.0, 20.0]}, "$maxDistance": 1000}}}
 
-Please refer to MongoDB documentation for details on geo queries.
+有关地理查询的详细信息，请参阅 MongoDB 文档。
 
 .. _internal_resources:
 
 内部资源
 ------------------
-By default responses to GET requests to the home endpoint will include all the
-resources. The ``internal_resource`` setting keyword, however, allows you to
-make an endpoint internal, available only for internal data manipulation: no
-HTTP calls can be made against it and it will be excluded from the ``HATEOAS``
-links.
+默认情况下，对 home 终结点的请求的响应将包含所有资源。然而，``internal_resource`` 
+设置关键字允许你将端点设置为内部的，仅用于内部数据操作: 不能对它进行 HTTP 调用，而
+且它将被排除在 ``HATEOAS`` 链接之外。
 
-An usage example would be a mechanism for logging all inserts happening in
-the system, something that can be used for auditing or a notification system.
-First we define an ``internal_transaction`` endpoint, which is flagged as an
-``internal_resource``:
+一个记录系统中发生的所有插入的机制的用法示例，可以用于审计或通知系统。首先，我们定义
+一个 ``internal_transaction`` 终结点，它被标记为 ``internal_resource``:
 
 .. code-block:: python
    :emphasize-lines: 10
@@ -1847,10 +1744,9 @@ First we define an ``internal_transaction`` endpoint, which is flagged as an
     }
 
 
-Now, if we access the home endpoint and ``HATEOAS`` is enabled, we won't get
-the ``internal-transactions`` listed (and hitting the endpoint via HTTP will
-return a ``404``.) We can use the data layer to access our secret endpoint.
-Something like this:
+现在，如果我们访问主端点而且启用了 ``HATEOAS``，我们将不会得到列出的 
+``internal-transactions`` (通过 HTTP 访问终结点将返回 ``404``)。我们可以使用
+数据层访问我们的秘密端点。像这样:
 
 .. code-block:: python
    :emphasize-lines: 12
@@ -1873,36 +1769,31 @@ Something like this:
 
     app.run()
 
-I admit that this example is as rudimentary as it can get, but hopefully it
-will get the point across.
+我承认这个例子是最基本的，但希望它能让人明白这一点。
 
 .. _logging:
 
 增强的日志记录
 ----------------
-A number of events are available for logging via the default application
-logger. The standard `LogRecord attributes`_ are extended with a few request
-attributes:
+可以通过默认的应用程序日志记录器记录许多事件。标准的 `LogRecord attributes`_ 通过
+几个请求属性被扩展了:
 
 .. tabularcolumns:: |p{6.5cm}|p{8.5cm}|
 
 =================================== =========================================
-``clientip``                        IP address of the client performing the
-                                    request.
+``clientip``                        执行请求的客户端的 IP 地址。
 
-``url``                             Full request URL, eventual query parameters
-                                    included.
+``url``                             完整的请求 URL，包括最终的查询参数。
 
-``method``                          Request method (``POST``, ``GET``, etc.)
+``method``                          请求方法 (``POST``, ``GET``, 等等)
 
 =================================== =========================================
 
 
-You can use these fields when logging to a file or any other destination.
+您可以在将日志记录到文件或任何其他目的地时使用这些字段。
 
-Callback functions can also take advantage of the builtin logger. The following
-example logs application events to a file, and also logs custom messages every
-time a custom function is invoked.
+回调函数也可以利用内置日志记录器。下面的示例将应用程序事件记录到文件中，并在每次调用自
+定义函数时记录自定义消息。
 
 .. code-block:: python
 
@@ -1911,7 +1802,7 @@ time a custom function is invoked.
     from eve import Eve
 
     def log_every_get(resource, request, payload):
-        # custom INFO-level message is sent to the log file
+        # 自定义的 INFO 级别消息被发送到日志文件
         app.logger.info('We just answered to a GET request!')
 
     app = Eve()
@@ -1919,65 +1810,60 @@ time a custom function is invoked.
 
     if __name__ == '__main__':
 
-        # enable logging to 'app.log' file
+        # 启用记录日志到 'app.log' 文件
         handler = logging.FileHandler('app.log')
 
-        # set a custom log format, and add request
-        # metadata to each log line
+        # 设置一个自定义的日志格式，并添加请求元数据到每一行日志
         handler.setFormatter(logging.Formatter(
             '%(asctime)s %(levelname)s: %(message)s '
             '[in %(filename)s:%(lineno)d] -- ip: %(clientip)s, '
             'url: %(url)s, method:%(method)s'))
 
-        # the default log level is set to WARNING, so
-        # we have to explicitly set the logging level
-        # to INFO to get our custom message logged.
+        # 默认的日志级别设置为 WARNING，因此我们必须将日志级别显式设置为 INFO，
+        # 以获取自定义消息的日志记录.
         app.logger.setLevel(logging.INFO)
 
-        # append the handler to the default application logger
+        # 将处理程序添加到默认的应用程序日志记录器
         app.logger.addHandler(handler)
 
-        # let's go
+        # 现在开始吧
         app.run()
 
 
-Currently only exceptions raised by the MongoDB layer and ``POST``, ``PATCH``
-and ``PUT`` methods are logged. The idea is to also add some ``INFO`` and
-possibly ``DEBUG`` level events in the future.
+目前，只有 MongoDB 层以及 ``POST``, ``PATCH`` 和 ``PUT`` 方法引发的异常才会被记录下
+来。我们的想法是在将来添加一些 ``INFO`` 和 ``DEBUG`` 级别的事件。
 
 .. _oplog:
 
 操作日志
 --------------
-The OpLog is an API-wide log of all edit operations. Every ``POST``, ``PATCH``
-``PUT`` and ``DELETE`` operation can be recorded to the oplog. At its core the
-oplog is simply a server log. What makes it a little bit different is that it
-can be exposed as a read-only endpoint, thus allowing clients to query it as
-they would with any other API endpoint.
+OpLog 是一个 API 范围的日志，记录所有编辑操作。每个 ``POST``, ``PATCH`` ``PUT`` 和 
+``DELETE`` 操作都可以记录到 oplog 中。oplog 的核心只是一个服务器日志。不同之处在于，
+它可以公开为只读终结点，从而允许客户端像查询任何其他 API 终结点一样查询它。
 
-Every oplog entry contains information about the document and the operation:
+每个 oplog 条目都包含关于文档和操作的信息:
 
-- Operation performed
-- Unique ID of the document
-- Update date
-- Creation date
-- Resource endpoint URL
-- User token, if :ref:`user-restricted` is enabled for the endpoint
-- Optional custom data
+- 已执行的操作
+- 文档的唯一 ID
+- 更新日期
+- 创建日期
+- 资源终结点 URL
+- 用户令牌，如果整个终结点启用了 :ref:`user-restricted` 的话
+- 可选的自定义数据
 
-Like any other API-maintained document, oplog entries also expose:
+与任何其他 API 维护的文档一样，oplog 条目也公开:
 
-- Entry ID
+- 条目 ID
 - ETag
-- HATEOAS fields if that's enabled.
+- HATEOAS 字段，如果启用的话。
 
-If ``OPLOG_AUDIT`` is enabled entries also expose:
+如果启用了 ``OPLOG_AUDIT``，则还会公开以下条目:
 
-- client IP
-- Username or token, if available
-- changes applied to the document (for ``DELETE`` the whole document is included).
+- 客户端 IP
+- 用户名或令牌，如果可用
+- 应用到文档上的修改 (对于 ``DELETE`` 来说，包含整个文档)。
 
-A typical oplog entry looks like this:
+一个典型的 oplog 条目是这样的:
 
 .. code-block:: python
 
@@ -1995,76 +1881,62 @@ A typical oplog entry looks like this:
         "_links": {...},
     }
 
-To save a little space (at least on MongoDB) field names have been shortened:
+为了节省一点空间 (至少在 MongoDB 上)，字段名被缩短了:
 
-- ``o`` stands for operation performed
-- ``r`` stands for resource endpoint
-- ``i`` stands for document id
-- ``ip`` is the client IP
-- ``u`` stands for user (or token)
-- ``c`` stands for changes occurred
-- ``extra`` is an optional field which you can use to store custom data
+- ``o`` 代表已执行的操作
+- ``r`` 代表资源终结点
+- ``i`` 代表文档 id
+- ``ip`` 是 IP
+- ``u`` 代表用户 (或令牌)
+- ``c`` 代表发生的变化
+- ``extra`` 是一个可选字段，你可以使用它来存储自定义数据
 
-``_created`` and ``_updated`` are relative to the target document, which comes
-handy in a variety of scenarios (like when the oplog is available to clients,
-more on this later).
+``_created`` 和 ``_updated`` 是相对于目标文档的，这在很多场景中都很方便 (比如当 
+oplog 对客户端可用时，后面会详细介绍)。
 
-Please note that by default the ``c`` (changes) field is not included for
-``POST`` operations. You can add ``POST`` to the ``OPLOG_CHANGE_METHODS``
-setting (see :ref:`global`) if you wish the whole document to be included on
-every insertion.
+请注意，在默认情况下，``c`` (更改) 字段不包括在 ``POST`` 操作中。如果希望在每次插入
+时都包含整个文档，可以将 ``POST`` 添加到 ``OPLOG_CHANGE_METHODS`` 设置中 (参见 
+:ref:`global`)。
 
 oplog 是如何操作的?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
-Seven settings are dedicated to the OpLog:
+OpLog 有 7 个设置:
 
-- ``OPLOG`` switches the oplog feature on and off. Defaults to ``False``.
-- ``OPLOG_NAME`` is the name of the oplog collection on the database. Defaults to ``oplog``.
-- ``OPLOG_METHODS`` is a list of HTTP methods to be logged. Defaults to all of them.
-- ``OPLOG_ENDPOINT`` is the endpoint name. Defaults to ``None``.
-- ``OPLOG_AUDIT`` if enabled, IP addresses and changes are also logged. Defaults to ``True``.
-- ``OPLOG_CHANGE_METHODS`` determines which methods will log changes. Defaults to ['PATCH', 'PUT', 'DELETE'].
-- ``OPLOG_RETURN_EXTRA_FIELD`` determines if the optional ``extra`` field
-  should be returned by the ``OPLOG_ENDPOINT``. Defaults to ``False``.
+- ``OPLOG`` 打开和关闭 OPLOG 特性。默认为 ``False``。
+- ``OPLOG_NAME`` 是数据库 oplog 集合的名称。默认为 ``oplog``。
+- ``OPLOG_METHODS`` 是要记录的 HTTP 方法列表。默认为所有方法。
+- ``OPLOG_ENDPOINT`` 是终结点名称。默认为 ``None``。
+- ``OPLOG_AUDIT`` 如果启用，IP 地址和更改也会被记录下来。默认为 ``True``。
+- ``OPLOG_CHANGE_METHODS`` 确定哪些方法将记录更改。默认为 ['PATCH', 'PUT', 'DELETE']。
+- ``OPLOG_RETURN_EXTRA_FIELD`` 确定可选的 ``extra`` 字段是否应该由 ``OPLOG_ENDPOINT`` 返回。默认为 ``False``。
 
-As you can see the oplog feature is turned off by default. Also, since
-``OPLOG_ENDPOINT`` defaults to ``None``, even if you switch the feature on no
-public oplog endpoint will be available. You will have to explicitly set the
-endpoint name in order to expose your oplog to the public.
+可以看到，oplog 特性在默认情况下是关闭的。此外，由于 ``OPLOG_ENDPOINT`` 默认为 
+``None``，即使你在没有公共 oplog 终结点的情况下切换该特性，也不能使用它。你必须显式地
+设置终结点名称，以便向公众公开你的 oplog。
 
 Oplog 终结点
 ~~~~~~~~~~~~~~~~~~
-Since the oplog endpoint is nothing but a standard API endpoint, you can
-customize it. This allows for setting up custom authentication (you might want
-this resource to be only accessible for administrative purposes) or any other
-useful setting.
+由于 oplog 终结点只是一个标准 API 终结点，所以你可以定制它。这允许配置自定义身份验
+证 (你可能希望此资源仅用于管理目的) 或任何其他有用的设置。
 
-Note that while you can change most of its settings, the endpoint will always
-be read-only so setting either ``resource_methods`` or ``item_methods`` to
-something other than ``['GET']`` will serve no purpose. Also, unless you need to
-customize it, adding an oplog entry to the domain is not really necessary as it
-will be added for you automatically.
+请注意，虽然你可以更改它的大多数设置，但终结点始终是只读的，因此将 ``resource_methods`` 
+或 ``item_methods`` 设置为 ``['GET']`` 之外的其他值将不起任何作用。此外，除非需要自定
+义，否则没有必要向域添加 oplog 条目，因为它将自动添加。
 
-Exposing the oplog as an endpoint could be useful in scenarios where you have
-multiple clients (say phone, tablet, web and desktop apps) which need to stay
-in sync with each other and the server. Instead of hitting every single
-endpoint they could just access the oplog to learn all that's happened
-since their last access. That’s a single request versus several. This is not
-always the best approach a client could take. Sometimes it is probably better
-to only query for changes on a certain endpoint. That's also possible, just
-query the oplog for changes occured on that endpoint.
+将 oplog 作为终结点公开，在有需要和彼此以及服务器保持同步的多个客户端 (例如电话、平板
+电脑、web 和桌面应用程序) 的场景中可能很有用。他们可以访问 oplog 来了解自上次访问以来
+发生的所有事情，而不是访问每个终结点。这是一个请求而不是多个请求。这并不总是客户端可以
+采用的最佳方法。有时候，只查询某个终结点上的更改很可能会更好。只查询 oplog 以了解终结
+点上发生的更改，也是可行的。
 
-Extending Oplog entries
+扩展 Oplog 条目
 ~~~~~~~~~~~~~~~~~~~~~~~
-Every time the oplog is about to be updated the ``on_oplog_push`` event is fired.
-You can hook one or more callback functions to this event. Callbacks receive
-``resource`` and ``entries`` as arguments. The former is the resource name
-while the latter is a list of oplog entries which are about to be written to
-disk.
+每次要更新 oplog 时，都会触发 ``on_oplog_push`` 事件。你可以将一个或多个回调函数挂到
+此事件上。回调函数接收 ``resource`` 和 ``entries`` 作为参数。前者是资源名称，而后者
+是即将写入磁盘的 oplog 条目列表。
 
-Your callback can add an optional ``extra`` field to canonical oplog entries.
-The field can be of any type. In this example we are adding a custom dict to
-each entry:
+你的回调函数可以向规范的 oplog 条目添加一个可选的 ``extra`` 字段。字段可以是任何类型。
+在这个例子中，我们将一个自定义的字典添加到每个条目:
 
 .. code-block:: python
 
@@ -2077,14 +1949,13 @@ each entry:
     app.on_oplog_push += oplog_extras
     app.run()
 
-Please note that unless you explicitly set ``OPLOG_RETURN_EXTRA_FIELD`` to
-``True``, the ``extra`` field will *not* be returned by the ``OPLOG_ENDPOINT``.
+请注意，除非你显式地将 ``OPLOG_RETURN_EXTRA_FIELD`` 设置为 ``True``，否则 
+``OPLOG_ENDPOINT`` 不会返回 ``extra`` 字段。
 
-.. note::
+.. 注意::
 
-    Are you on MongoDB? Consider making the oplog a `capped collection`_. Also,
-    in case you are wondering yes, the Eve oplog is blatantly inspired by the
-    awesome `Replica Set Oplog`_.
+    你在使用 MongoDB 吗? 考虑让 oplog 成为一个 `capped collection`_。另外，如果
+    你想知道，是的，Eve oplog 显然是受到了很棒的 `Replica Set Oplog`_ 的启发。
 
 .. _schema_endpoint:
 
@@ -2100,15 +1971,13 @@ Please note that unless you explicitly set ``OPLOG_RETURN_EXTRA_FIELD`` to
 
 MongoDB 聚合框架
 -----------------------------
-Support for the `MongoDB Aggregation Framework`_ is built-in. In the example
-below (taken from PyMongo) we’ll perform a simple aggregation to count the
-number of occurrences for each tag in the tags array, across the entire
-collection. To achieve this we need to pass in three operations to the
-pipeline. First, we need to unwind the tags array, then group by the tags and
-sum them up, finally we sort by count.
+内置了对 `MongoDB Aggregation Framework`_ 的支持。在下面的示例中 (取自 PyMongo)，我
+们将执行一个简单的聚合，计算整个集合中每个标记在标记数组中出现的次数。为了实现这一点，
+我们需要向管道传递三个操作。首先，我们需要展开标记数组，然后按标记分组并对它们求和，最
+后按计数排序。
 
-As python dictionaries don’t maintain order you should use ``SON`` or
-collections ``OrderedDict`` where explicit ordering is required eg ``$sort``:
+由于 python 字典不维护顺序，你应该在需要显式排序的地方使用 ``SON`` 或集合 
+``OrderedDict``，如 ``$sort``:
 
 ::
 
@@ -2124,9 +1993,8 @@ collections ``OrderedDict`` where explicit ordering is required eg ``$sort``:
         }
     }
 
-The pipeline above is static. You have the option to allow for dynamic
-pipelines, whereas the client will directly influence the aggregation results.
-Let's update the pipeline a little bit:
+上面的管道是静态的。你可以选择允许动态管道，这样客户端将直接影响聚合结果。让我们稍微
+更新一下管道:
 
 ::
 
@@ -2142,23 +2010,20 @@ Let's update the pipeline a little bit:
         }
     }
 
-As you can see the `count` field is now going to sum the value of ``$value``,
-which will be set by the client upon performing the request:
+如你所见，``count`` 字段现在将会对 ``$value`` 的值求和，该值将由客户端在执行请求时设置:
 
 ::
 
     $ curl -i http://example.com/posts?aggregate={"$value": 2}
 
-The request above will cause the aggregation to be executed on the server with
-a `count` field configured as if it was a static ``{"$sum": 2}``. The client
-simply adds the ``aggregate`` query parameter and then passes a dictionary with
-field/value pairs. Like with all other keywords, you can change ``aggregate``
-to a keyword of your liking, just set ``QUERY_AGGREGATION`` in your settings.
+上面的请求将导致在服务器上执行聚合，并配置一个 `count`` 字段，就像它是一个静态 
+``{"$sum": 2}`` 一样。客户端只需添加 ``aggregate`` 查询参数，然后传递一个含有字段/值对
+的字典。与所有其他关键字一样，你可以将 ``aggregate`` 更改为你喜欢的关键字，只需在配置中
+设置 ``QUERY_AGGREGATION`` 即可。
 
-You can also set all options natively supported by PyMongo. For more
-information on aggregation see :ref:`datasource`.
+你还可以设置 PyMongo 本地支持的所有选项。有关聚合的更多信息，请参见 :ref:`datasource`。
 
-You can pass ``{}`` to fields which you want to ignore. Considering the following pipelines:
+您可以将 ``{}`` 传递给要忽略的字段。考虑以下管道:
 
 ::
 
@@ -2174,52 +2039,46 @@ You can pass ``{}`` to fields which you want to ignore. Considering the followin
         }
     }
 
-If performing the following request:
+如果执行以下请求:
 
 ::
 
     $ curl -i http://example.com/posts?aggregate={"$name": {"$regex": "Apple"}, "$time": {}}
 
-The stage ``{"$match": { "name": "$name", "time": "$time"}}`` in the pipeline will be executed as ``{"$match": { "name": {"$regex": "Apple"}}}``. And for the following request:
+管道中的阶段 ``{"$match": { "name": "$name", "time": "$time"}}`` 将作为 
+``{"$match": { "name": {"$regex": "Apple"}}}`` 执行。而对于以下请求:
 
 ::
 
     $ curl -i http://example.com/posts?aggregate={"$name": {}, "$time": {}}
 
-The stage ``{"$match": { "name": "$name", "time": "$time"}}`` in the pipeline will be completely skipped.
+管道中的阶段 ``{"$match": { "name": "$name", "time": "$time"}}`` 将被完全跳过。
 
-The request above will ignore ``"count": {"$sum": "$value"}}``. A
-Custom callback functions can be attached to the ``before_aggregation`` and ``after_aggregation`` event hooks. For more information, see :ref:`aggregation_hooks`.
+上面的请求将忽略 ``"count": {"$sum": "$value"}}``。可以将一个自定义回调函数附加到
+``before_aggregation`` 和 ``after_aggregation`` 事件钩子。有关更多信息，请参见
+:ref:`aggregation_hooks`。
 
-Limitations
+边界
 ~~~~~~~~~~~
-Client pagination (``?page=2``) is enabled by default. This is currently
-achieved by injecting a ``$facet`` stage contianing two sub-pipelines,
-total_count (``$count``) and paginated_results (``$limit`` first, then ``$skip``)
-to the very end of the aggregation pipeline after the ``before_aggregation`` hook.
-You can turn pagination off by setting ``pagination`` to ``False`` for the endpoint. Keep in mind that, when pagination
-is disabled, all aggregation results are included with every response.
-Disabling pagination might be appropriate (and actually advisable) only if the
-expected response payload is not huge.
+默认情况下启用了客户端分页 (``?page=2``)。目前，通过在 ``before_aggregation`` 钩
+子后面，将 ``$facet`` 阶段包含的两个子管道，total_count (``$count``) 和 
+paginated_results (首先是 ``$limit``，然后是 ``$skip``) 注入聚合管道的末尾，来实现
+这一点。您可以通过将端点的 ``pagination`` 设置为 ``False`` 来关闭分页。请记住，禁
+用分页时，每个响应都包含所有聚合结果。
+只有当预期的响应负载不是很大时，禁用分页才可能是适当的 (实际上也是可取的)。
 
-Client sorting (``?sort=field1``) is not supported at aggregation endpoints.
-You can of course add one or more ``$sort`` stages to the pipeline, as we did
-with the example above. If you do add a ``$sort`` stage to the pipeline,
-consider adding it at the end of the pipeline. According to MongoDB's ``$limit``
-documentation (link_):
+聚合终结点不支持客户端排序 (``?sort=field1``)。当然，你可以向管道中添加一个或多个
+``$sort`` 阶段，就像我们在上面的示例中所做的那样。如果你确实要向管道添加 ``$sort`` 
+阶段，请考虑在管道的末尾添加它。根据 MongoDB 的 ``$limit`` 文档 (link_):
 
-    When a ``$sort`` immediately precedes a ``$limit`` in the pipeline, the
-    sort operation only maintains the top **n** results as it progresses, where
-    **n** is the specified limit, and MongoDB only needs to store **n** items
-    in memory.
+    当管道中的 ``$sort`` 紧跟着 ``$limit`` 时，排序操作只维护最上面的 **n** 个结果，
+    其中 **n** 是指定的限制，MongoDB 只需要在内存中存储 **n** 个数据项。
 
-As we just saw earlier, pagination adds a ``$limit`` stage to the end of the
-pipeline. So if pagination is enabled and ``$sort`` is the last stage of your
-pipeline, then the resulting combined pipeline should be optimized.
+正如我们刚才看到的，分页在管道的末尾添加了一个 ``$limit`` 阶段。因此，如果启用了分页，
+并且 ``$sort`` 是管道的最后一个阶段，那么最终的组合管道应该会被优化。
 
-A single endpoint cannot serve both regular and aggregation results. However,
-since it is possible to setup multiple endpoints all serving from the same
-datasource (see :ref:`source`), similar functionality can be easily achieved.
+单个终结点不能同时提供常规结果和聚合结果。但是，由于可以设置多个终结点提供来自同一个数
+据源的数据 (参见 :ref:`source`)，因此可以轻松实现类似的功能。
 
 
 MongoDB 和 SQL 支持
