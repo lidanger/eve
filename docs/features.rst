@@ -951,7 +951,7 @@ Limitations
 
 .. _soft_delete:
 
-Soft Delete
+软删除
 -----------
 Eve 提供了一个可选的 “软删除” 模式，在该模式中，已删除的文档继续存储在数据库中，并且
 能够恢复，但在响应 API 请求时仍然作为已删除的项。默认情况下软删除是禁用的，但是可以
@@ -1133,75 +1133,75 @@ Post-Request 事件钩子
 让我们来看看可用事件的概述:
 
 +-------+--------+------+--------------------------------------------------+
-|行为   | 对象    | 时机 | 事件名称 / 方法签名                                |
+|Action |What    |When  |Event name / method signature                     |
 +=======+========+======+==================================================+
-|Fetch  |Resource|之后  || ``on_fetched_resource``                         |
+|Fetch  |Resource|After || ``on_fetched_resource``                         |
 |       |        |      || ``def event(resource_name, response)``          |
 |       |        |      +--------------------------------------------------+
 |       |        |      || ``on_fetched_resource_<resource_name>``         |
 |       |        |      || ``def event(response)``                         |
 |       +--------+------+--------------------------------------------------+
-|       |Item    |之后  || ``on_fetched_item``                             |
+|       |Item    |After || ``on_fetched_item``                             |
 |       |        |      || ``def event(resource_name, response)``          |
 |       |        |      +--------------------------------------------------+
 |       |        |      || ``on_fetched_item_<resource_name>``             |
 |       |        |      || ``def event(response)``                         |
 |       +--------+------+--------------------------------------------------+
-|       |Diffs   |之后  || ``on_fetched_diffs``                            |
+|       |Diffs   |After || ``on_fetched_diffs``                            |
 |       |        |      || ``def event(resource_name, response)``          |
 |       |        |      +--------------------------------------------------+
 |       |        |      || ``on_fetched_diffs_<resource_name>``            |
 |       |        |      || ``def event(response)``                         |
 +-------+--------+------+--------------------------------------------------+
-|Insert |Items   |之前  || ``on_insert``                                   |
+|Insert |Items   |Before|| ``on_insert``                                   |
 |       |        |      || ``def event(resource_name, items)``             |
 |       |        |      +--------------------------------------------------+
 |       |        |      || ``on_insert_<resource_name>``                   |
 |       |        |      || ``def event(items)``                            |
 |       |        +------+--------------------------------------------------+
-|       |        |之后  || ``on_inserted``                                 |
+|       |        |After || ``on_inserted``                                 |
 |       |        |      || ``def event(resource_name, items)``             |
 |       |        |      +--------------------------------------------------+
 |       |        |      || ``on_inserted_<resource_name>``                 |
 |       |        |      || ``def event(items)``                            |
 +-------+--------+------+--------------------------------------------------+
-|Replace|Item    |之前  || ``on_replace``                                  |
+|Replace|Item    |Before|| ``on_replace``                                  |
 |       |        |      || ``def event(resource_name, item, original)``    |
 |       |        |      +--------------------------------------------------+
 |       |        |      || ``on_replace_<resource_name>``                  |
 |       |        |      || ``def event(item, original)``                   |
 |       |        +------+--------------------------------------------------+
-|       |        |之后  || ``on_replaced``                                 |
+|       |        |After || ``on_replaced``                                 |
 |       |        |      || ``def event(resource_name, item, original)``    |
 |       |        |      +--------------------------------------------------+
 |       |        |      || ``on_replaced_<resource_name>``                 |
 |       |        |      || ``def event(item, original)``                   |
 +-------+--------+------+--------------------------------------------------+
-|Update |Item    |之前  || ``on_update``                                   |
+|Update |Item    |Before|| ``on_update``                                   |
 |       |        |      || ``def event(resource_name, updates, original)`` |
 |       |        |      +--------------------------------------------------+
 |       |        |      || ``on_update_<resource_name>``                   |
 |       |        |      || ``def event(updates, original)``                |
 |       |        +------+--------------------------------------------------+
-|       |        |之后  || ``on_updated``                                  |
+|       |        |After || ``on_updated``                                  |
 |       |        |      || ``def event(resource_name, updates, original)`` |
 |       |        |      +--------------------------------------------------+
 |       |        |      || ``on_updated_<resource_name>``                  |
 |       |        |      || ``def event(updates, original)``                |
 +-------+--------+------+--------------------------------------------------+
-|Delete |Item    |之前  || ``on_delete_item``                              |
+|Delete |Item    |Before|| ``on_delete_item``                              |
 |       |        |      || ``def event(resource_name, item)``              |
 |       |        |      +--------------------------------------------------+
 |       |        |      || ``on_delete_item_<resource_name>``              |
 |       |        |      || ``def event(item)``                             |
 |       |        +------+--------------------------------------------------+
-|       |        |之后  || ``on_deleted_item``                             |
+|       |        |After || ``on_deleted_item``                             |
 |       |        |      || ``def event(resource_name, item)``              |
 |       |        |      +--------------------------------------------------+
 |       |        |      || ``on_deleted_item_<resource_name>``             |
 |       |        |      || ``def event(item)``                             |
 |       +--------+------+--------------------------------------------------+
-|       |Resource|之前  || ``on_delete_resource``                          |
+|       |Resource|Before|| ``on_delete_resource``                          |
 |       |        |      || ``def event(resource_name)``                    |
 |       |        |      +--------------------------------------------------+
 |       |        |      || ``on_delete_resource_<resource_name>``          |
@@ -1213,7 +1213,7 @@ Post-Request 事件钩子
 |       |        |      || ``on_delete_resource_originals_<resource_name>``|
 |       |        |      || ``def event(originals, lookup)``                |
 |       |        +------+--------------------------------------------------+
-|       |        |之后  || ``on_deleted_resource``                         |
+|       |        |After || ``on_deleted_resource``                         |
 |       |        |      || ``def event(resource_name, item)``              |
 |       |        |      +--------------------------------------------------+
 |       |        |      || ``on_deleted_resource_<resource_name>``         |
