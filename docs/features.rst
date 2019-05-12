@@ -542,7 +542,7 @@ API 响应包括一个 ``ETag`` 头，它也允许适当的并发控制。``ETag
     }
 
 这一次我们的补丁打对了，服务器返回了新的 ``ETag``。我们还得到了新的 ``_updated`` 
-值，它最终将允许我们执行后续的 `conditional requests`_ 。
+值，它最终将允许我们执行后续的 `conditional_requests`_ 。
 
 并发控制适用于所有版本方法: ``PATCH`` (edit), ``PUT`` (覆盖), ``DELETE`` (删除)。
 
