@@ -943,8 +943,8 @@ Limitations
 
 .. 警告:: 请注意
 
-    当涉及到 MongoDB 时，嵌入式资源序列化处理的是*文档引用* (链接文档)，这与
-    *嵌入式文档*不同，也受到 Eve 的支持 (参见 `MongoDB Data Model
+    当涉及到 MongoDB 时，嵌入式资源序列化处理的是 *文档引用* (链接文档)，这与
+    *嵌入式文档* 不同，也受到 Eve 的支持 (参见 `MongoDB Data Model
     Design`_)。嵌入式资源序列化是一个很好的特性，它可以帮助你为客户端规范化数据
     模型。但是，在决定是否启用它时 (尤其是默认情况下)，请记住，正在查找的每个嵌入
     式资源都需要进行数据库查找，这很容易导致性能问题。
@@ -1954,7 +1954,7 @@ Oplog 终结点
 
 .. 注意::
 
-    你在使用 MongoDB 吗? 考虑让 oplog 成为一个 `capped collection`_。另外，如果
+    你在使用 MongoDB 吗? 考虑让 oplog 成为一个 `capped collection`_ 。另外，如果
     你想知道，是的，Eve oplog 显然是受到了很棒的 `Replica Set Oplog`_ 的启发。
 
 .. _schema_endpoint:
@@ -1965,7 +1965,7 @@ Oplog 终结点
 ``SCHEMA_ENDPOINT`` 配置选项设置为要从中提供模式数据的 API 端点名称。启用后，Eve 将
 把终结点当作一个只读资源，其中包含 JSON 编码的 Cerberus 模式定义，并按资源名称索引。
 将启用资源可见性和授权设置，因此无法在模式终结点访问内部资源或请求没有读取身份验证的资
-源。默认情况下，``SCHEMA_ENDPOINT`` 被设置为 ``None``。
+源。默认情况下，``SCHEMA_ENDPOINT`` 被设置为 ``None`` 。
 
 .. _aggregation:
 
