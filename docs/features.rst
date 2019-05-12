@@ -778,7 +778,7 @@ web 页面中包含的 JavaScript 可以访问 Eve 支持的 API。默认情况�
 web 页面可以使用 REST API，这通常受到大多数浏览器 “同域” 安全策略的限制。
 ``X_DOMAINS`` 设置允许指定允许哪些域可以执行 CORS 请求。正则表达式列表可以在
 ``X_DOMAINS_RE`` 中定义，这对于具有子域动态范围的网站非常有用。确保锚定并正确转义 
-regex，例如 ``X_DOMAINS_RE = ['^http://sub-\d{3}\.example\.com$']`。
+regex，例如 ``X_DOMAINS_RE = ['^http://sub-\d{3}\.example\.com$']``。
 
 JSONP 支持
 -------------
@@ -809,7 +809,7 @@ JSONP 支持
 默认的和可为空的值
 ---------------------------
 字段可以有默认值和可空类型。当服务 POST (创建) 请求时，将为缺失的字段分配配置的默认值。
-有关更多信息，请参见 :ref:`schema` 中的 ``default`` and ``nullable``关键字。
+有关更多信息，请参见 :ref:`schema` 中的 ``default`` 和 ``nullable`` 关键字。
 
 预定义的数据库过滤器
 ---------------------------
@@ -1345,7 +1345,7 @@ Update 事件
 这里的 `updates` 表示应用于该项的更新，而 `original` 则表示即将更新的数据库项。回调
 函数可以挂接到这些事件中，以在 `updates` 中任意添加或更新字段，或执行其他辅助操作。
 
-数据项更新`后`:
+数据项更新 `后`:
 
 - ``on_updated`` 由任何资源终结点触发。.
 - ``on_updated_<resource_name>`` 只有在 `<resource_name>` 终结点被命中时触发。
